@@ -1,0 +1,32 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "EFrameCommandType.h"
+#include "FrameCommand.generated.h"
+
+USTRUCT(BlueprintType)
+struct FFrameCommand
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EFrameCommandType Command = EFrameCommandType::None;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 FrameExecution = -1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool BoolParam = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 IntParam = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D VectorParam = { 0.f, 0.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName NameParam = "none";
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UObject> Filepath;
+};

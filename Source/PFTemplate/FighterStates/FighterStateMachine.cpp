@@ -1,0 +1,156 @@
+#include "FighterStateMachine.h"
+#include "FighterPawn.h"
+#include "FighterState.h"
+#include "IdleState.h"
+#include "AttackState.h"
+#include "JumpSquatState.h"
+#include "DashState.h"
+#include "RunState.h"
+#include "WalkingState.h"
+#include "SkidState.h"
+#include "HeavyAttackState.h"
+#include "RisingState.h"
+#include "FallingState.h"
+#include "AirAttackState.h"
+#include "HitstopState.h"
+#include "KnockbackState.h"
+#include "KnockdownState.h"
+#include "OnLedgeState.h"
+#include "ParryState.h"
+#include "ShieldbreakState.h"
+#include "ShieldState.h"
+#include "TumbleState.h"
+
+void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
+{
+	FighterPawnRef = InOwner;
+
+	StateMap.Add("Idle", NewObject<UIdleState>(this));
+	StateMap.Add("GroundAttack", NewObject<UAttackState>(this));
+	StateMap.Add("JumpSquat", NewObject<UJumpSquatState>(this));
+	StateMap.Add("Dash", NewObject<UDashState>(this));
+	StateMap.Add("Run", NewObject<URunState>(this));
+	StateMap.Add("Walking", NewObject<UWalkingState>(this));
+	StateMap.Add("Skid", NewObject<USkidState>(this));
+	StateMap.Add("HeavyAttack", NewObject<UHeavyAttackState>(this));
+	StateMap.Add("Rising", NewObject<URisingState>(this));
+	StateMap.Add("Falling", NewObject<UFallingState>(this));
+	StateMap.Add("AirAttack", NewObject<UAirAttackState>(this));
+	StateMap.Add("Shield", NewObject<UShieldState>(this));
+	StateMap.Add("Knockback", NewObject<UKnockbackState>(this));
+	StateMap.Add("Knockdown", NewObject<UKnockdownState>(this));
+	StateMap.Add("OnLedge", NewObject<UOnLedgeState>(this));
+	StateMap.Add("Hitstop", NewObject<UHitstopState>(this));
+	StateMap.Add("Tumble", NewObject<UTumbleState>(this));
+	StateMap.Add("Shieldbreak", NewObject<UShieldbreakState>(this));
+	StateMap.Add("Parry", NewObject<UParryState>(this));
+	
+	if (FighterPawnRef)
+	{
+		FighterPawnRef->RegisterCustomStates(this);
+	}
+
+	for (auto& Elem : StateMap)
+	{
+		if (Elem.Value)
+			Elem.Value->InitState(FighterPawnRef, FighterPawnRef->MovementComponent, this);
+	}
+
+	CurrentStateKey = "Idle";
+	CurrentState = StateMap[CurrentStateKey];
+	CurrentState->OnEnter();
+	TickCurrentState();
+}
+
+bool UFighterStateMachine::TryChangeState(FName NewState)
+{
+	if (!StateMap.Contains(NewState) || !FighterPawnRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("State '%s' does not exist in StateMap!"), *NewState.ToString());
+		return false;
+	}
+
+	if (CurrentState->CanExitState() && StateMap[NewState]->CanEnterState())
+	{
+		CurrentState->OnExit();
+		CurrentState = StateMap[NewState];
+		CurrentStateKey = NewState;
+		CurrentState->OnEnter();
+		FramesInState = 0;
+		StateMap[NewState]->Tick();
+
+		return true;
+	}
+	return false;
+}
+
+void UFighterStateMachine::TickCurrentState()
+{
+	if (CurrentState && FighterPawnRef)
+	{
+		FramesInState++;
+		CurrentState->Tick();
+	}
+}
+
+void UFighterStateMachine::ShowStateDebug()
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		0.0f,
+		FColor::Yellow,
+		FString::Printf(TEXT("FSM State: %s"), *CurrentState->GetStateName())
+	);
+}
+
+bool UFighterStateMachine::Attack() const
+{
+	return CurrentState->Attack();
+}
+
+void UFighterStateMachine::AttackReleased() const
+{
+	CurrentState->AttackRelease();
+}
+
+bool UFighterStateMachine::Special() const
+{
+	return CurrentState->Special();
+}
+
+bool UFighterStateMachine::Shield() const
+{
+	return CurrentState->ShieldPressed();
+}
+
+void UFighterStateMachine::ShieldReleased() const
+{
+	CurrentState->ShieldReleased();
+}
+
+bool UFighterStateMachine::Grab() const
+{
+	return CurrentState->Grab();
+}
+
+bool UFighterStateMachine::JumpPressed() const
+{
+	return CurrentState->JumpPressed();
+}
+
+void UFighterStateMachine::JumpReleased() const
+{
+	CurrentState->JumpReleased();
+}
+
+void UFighterStateMachine::Parry() const
+{
+	CurrentState->Parry();
+}
+void UFighterStateMachine::AddState(FName StateName, UFighterState* State)
+{
+	if (!State || StateMap.Contains(StateName)) return;
+
+	State->FighterPawnRef = FighterPawnRef;
+	StateMap.Add(StateName, State);
+}
