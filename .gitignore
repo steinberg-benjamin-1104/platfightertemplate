@@ -1,31 +1,66 @@
-# Unreal build folders
+# ------------------------------------------------------------------------------
+# Epic-recommended UE ignores (UE4 & UE5)
+# ------------------------------------------------------------------------------
+# Generated binaries & intermediates
 Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
 Build/
-.vs/
-*.sln
 
-# User-specific and temporary
-*.opensdf
-*.sdf
+# IDE / toolchain cache
+.vs/
+.vscode/
+.idea/
+cmake-build-*/
+*.sln
 *.suo
-*.user
-*.userprefs
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.iml
+
+# Compiled / temp artefacts
+*.obj
+*.pch
+*.lib
+*.a
+*.dll
+*.so
+*.dylib
+*.exe
+*.tmp
+*.temp
 *.log
 *.tlog
-*.tmp
+*.lastbuildstate
+*.ilk
+*.pdb
+*.exp
+*.dmp
+*.ipch
+*.aps
+*.ncb
+*.opendb
+*.cachefile
+*.psess
+*.vsp
+*.vspx
+*.sap
 
-# Local plugin builds
-Plugins/*/Intermediate/
-Plugins/*/Binaries/
-
-# OS junk
+# OS-generated junk
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# Optional: exclude heavy content
-Content/StarterContent/
-Content/Cinematic/
-Content/Movies/
+# Locally exported packages
+Package/
+Platforms/*/Staging/
+Platforms/*/Build/
