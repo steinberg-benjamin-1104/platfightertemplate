@@ -1,66 +1,112 @@
-# ------------------------------------------------------------------------------
-# Epic-recommended UE ignores (UE4 & UE5)
-# ------------------------------------------------------------------------------
-# Generated binaries & intermediates
-Binaries/
-DerivedDataCache/
-Intermediate/
-Saved/
-Build/
+#################################
+# Unreal Engine Generated Files #
+#################################
+/Binaries/
+/Intermediate/
+/DerivedDataCache/
+/Saved/
+/Build/
+/Builds/
 
-# IDE / toolchain cache
-.vs/
-.vscode/
-.idea/
-cmake-build-*/
-*.sln
-*.suo
-*.sdf
-*.opensdf
-*.VC.db
-*.VC.opendb
-*.xcodeproj
-*.xcworkspace
-*.iml
+# Optional: Ignore specific platform build folders
+/Windows/
+/Mac
+/Linux
 
-# Compiled / temp artefacts
-*.obj
-*.pch
-*.lib
-*.a
-*.dll
-*.so
-*.dylib
-*.exe
+#################################
+# Unreal Engine Cache Files     #
+#################################
+*.pid
 *.tmp
-*.temp
 *.log
 *.tlog
-*.lastbuildstate
-*.ilk
-*.pdb
-*.exp
-*.dmp
-*.ipch
-*.aps
-*.ncb
-*.opendb
-*.cachefile
-*.psess
-*.vsp
-*.vspx
-*.sap
+*.db
+*.db-shm
+*.db-wal
 
-# OS-generated junk
+#################################
+# Project User Files            #
+#################################
+*.uproject.log
+*.vsconfig
+*.uasset.tmp
+*.umap.tmp
+
+#################################
+# Editors                       #
+#################################
+
+######## Visual Studio ##########
+.vs/
+*.VC.db
+*.VC.opendb
+*.opendb
+*.opensdf
+*.sdf
+*.suo
+*.user
+*.userosscache
+*.rsuser
+*.sln.docstates
+*.sln
+
+######## VSCode #################
+.vscode/
+**/.history/
+
+######## Rider / JetBrains ######
+.idea/
+*.sln*
+*.csproj
+*.DotSettings
+*.DotSettings.user
+
+#################################
+# macOS System Junk             #
+#################################
 .DS_Store
 .AppleDouble
-.LSOverride
 Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
 
-# Locally exported packages
-Package/
-Platforms/*/Staging/
-Platforms/*/Build/
+#################################
+# Build Artifacts               #
+#################################
+*.iobj
+*.ipdb
+*.pdb
+*.dll
+*.lib
+*.app
+*.dylib
+*.exe
+*.target
+*.modules
+*.manifest
+*.generated.*
+
+#################################
+# Plugins (Per-Plugin Generated)#
+#################################
+**/Binaries/
+**/Intermediate/
+**/Saved/
+
+#################################
+# Xcode / macOS Project Files   #
+#################################
+*.xcworkspace
+*.xcworkspacedata
+*.xccheckout
+*.xcsettings
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcuserdata/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+#################################
+# Miscellaneous                 #
+#################################
+# Add new generated dirs as needed
