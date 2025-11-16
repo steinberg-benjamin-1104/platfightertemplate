@@ -1,4 +1,4 @@
-#include "RollbackSafeMath.h"
+#include "FixedVector2D.h"
 #include "Logging/LogMacros.h"
 
 constexpr int64_t ONE  = 1LL << 32;
@@ -99,30 +99,4 @@ FIXED_32 FIXED_32::Sin() const
 FIXED_32 FIXED_32::Cos() const
 {
 	return (*this + HALF_PI()).Sin();
-}
-
-std::pair<FIXED_32,FIXED_32> FIXED_32::SinCos() const
-{
-	FIXED_32 s = Sin();
-	FIXED_32 c = (*this + HALF_PI()).Sin();
-	return {s,c};
-}
-
-FFixedVector2D FFixedVector2D::FromFloatXY(float x, float z)
-{
-    return { FIXED_32((int64_t)(x * (float)(1LL << 32))),
-             FIXED_32((int64_t)(z * (float)(1LL << 32))) };
-}
-
-void FFixedVector2D::ToFloatXY(float& OutX, float& OutZ) const
-{
-    const float inv = 1.0f / (float)(1LL << 32);
-    OutX = (float)X.v * inv;
-    OutZ = (float)Z.v * inv;
-}
-
-FFixedVector2D FFixedVector2D::GetSafeNormal() const
-{
-    FIXED_32 len = Length();
-    return len.v == 0 ? FFixedVector2D{} : *this / len;
 }
