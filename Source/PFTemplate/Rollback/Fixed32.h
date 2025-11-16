@@ -3,13 +3,16 @@
 #include <stdint.h>
 
 /*  Q32.32 64-bit fixed point  */
+USTRUCT(BlueprintType)
 struct FIXED_32
 {
+    GENERATED_BODY()
+    
     int64_t v = 0;  // raw 32.32 value
 
     // construction / conversion
     FIXED_32() = default;
-    explicit FIXED_32(int64_t raw) : v(raw) {}
+    FIXED_32(float f) { v = (int64_t)(f * (double)(1ULL << 32)); }
     
     static FIXED_32 FromUnits(int32_t whole, uint32_t frac);
     int32_t GetWhole() const;
@@ -57,3 +60,6 @@ private:
     FIXED_32 MulHigh(FIXED_32 b) const;
     static FIXED_32 poly5(FIXED_32 x2);
 };
+
+FORCEINLINE float FixedToFloat(FIXED_32 f)   { return (float)(f.v / 4294967296.0); }
+FORCEINLINE FIXED_32 FloatToFixed(float fl)  { return FIXED_32(fl); }

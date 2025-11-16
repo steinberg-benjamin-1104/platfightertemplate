@@ -4,6 +4,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "FighterCapsule.h"
 #include "Jump.h"
+#include "SafeMath.h"
 #include "FighterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -25,7 +26,7 @@ class PFTEMPLATE_API UFighterMovementComponent : public UPawnMovementComponent
 public:
 	UFighterMovementComponent();
 
-	static constexpr float FixedFrameTime = 1.0f / 60.0f;
+	static constexpr FIXED_32 FixedFrameTime = 1.0f / 60.0f;
 
 	UFUNCTION(BlueprintCallable)
 	EFighterMovementMode GetCurrentMode() {return CurrentMovementMode;}
@@ -61,18 +62,18 @@ public:
 	bool PerformCeilingCollisionCheck(FVector &InVelocity, FHitResult& OutHit, bool bHitWall);
 	
 	void UpdateJumpRise();
-	void ApplyAirDrift(float StickX);
+	void ApplyAirDrift(FIXED_32 StickX);
 	
 	//Divide by 3600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Gravity = 3600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 Gravity = 3600.f;
 	//Divide by 600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TerminalFallVelocity = -900.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AirFriction = 360.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float FastFallMultiplier = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 AirFriction = 360.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 FastFallMultiplier = 1.6f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AirAcceleration = 3000.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MaxAirSpeed = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 AirAcceleration = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 MaxAirSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EHopType, FHopData> HopDataMap;
@@ -82,13 +83,13 @@ public:
 	FVector GetVelocity() const { return Velocity; }
 	FVector PreviousVelocity;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float RunSpeed = 1200.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float DashSpeed = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 RunSpeed = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 DashSpeed = 1400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int DashDuration = 12;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float WalkSpeed = 500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 WalkSpeed = 500.f;
 
 	//Lower Friction: 0.95, Higher Friction: 0.5
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float GroundFriction = 0.8f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 GroundFriction = 0.8f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int MaxJumpCount = 2;
 	UPROPERTY() int JumpsRemaining = 0;
 	UPROPERTY() bool bIsFastFalling = false;
@@ -99,17 +100,17 @@ public:
 	bool bCanApplyGroundFriction = true;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void ApplyCustomFriction(float Friction);
+	void ApplyCustomFriction(FIXED_32 Friction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void SnapToNearestGroundBehindStep(float Direction);
+	void SnapToNearestGroundBehindStep(FIXED_32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FVector FindFurthestGroundedPosition() const;
 	
 	void ProcessLanded();
 
-	bool WillStayGroundedNextFrame(float HorizontalSpeed, float Direction) const; //this update
+	bool WillStayGroundedNextFrame(FIXED_32 HorizontalSpeed, FIXED_32 Direction) const; //this update
 	void HaltHorizontalVelocity();
 	void HaltVerticalVelocity();
 	void StopMovementCompletely(bool bStopCollision = false);

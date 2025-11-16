@@ -13,9 +13,6 @@ struct FFixedVector2D
     //construction
     FFixedVector2D() = default;
     FFixedVector2D(FIXED_32 x, FIXED_32 z) : X(x), Z(z) {}
-    
-    static FFixedVector2D FromFloatXY(float x, float z);
-    void ToFloatXY(float& OutX, float& OutZ) const;
 
     //operator overloads
     FFixedVector2D operator+(const FFixedVector2D& o) const { return {X + o.X, Z + o.Z}; }
@@ -42,3 +39,13 @@ struct FFixedVector2D
         return true;
     }
 };
+
+FORCEINLINE FVector ToFloat(const FFixedVector2D& V)
+{
+    return FVector(FixedToFloat(V.X), 0.f, FixedToFloat(V.Z));
+}
+
+FORCEINLINE FFixedVector2D ToFixed(const FVector& V)
+{
+    return FFixedVector2D(FloatToFixed(V.X), FloatToFixed(V.Z));
+}
