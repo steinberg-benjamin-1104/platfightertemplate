@@ -185,6 +185,9 @@ public:
 
 	bool bParry = false;
 
+	FFixedVector2D GetFixedLoc() const { return VectorToFixed2D(GetActorLocation()); }
+	void SetFixedLoc(FFixedVector2D InLoc) { SetActorLocation(Fixed2DToVector(InLoc)); }
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")

@@ -31,9 +31,9 @@ struct FFighterCapsule
 	
 	FFixedVector2D GetCenter() const {return CenterPosition;}
 	
-	void UpdateCenter(const FVector& AnchorPoint)
+	void UpdateCenter(const FFixedVector2D& AnchorPoint)
 	{
-		CenterPosition = VectorToFixed2D(AnchorPoint) + FFixedVector2D(0.f, defaultHalfHeight);
+		CenterPosition = AnchorPoint + FFixedVector2D(0.f, defaultHalfHeight);
 		if (TopLowered) CenterPosition.Z -= TopOffset;
 		if (BottomLifted) CenterPosition.Z += BottomOffset;
 	}

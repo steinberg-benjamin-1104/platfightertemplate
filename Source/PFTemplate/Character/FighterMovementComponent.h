@@ -5,6 +5,7 @@
 #include "FighterCapsule.h"
 #include "Jump.h"
 #include "SafeMath.h"
+#include "FighterPawn.h"
 #include "FighterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -56,9 +57,9 @@ public:
 	// Air & Gravity
 	void ApplyFallingGravity();
 	void PerformCollisionChecks();
-	bool PerformWallCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit);
-	bool PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit, bool bHitWall);
-	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit, bool bHitWall);
+	bool PerformWallCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit);
+	bool PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit, bool bHitWall);
+	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit, bool bHitWall);
 	
 	void UpdateJumpRise();
 	void ApplyAirDrift(FIXED_32 StickX);
@@ -103,14 +104,14 @@ public:
 	void ApplyCustomFriction(FIXED_32 Friction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void SnapToNearestGroundBehindStep(FIXED_32 Direction);
+	void SnapToNearestGroundBehindStep(int32 inDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	FFixedVector2D FindFurthestGroundedPosition(float Direction) const;
+	FFixedVector2D FindFurthestGroundedPosition(int32 Direction) const;
 	
 	void ProcessLanded();
 
-	bool WillStayGroundedNextFrame(FIXED_32 HorizontalSpeed, FIXED_32 Direction) const; //this update
+	bool WillStayGroundedNextFrame(FIXED_32 HorizontalSpeed, int32 Direction) const;
 	void HaltHorizontalVelocity();
 	void HaltVerticalVelocity();
 	void StopMovementCompletely(bool bStopCollision = false);

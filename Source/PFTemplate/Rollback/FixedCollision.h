@@ -10,10 +10,11 @@ struct FFixedHitResult
 	bool            bBlockingHit = false;
 };
 
+constexpr ECollisionChannel Channel = ECC_WorldStatic;
+
 static FFixedHitResult FixedLineTrace(const UWorld* World,
 									  const FFixedVector2D& Start,
-									  const FFixedVector2D& End,
-									  const ECollisionChannel Channel = ECC_Visibility)
+									  const FFixedVector2D& End)
 {
 	FHitResult Hit;
 	const bool bHit = World->LineTraceSingleByChannel(
@@ -36,8 +37,7 @@ static FFixedHitResult FixedLineTrace(const UWorld* World,
 static FFixedHitResult FixedSweepBox(const UWorld* World,
 									 const FFixedVector2D& Start,
 									 const FFixedVector2D& End,
-									 const FFixedVector2D& HalfExtent,
-									 const ECollisionChannel Channel = ECC_Pawn)
+									 const FFixedVector2D& HalfExtent)
 {
 	FHitResult Hit;
 	const bool bHit = World->SweepSingleByChannel(
@@ -65,8 +65,7 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 										 const FFixedVector2D& Start,
 										 const FFixedVector2D& End,
 										 FIXED_32 Radius,
-										 FIXED_32 HalfHeight,
-										 ECollisionChannel Channel = ECC_Pawn)
+										 FIXED_32 HalfHeight)
 {
 	FHitResult Hit;
 	const bool bHit = World->SweepSingleByChannel(

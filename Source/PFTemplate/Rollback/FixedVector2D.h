@@ -15,6 +15,7 @@ struct FFixedVector2D
     FFixedVector2D(FIXED_32 x, FIXED_32 z) : X(x), Z(z) {}
     FFixedVector2D(FIXED_32 x, float z) : X(x), Z(z) {}
     FFixedVector2D(float x, FIXED_32 z) : X(x), Z(z) {}
+    FFixedVector2D(float x, float z) : X(x), Z(z) {}
 
     //operator overloads
     FFixedVector2D operator+(const FFixedVector2D& o) const { return {X + o.X, Z + o.Z}; }

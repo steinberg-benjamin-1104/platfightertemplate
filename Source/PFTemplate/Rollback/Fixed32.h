@@ -55,9 +55,8 @@ struct FIXED_32
 
     FIXED_32 Sqrt() const;
     FIXED_32 Abs() const { return v < 0 ? FIXED_32(-v) : *this; }
-    static FIXED_32 Min(FIXED_32 a, FIXED_32 b) { return a < b ? a : b; }
-    static FIXED_32 Max(FIXED_32 a, FIXED_32 b) { return a > b ? a : b; }
-    FIXED_32 Clamp(FIXED_32 min, FIXED_32 max) const { return Max(min, Min(max, *this));}
+    int32 Sign() const { return (v > 0) ? 1 : -1;}
+
 
     static constexpr FIXED_32 Pi()       { return FIXED_32(0x3243F6A89LL); } // pi
     static constexpr FIXED_32 TWO_Pi()   { return FIXED_32(0x6487ED511LL); } // 2*pi
@@ -81,5 +80,10 @@ private:
     static FIXED_32 poly5(FIXED_32 x2);
 };
 
+FORCEINLINE FIXED_32 operator*(const FIXED_32& v, int32 i) { return FIXED_32(v.v * i); }
+FORCEINLINE FIXED_32 operator*(int32 i, const FIXED_32& v) { return FIXED_32(v.v * i); }
 FORCEINLINE float FixedToFloat(FIXED_32 f)   { return (float)(f.v / 4294967296.0); }
 FORCEINLINE FIXED_32 FloatToFixed(float fl)  { return FIXED_32(fl); }
+FORCEINLINE FIXED_32 FixedMin(FIXED_32 a, FIXED_32 b) { return (a < b) ? a : b; }
+FORCEINLINE FIXED_32 FixedMax(FIXED_32 a, FIXED_32 b) { return (a > b) ? a : b; }
+FORCEINLINE FIXED_32 FixedClamp(FIXED_32 value, FIXED_32 min, FIXED_32 max) { return FixedMax(min, FixedMin(max, value)); }

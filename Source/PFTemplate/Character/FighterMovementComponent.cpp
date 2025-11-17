@@ -2,6 +2,9 @@
 #include "GameFramework/Actor.h"
 #include "DrawDebugHelpers.h"
 #include "FighterPawn.h"
+#include "FixedCollision.h"
+#include "LandscapeRender.h"
+#include "VectorUtil.h"
 
 UFighterMovementComponent::UFighterMovementComponent()
 {
@@ -12,7 +15,7 @@ void UFighterMovementComponent::InitFMC(AFighterPawn* InFighterPawn)
 {
 	FighterPawnRef = InFighterPawn;
 	CollisionCapsule.Reset();
-	CollisionCapsule.UpdateCenter(GetOwner()->GetActorLocation());
+	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
 }
 
 void UFighterMovementComponent::TickFMC()
@@ -32,7 +35,7 @@ void UFighterMovementComponent::TickFMC()
 void UFighterMovementComponent::UpdateCapsule()
 {
 	FollowCapsule = CollisionCapsule;
-	CollisionCapsule.UpdateCenter(GetOwner()->GetActorLocation());
+	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
 }
 
 void UFighterMovementComponent::ApplyMovementPhysics()
@@ -111,9 +114,12 @@ void UFighterMovementComponent::UpdateJumpRise()
 
 	const FIXED_32 CurrentHeight = HeightRatio * CurrentHopData.Height;
 
-	const FIXED_32 PrevAlpha =
-		FloatToFixed(static_cast<float>(HopCurrentFrame - 1) / static_cast<float>(CurrentHopData.Frames))
-		.Clamp(FloatToFixed(0.f), FloatToFixed(1.f));
+	const FIXED_32 PrevAlpha = FixedClamp(
+		FloatToFixed(static_cast<float>(HopCurrentFrame - 1) /
+					 static_cast<float>(CurrentHopData.Frames)),
+		FloatToFixed(0.f),
+		FloatToFixed(1.f)
+	);
 
 	const FIXED_32 PrevHeightRatio =
 		FloatToFixed(CurrentHopData.Curve->GetFloatValue(FixedToFloat(PrevAlpha)));
@@ -170,32 +176,32 @@ void UFighterMovementComponent::ApplyCustomFriction(FIXED_32 Friction)
 
 #pragma region Falling/Landing
 
-void UFighterMovementComponent::ApplyAirDrift(float StickX)
+void UFighterMovementComponent::ApplyAirDrift(FIXED_32 StickX)
 {
-	FVector CurrentVelocity = GetVelocity();
+	FFixedVector2D CurrentVelocity = GetVelocity();
 
-	if (FMath::IsNearlyZero(StickX, 0.01f))
+	if (StickX == FIXED_32(0.f)) //no stick input
 	{
-		float Decel = AirFriction * FixedFrameTime;
+		FIXED_32 Decel = AirFriction * FixedDt;
     
 		// apply deceleration toward zero
-		if (CurrentVelocity.X > 0.f)
-			CurrentVelocity.X = FMath::Max(0.f, CurrentVelocity.X - Decel);
-		else if (CurrentVelocity.X < 0.f)
-			CurrentVelocity.X = FMath::Min(0.f, CurrentVelocity.X + Decel);
+		if (CurrentVelocity.X > FIXED_32(0.f))
+			CurrentVelocity.X = FixedMax(0.f, CurrentVelocity.X - Decel);
+		else if (CurrentVelocity.X < FIXED_32(0.f))
+			CurrentVelocity.X = FixedMin(0.f, CurrentVelocity.X + Decel);
 
 		SetVelocity(CurrentVelocity);
 		return;
 	}
 
 	// Compute target speed
-	const float TargetSpeed = StickX * MaxAirSpeed;
+	const FIXED_32 TargetSpeed = StickX * MaxAirSpeed;
 
 	// Apply acceleration toward target speed
 	if (!FMath::IsNearlyEqual(CurrentVelocity.X, TargetSpeed, 0.1f))
 	{
-		const float DeltaSpeed = FMath::Sign(TargetSpeed - CurrentVelocity.X) * AirAcceleration * FrameDuration;
-		CurrentVelocity.X += DeltaSpeed;
+		const FIXED_32 DeltaSpeed = (TargetSpeed - CurrentVelocity.X) * AirAcceleration * FixedDt;
+		CurrentVelocity.X += DeltaSpeed.Sign();
 
 		// Clamp to target
 		if ((TargetSpeed - CurrentVelocity.X) * DeltaSpeed < 0.f)
@@ -227,29 +233,28 @@ void UFighterMovementComponent::ProcessLanded()
 
 #pragma endregion
 
-FVector UFighterMovementComponent::FindFurthestGroundedPosition(float InDirection) const
+FFixedVector2D UFighterMovementComponent::FindFurthestGroundedPosition(int32 InDirection) const
 {
-	const float StepSize = 0.5f;               // Tune this to go closer or coarser
-	const int MaxSteps = 30;                  // Maximum look-ahead steps
+	const FIXED_32 StepSize = 0.5f;
+	const int32 MaxSteps = 30;                  // Maximum look-ahead steps
 
-	const FVector Start = CollisionCapsule.GetBottom();
+	const FFixedVector2D Start = CollisionCapsule.GetBottom();
 	const float Direction = InDirection;
 
-	FVector LastGrounded = Start;
+	FFixedVector2D LastGrounded = Start;
 
-	for (int i = 1; i <= MaxSteps; ++i)
+	for (int32 i = 1; i <= MaxSteps; ++i)
 	{
-		FVector TestPos = Start + FVector(Direction * i * StepSize, 0.f, 0.f);
-		FVector TraceStart = TestPos + FVector(0.f, 0.f, 10.f);
-		FVector TraceEnd   = TestPos - FVector(0.f, 0.f, 20.f);
-
-		FHitResult Hit;
+		FFixedVector2D TestPos = Start + FFixedVector2D(Direction * i * StepSize, 0.f);
+		FFixedVector2D TraceStart = TestPos + FFixedVector2D(FIXED_32(), 10.f);
+		FFixedVector2D TraceEnd   = TestPos - FFixedVector2D(FIXED_32(), 20.f);
+		
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(GetOwner());
+		
+		FFixedHitResult Hit = FixedLineTrace(GetWorld(), TraceStart, TraceEnd);
 
-		bool bGrounded = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params);
-
-		if (!bGrounded)
+		if (!Hit.bBlockingHit)
 		{
 			break; // We've reached the point just past the ledge
 		}
@@ -258,32 +263,29 @@ FVector UFighterMovementComponent::FindFurthestGroundedPosition(float InDirectio
 	}
 
 	// Place actor flush to the ledge
-	FVector Result = GetOwner()->GetActorLocation();
+	FFixedVector2D Result = FighterPawnRef->GetFixedLoc();
 	Result.X = LastGrounded.X;
 	return Result;
 }
 
-bool UFighterMovementComponent::WillStayGroundedNextFrame(float HorizontalSpeed, float Direction) const
+bool UFighterMovementComponent::WillStayGroundedNextFrame(FIXED_32 HorizontalSpeed, int32 Direction) const
 {
-	FVector CurrentPos = GetOwner()->GetActorLocation();
-	float NextX = CurrentPos.X + (Direction * HorizontalSpeed * FixedFrameTime);
-	FVector PredictPos = FVector(NextX, CurrentPos.Y, CurrentPos.Z);
+	FFixedVector2D CurrentPos = FighterPawnRef->GetFixedLoc();
+	FIXED_32 NextX = CurrentPos.X + (Direction * HorizontalSpeed * FixedDt);
+	FFixedVector2D PredictPos = FFixedVector2D(NextX, CurrentPos.Z);
 
-	FVector TraceStart = PredictPos + FVector(0.f, 0.f, 5.f);
-	FVector TraceEnd = PredictPos - FVector(0.f, 0.f, 35.f);
+	FFixedVector2D TraceStart = PredictPos + FFixedVector2D(0.f, 5.f);
+	FFixedVector2D TraceEnd = PredictPos - FFixedVector2D(0.f, 35.f);
 
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwner());
-
-	return GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params);
+	FFixedHitResult Hit = FixedLineTrace(GetWorld(), TraceStart, TraceEnd);
+	return Hit.bBlockingHit;
 }
 
-void UFighterMovementComponent::SnapToNearestGroundBehindStep(float Direction)
+void UFighterMovementComponent::SnapToNearestGroundBehindStep(int32 inDirection)
 {
-	FVector SafePosition = FindFurthestGroundedPosition();
-	SetVelocity(FVector::ZeroVector);
-	GetOwner()->SetActorLocation(SafePosition);
+	FFixedVector2D SafePosition = FindFurthestGroundedPosition(inDirection);
+	SetVelocity(FFixedVector2D());
+	FighterPawnRef->SetFixedLoc(SafePosition);
 }
 
 void UFighterMovementComponent::HaltHorizontalVelocity()
@@ -299,7 +301,7 @@ void UFighterMovementComponent::HaltVerticalVelocity()
 void UFighterMovementComponent::HandleLedgeOrFall(bool bPreventFall)
 {
 	const FIXED_32 CurrentSpeed = Velocity.X.Abs();
-	const float Direction = (Velocity.X > 0.f) ? 1.f : -1.f;
+	int32 Direction = Velocity.X.Sign();
 
 	if (!WillStayGroundedNextFrame(CurrentSpeed, Direction))
 	{
@@ -336,9 +338,9 @@ void UFighterMovementComponent::DrawDebugFighterCapsule(const FFighterCapsule& C
 {
 	DrawDebugCapsule(
 		GetWorld(),
-		Capsule.GetCenter(),
-		Capsule.HalfHeight,
-		Capsule.Radius,
+		Fixed2DToVector(Capsule.GetCenter()),
+		FixedToFloat(Capsule.HalfHeight),
+		FixedToFloat(Capsule.Radius),
 		FQuat::Identity,
 		Color,
 		false,
@@ -350,7 +352,7 @@ void UFighterMovementComponent::DrawDebugFighterCapsule(const FFighterCapsule& C
 
 void UFighterMovementComponent::PerformCollisionChecks()
 {
-	FHitResult WallHit, GroundHit, CeilingHit;
+	FFixedHitResult WallHit, GroundHit, CeilingHit;
 	bool bHitWall = PerformWallCollisionCheck(Velocity, WallHit);
 	
 	if (CurrentMovementMode == EFighterMovementMode::Falling)
@@ -365,32 +367,24 @@ void UFighterMovementComponent::PerformCollisionChecks()
 	PerformCeilingCollisionCheck(Velocity, CeilingHit, bHitWall);
 }
 
-bool UFighterMovementComponent::PerformWallCollisionCheck(FVector& InVelocity, FHitResult& OutHit)
+bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelocity, FFixedHitResult& OutHit)
 {
-	const FVector Start = CollisionCapsule.GetCenter();
-	const float SmallCheckDist = CollisionCapsule.Radius * 0.2f;
-	const FVector TraceDelta = InVelocity * FixedDt;
+	const FFixedVector2D Start = CollisionCapsule.GetCenter();
+	const FIXED_32 SmallCheckDist = CollisionCapsule.Radius * 0.2f;
+	const FFixedVector2D TraceDelta = InVelocity * FixedDt;
 
 	// Horizontal velocity case
-	if (InVelocity.X != 0.f)
+	if (InVelocity.X.Abs() != FIXED_32(0.f))
 	{
-		const FVector End = Start + TraceDelta;
-		if (GetWorld()->SweepSingleByChannel(
-			OutHit,
-			Start,
-			End,
-			FQuat::Identity,
-			ECC_WorldStatic,
-			GetCapsule()
-		))
+		const FFixedVector2D End = Start + TraceDelta;
+		OutHit = FixedSweepCapsule(GetWorld(), Start, End, CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
 		{
-			const FVector Normal = OutHit.ImpactNormal;
-			if (FMath::Abs(Normal.X) > 0.5f)
+			if (OutHit.Normal.X.Abs() > FIXED_32(0.5f))
 			{
-				FVector ActorLoc = GetOwner()->GetActorLocation();
-				ActorLoc.X = OutHit.ImpactPoint.X + (Normal.X * (CollisionCapsule.Radius + CollisionCapsule.bufferlayer));
-				GetOwner()->SetActorLocation(ActorLoc);
-				InVelocity.X = 0.f;
+				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
+				ActorLoc.X = OutHit.Position.X + OutHit.Normal.X * CollisionCapsule.bufferlayer;
+				FighterPawnRef->SetFixedLoc(ActorLoc);
+				InVelocity.X = FIXED_32(0.f);
 				CollisionCapsule.UpdateCenter(ActorLoc);
 				return true;
 			}
@@ -398,33 +392,31 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FVector& InVelocity, F
 	}
 	else // No horizontal velocity: check small forward/back traces
 	{
-		FHitResult TempHit;
-		const FVector ForwardStart = Start + FVector(SmallCheckDist, 0, 0);
-		const FVector BackwardStart = Start - FVector(SmallCheckDist, 0, 0);
+		const FFixedVector2D ForwardStart  = Start + FFixedVector2D(SmallCheckDist, 0.f);
+		const FFixedVector2D BackwardStart = Start - FFixedVector2D(SmallCheckDist, 0.f);
 
-		if (GetWorld()->SweepSingleByChannel(
-			TempHit,
-			Start,
-			ForwardStart,
-			FQuat::Identity,
-			ECC_WorldStatic,
-			GetCapsule()
-		) || GetWorld()->SweepSingleByChannel(
-			TempHit,
-			Start,
-			BackwardStart,
-			FQuat::Identity,
-			ECC_WorldStatic,
-			GetCapsule()
-		))
+		FFixedHitResult ForwardHit  = FixedSweepCapsule(GetWorld(), Start, ForwardStart,  CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
+		FFixedHitResult BackwardHit = FixedSweepCapsule(GetWorld(), Start, BackwardStart, CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
+
+		const FFixedHitResult* HitToUse = nullptr;
+
+		if (ForwardHit.bBlockingHit)
+			HitToUse = &ForwardHit;
+		else if (BackwardHit.bBlockingHit)
+			HitToUse = &BackwardHit;
+
+		if (HitToUse)
 		{
-			if (FMath::Abs(TempHit.ImpactNormal.X) > 0.5f)
+			const FFixedHitResult& Hit = *HitToUse;
+
+			if (Hit.Normal.X.Abs() > FIXED_32(0.5f))
 			{
-				FVector ActorLoc = GetOwner()->GetActorLocation();
-				ActorLoc.X = TempHit.ImpactPoint.X + (TempHit.ImpactNormal.X * (CollisionCapsule.Radius + CollisionCapsule.bufferlayer));
-				GetOwner()->SetActorLocation(ActorLoc);
+				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
+				ActorLoc.X = Hit.Position.X + Hit.Normal.X * CollisionCapsule.bufferlayer;
+				FighterPawnRef->SetFixedLoc(ActorLoc);
+				InVelocity.X = FIXED_32(0);
 				CollisionCapsule.UpdateCenter(ActorLoc);
-				OutHit = TempHit;
+				OutHit = Hit;
 				return true;
 			}
 		}
@@ -433,58 +425,45 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FVector& InVelocity, F
 	return false;
 }
 
-bool UFighterMovementComponent::PerformGroundCollisionCheck(FVector &InVelocity, FHitResult &OutHit, bool bHitWall)
+bool UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult &OutHit, bool bHitWall)
 {
-	if (InVelocity.Z >= 0.f) return false;
-	FVector Start = CollisionCapsule.GetBottom();
-	Start.X += bHitWall ? 0.f : InVelocity.X * FixedFrameTime;
+	if (InVelocity.Z >= FIXED_32(0.f)) return false;
+	FFixedVector2D Start = CollisionCapsule.GetBottom();
+	Start.X += bHitWall ? 0.f : InVelocity.X * FixedDt;
     
-	float TraceDistance = InVelocity.Z * 1/60;
+	FIXED_32 TraceDistanceZ = InVelocity.Z * FixedDt;
     
-	FVector End = Start + FVector(0, 0, TraceDistance);
+	FFixedVector2D End = Start + FFixedVector2D(0.f, TraceDistanceZ);
+
+	OutHit = FixedLineTrace(GetWorld(), Start, End);
     
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-	   OutHit,
-	   Start,
-	   End,
-	   ECC_WorldStatic
-	);
-    
-	if (bHit)
+	if (OutHit.bBlockingHit)
 	{
-		FVector NewLocation = OutHit.Location;
-		NewLocation.X -= InVelocity.X * 1/60;
+		FFixedVector2D NewLocation = OutHit.Position;
+		NewLocation.X -= InVelocity.X * FixedDt;
 		NewLocation.Z += CollisionCapsule.bufferlayer;
-		GetOwner()->SetActorLocation(NewLocation);
-		Velocity.Z = 0.f;
+		FighterPawnRef->SetFixedLoc(NewLocation);
+		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
 		return true;
 	}
 	return false;
 }
 
-bool UFighterMovementComponent::PerformCeilingCollisionCheck(FVector &InVelocity, FHitResult &OutHit, bool bHitWall)
+bool UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult &OutHit, bool bHitWall)
 {
 	if (InVelocity.Z <= 0.f) return false;
-	FVector Start = CollisionCapsule.GetCenter() + FVector(bHitWall ? 0 : InVelocity.X * FixedFrameTime, 0.f, CollisionCapsule.HalfHeight);
+	FFixedVector2D Start = CollisionCapsule.GetCenter() + FFixedVector2D(bHitWall ? 0 : InVelocity.X * FixedDt, CollisionCapsule.HalfHeight);
+	FFixedVector2D End = Start + FFixedVector2D(0.f, InVelocity.Z * FixedDt);
+
+	OutHit = FixedLineTrace(GetWorld(), Start, End);
     
-	float TraceDistance = InVelocity.Z * 1/60;
-    
-	FVector End = Start + FVector(0, 0, TraceDistance);
-    
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-	   OutHit,
-	   Start,
-	   End,
-	   ECC_WorldStatic
-	);
-    
-	if (bHit)
+	if (OutHit.bBlockingHit)
 	{
-		const float CapsuleTopOffset = CollisionCapsule.defaultHalfHeight * 2 + CollisionCapsule.bufferlayer;
-		const FVector NewLocation = OutHit.ImpactPoint - FVector(0, 0, CapsuleTopOffset);
-		GetOwner()->SetActorLocation(NewLocation);
-		InVelocity.Z = 0.f;
+		const FIXED_32 CapsuleTopOffset = CollisionCapsule.defaultHalfHeight * 2 + CollisionCapsule.bufferlayer;
+		const FFixedVector2D NewLocation = OutHit.Position - FFixedVector2D(0.f, CapsuleTopOffset);
+		FighterPawnRef->SetFixedLoc(NewLocation);
+		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
 		return true;
 	}
