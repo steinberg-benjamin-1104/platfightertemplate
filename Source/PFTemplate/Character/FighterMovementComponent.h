@@ -26,8 +26,6 @@ class PFTEMPLATE_API UFighterMovementComponent : public UPawnMovementComponent
 public:
 	UFighterMovementComponent();
 
-	static constexpr FIXED_32 FixedFrameTime = 1.0f / 60.0f;
-
 	UFUNCTION(BlueprintCallable)
 	EFighterMovementMode GetCurrentMode() {return CurrentMovementMode;}
 
@@ -57,9 +55,9 @@ public:
 	// Air & Gravity
 	void ApplyFallingGravity();
 	void PerformCollisionChecks();
-	bool PerformWallCollisionCheck(FVector &InVelocity, FHitResult& OutHit);
-	bool PerformGroundCollisionCheck(FVector &InVelocity, FHitResult& OutHit, bool bHitWall);
-	bool PerformCeilingCollisionCheck(FVector &InVelocity, FHitResult& OutHit, bool bHitWall);
+	bool PerformWallCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit);
+	bool PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit, bool bHitWall);
+	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FHitResult& OutHit, bool bHitWall);
 	
 	void UpdateJumpRise();
 	void ApplyAirDrift(FIXED_32 StickX);
@@ -79,9 +77,9 @@ public:
 	TMap<EHopType, FHopData> HopDataMap;
 	
 	UFUNCTION(BlueprintCallable)
-	void SetVelocity(const FVector& InVelocity);
-	FVector GetVelocity() const { return Velocity; }
-	FVector PreviousVelocity;
+	void SetVelocity(const FFixedVector2D& InVelocity);
+	FFixedVector2D GetVelocity() const { return Velocity; }
+	FFixedVector2D PreviousVelocity;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 RunSpeed = 1200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 DashSpeed = 1400.f;
@@ -106,7 +104,7 @@ public:
 	void SnapToNearestGroundBehindStep(FIXED_32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	FVector FindFurthestGroundedPosition() const;
+	FFixedVector2D FindFurthestGroundedPosition() const;
 	
 	void ProcessLanded();
 
@@ -122,7 +120,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
 	FFighterCapsule CollisionCapsule;
 	
-	FVector GetCenter() const {return CollisionCapsule.GetCenter();}
+	FFixedVector2D GetCenter() const {return CollisionCapsule.GetCenter();}
 	
 	void UpdateCapsule();
 
