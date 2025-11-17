@@ -172,8 +172,6 @@ void UFighterMovementComponent::ApplyCustomFriction(FIXED_32 Friction)
 
 void UFighterMovementComponent::ApplyAirDrift(float StickX)
 {
-	constexpr float FrameDuration = 1.f / 60.f;
-
 	FVector CurrentVelocity = GetVelocity();
 
 	if (FMath::IsNearlyZero(StickX, 0.01f))
@@ -214,7 +212,7 @@ void UFighterMovementComponent::ApplyFallingGravity()
 	if (bIsFastFalling) Velocity.Z = TerminalFallVelocity * FastFallMultiplier;
 	else
 	{
-		Velocity.Z -= Gravity * FixedFrameTime;
+		Velocity.Z -= Gravity * FixedDt;
 		if (Velocity.Z < TerminalFallVelocity) Velocity.Z = TerminalFallVelocity;
 	}
 }
@@ -231,7 +229,6 @@ void UFighterMovementComponent::ProcessLanded()
 
 FVector UFighterMovementComponent::FindFurthestGroundedPosition(float InDirection) const
 {
-	constexpr float FixedDeltaTime = 1.f / 60.f;
 	const float StepSize = 0.5f;               // Tune this to go closer or coarser
 	const int MaxSteps = 30;                  // Maximum look-ahead steps
 
@@ -291,21 +288,17 @@ void UFighterMovementComponent::SnapToNearestGroundBehindStep(float Direction)
 
 void UFighterMovementComponent::HaltHorizontalVelocity()
 {
-	FVector NewVelocity = Velocity;
-	NewVelocity.X = 0.f;
-	SetVelocity(NewVelocity);
+	Velocity.X = FIXED_32(0.f);
 }
 
 void UFighterMovementComponent::HaltVerticalVelocity()
 {
-	FVector NewVelocity = Velocity;
-	NewVelocity.Z = 0.f;
-	SetVelocity(NewVelocity);
+	Velocity.X = FIXED_32(0.f);
 }
 
 void UFighterMovementComponent::HandleLedgeOrFall(bool bPreventFall)
 {
-	const float CurrentSpeed = FMath::Abs(Velocity.X);
+	const FIXED_32 CurrentSpeed = Velocity.X.Abs();
 	const float Direction = (Velocity.X > 0.f) ? 1.f : -1.f;
 
 	if (!WillStayGroundedNextFrame(CurrentSpeed, Direction))
@@ -334,7 +327,7 @@ bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 
 void UFighterMovementComponent::StopMovementCompletely(bool bStopCollision)
 {
-	SetVelocity(FVector::ZeroVector);
+	SetVelocity(FFixedVector2D(0.f, 0.f));
 	SetMovementMode(EFighterMovementMode::None);
 	if (bStopCollision) bDoCollisionChecks = false;
 }
@@ -376,7 +369,7 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FVector& InVelocity, F
 {
 	const FVector Start = CollisionCapsule.GetCenter();
 	const float SmallCheckDist = CollisionCapsule.Radius * 0.2f;
-	const FVector TraceDelta = InVelocity * FixedFrameTime;
+	const FVector TraceDelta = InVelocity * FixedDt;
 
 	// Horizontal velocity case
 	if (InVelocity.X != 0.f)
@@ -496,14 +489,4 @@ bool UFighterMovementComponent::PerformCeilingCollisionCheck(FVector &InVelocity
 		return true;
 	}
 	return false;
-}
-
-FCollisionShape UFighterMovementComponent::GetCapsule() const
-{
-	return
-	FCollisionShape::MakeCapsule
-		(
-			CollisionCapsule.Radius,
-			CollisionCapsule.HalfHeight
-		);
 }

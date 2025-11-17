@@ -141,6 +141,4 @@ protected:
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);
-
-	FCollisionShape GetCapsule() const;
 };

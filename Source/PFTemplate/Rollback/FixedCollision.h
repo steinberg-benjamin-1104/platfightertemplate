@@ -1,6 +1,5 @@
 // FixedCollision.h
 #pragma once
-#include "SafeMath.h"
 #include "Engine/World.h"
 
 struct FFixedHitResult
@@ -19,16 +18,16 @@ static FFixedHitResult FixedLineTrace(const UWorld* World,
 	FHitResult Hit;
 	const bool bHit = World->LineTraceSingleByChannel(
 						Hit,
-						ToFloat(Start),
-						ToFloat(End),
+						Fixed2DToVector(Start),
+						Fixed2DToVector(End),
 						Channel);
 
 	FFixedHitResult Out;
 	Out.bBlockingHit = bHit;
 	if (bHit)
 	{
-		Out.Position  = ToFixed(Hit.Location);
-		Out.Normal    = ToFixed(Hit.Normal);
+		Out.Position  = VectorToFixed2D(Hit.Location);
+		Out.Normal    = VectorToFixed2D(Hit.Normal);
 		Out.Distance  = FloatToFixed(Hit.Distance);
 	}
 	return Out;
@@ -43,8 +42,8 @@ static FFixedHitResult FixedSweepBox(const UWorld* World,
 	FHitResult Hit;
 	const bool bHit = World->SweepSingleByChannel(
 						Hit,
-						ToFloat(Start),
-						ToFloat(End),
+						Fixed2DToVector(Start),
+						Fixed2DToVector(End),
 						FQuat::Identity,
 						Channel,
 						FCollisionShape::MakeBox(FVector(FixedToFloat(HalfExtent.X),
@@ -55,9 +54,9 @@ static FFixedHitResult FixedSweepBox(const UWorld* World,
 	Out.bBlockingHit = bHit;
 	if (bHit)
 	{
-		Out.Position = ToFixed(Hit.Location);
-		Out.Normal   = ToFixed(Hit.Normal);
-		Out.Distance = FloatToFixed(Hit.Distance);
+		Out.Position  = VectorToFixed2D(Hit.Location);
+		Out.Normal    = VectorToFixed2D(Hit.Normal);
+		Out.Distance  = FloatToFixed(Hit.Distance);
 	}
 	return Out;
 }
@@ -66,15 +65,15 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 										 const FFixedVector2D& Start,
 										 const FFixedVector2D& End,
 										 FIXED_32 Radius,
-										 FIXED_32 HalfHeight,   // vertical half-height
+										 FIXED_32 HalfHeight,
 										 ECollisionChannel Channel = ECC_Pawn)
 {
 	FHitResult Hit;
 	const bool bHit = World->SweepSingleByChannel(
 						Hit,
-						ToFloat(Start),
-						ToFloat(End),
-						FQuat::Identity,               // upright capsule
+						Fixed2DToVector(Start),
+						Fixed2DToVector(End),
+						FQuat::Identity,
 						Channel,
 						FCollisionShape::MakeCapsule(FixedToFloat(Radius),
 													 FixedToFloat(HalfHeight)));
@@ -83,9 +82,9 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 	Out.bBlockingHit = bHit;
 	if (bHit)
 	{
-		Out.Position = ToFixed(Hit.Location);
-		Out.Normal   = ToFixed(Hit.Normal);
-		Out.Distance = FloatToFixed(Hit.Distance);
+		Out.Position  = VectorToFixed2D(Hit.Location);
+		Out.Normal    = VectorToFixed2D(Hit.Normal);
+		Out.Distance  = FloatToFixed(Hit.Distance);
 	}
 	return Out;
 }

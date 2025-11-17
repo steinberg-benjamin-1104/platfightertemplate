@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "SafeMath.h"
 #include "FighterCapsule.generated.h"
 
 USTRUCT(BlueprintType)
@@ -8,31 +9,31 @@ struct FFighterCapsule
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	float defaultHalfHeight = 90.f;
+	FIXED_32 defaultHalfHeight = 90.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	float Radius = 30.f;
+	FIXED_32 Radius = 30.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	float BottomOffset = 25.f;
+	FIXED_32 BottomOffset = 25.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	float TopOffset = 25.f;
+	FIXED_32 TopOffset = 25.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	float bufferlayer = 0.05f;
+	FIXED_32 bufferlayer = 0.05f;
 	
 	bool TopLowered = false;
 	bool BottomLifted = false;
 	
-	FVector CenterPosition = FVector::ZeroVector;
-	float HalfHeight;
+	FFixedVector2D CenterPosition;
+	FIXED_32 HalfHeight;
 	
-	FVector GetCenter() const {return CenterPosition;}
+	FFixedVector2D GetCenter() const {return CenterPosition;}
 	
 	void UpdateCenter(const FVector& AnchorPoint)
 	{
-		CenterPosition = AnchorPoint + FVector(0.f, 0.f, defaultHalfHeight);
+		CenterPosition = VectorToFixed2D(AnchorPoint) + FFixedVector2D(0.f, defaultHalfHeight);
 		if (TopLowered) CenterPosition.Z -= TopOffset;
 		if (BottomLifted) CenterPosition.Z += BottomOffset;
 	}
@@ -60,9 +61,9 @@ struct FFighterCapsule
 		BottomLifted = false;
 	}
 
-	FVector GetBottom() const
+	FFixedVector2D GetBottom() const
 	{
-		FVector Bottom = CenterPosition;
+		FFixedVector2D Bottom = CenterPosition;
 		Bottom.Z -= HalfHeight;
 		return Bottom;
 	}
