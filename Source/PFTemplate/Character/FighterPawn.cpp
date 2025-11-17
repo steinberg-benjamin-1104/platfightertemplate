@@ -26,7 +26,6 @@ AFighterPawn::AFighterPawn()
 	
 	// Set movement driver to RootComponent
 	MovementComponent = CreateDefaultSubobject<UFighterMovementComponent>(TEXT("FighterMovement"));
-	MovementComponent->UpdatedComponent = RootComponent;
 	MovementComponent->PrimaryComponentTick.bCanEverTick = false;
 	MovementComponent->PrimaryComponentTick.bStartWithTickEnabled = false;
 
@@ -48,6 +47,8 @@ void AFighterPawn::BeginPlay()
 	Super::BeginPlay();
 	
 	FighterAnimInstance = Cast<UFighterAnimInstance>(CharacterMesh->GetAnimInstance());
+
+	MovementComponent->InitFMC(this);
 	
 	StateMachine = NewObject<UFighterStateMachine>(this);
 	StateMachine->Initialize(this);
@@ -85,7 +86,7 @@ void AFighterPawn::UpdateState()
 void AFighterPawn::InputPhase()
 {
 	if (FPC) FPC->UpdateInput();
-	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickComponent(0.f, ELevelTick::LEVELTICK_All, nullptr);
+	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
 }
 
 void AFighterPawn::UpdateAnimation()

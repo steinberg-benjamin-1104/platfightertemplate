@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SafeMath.h"
 #include "Jump.generated.h"
 
 UENUM(BlueprintType)
@@ -17,7 +18,7 @@ struct FHopData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Height = 0.f;
+	FIXED_32 Height = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Frames = 0;

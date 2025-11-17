@@ -20,11 +20,30 @@ struct FIXED_32
 
     // operator overloads
     FIXED_32 operator+(FIXED_32 o) const { return FIXED_32(v + o.v); }
+    FIXED_32& operator+=(const FIXED_32& o)
+    {
+        v += o.v;
+        return *this;
+    }
     FIXED_32 operator-(FIXED_32 o) const { return FIXED_32(v - o.v); }
+    FIXED_32& operator-=(const FIXED_32& o)
+    {
+        v -= o.v;
+        return *this;
+    }
     FIXED_32 operator-() const { return FIXED_32(-v); }
     FIXED_32 operator*(FIXED_32 o) const;
+    FIXED_32& operator*=(const FIXED_32& o)
+    {
+        *this = *this * o;
+        return *this;
+    }
     FIXED_32 operator/(FIXED_32 o) const;
-    FIXED_32 Sqrt() const;
+    FIXED_32& operator/=(const FIXED_32& o)
+    {
+        *this = *this / o;
+        return *this;
+    }
 
     //comparison
     bool operator==(FIXED_32 o) const { return v == o.v; }
@@ -34,6 +53,7 @@ struct FIXED_32
     bool operator<=(FIXED_32 o) const { return v <= o.v; }
     bool operator>=(FIXED_32 o) const { return v >= o.v; }
 
+    FIXED_32 Sqrt() const;
     FIXED_32 Abs() const { return v < 0 ? FIXED_32(-v) : *this; }
     static FIXED_32 Min(FIXED_32 a, FIXED_32 b) { return a < b ? a : b; }
     static FIXED_32 Max(FIXED_32 a, FIXED_32 b) { return a > b ? a : b; }

@@ -5,29 +5,26 @@
 
 UFighterMovementComponent::UFighterMovementComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UFighterMovementComponent::BeginPlay()
+void UFighterMovementComponent::InitFMC(AFighterPawn* InFighterPawn)
 {
-	Super::BeginPlay();
-	FighterPawnRef = Cast<AFighterPawn>(PawnOwner);
+	FighterPawnRef = InFighterPawn;
 	CollisionCapsule.Reset();
 	CollisionCapsule.UpdateCenter(GetOwner()->GetActorLocation());
 }
 
-void UFighterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFighterMovementComponent::TickFMC()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (!PawnOwner || !UpdatedComponent) return;
+	if (!FighterPawnRef) return;
 
 	ApplyMovementPhysics();
 
 	if (bDoCollisionChecks) PerformCollisionChecks();
-
-	FVector DesiredMove = Velocity * FixedFrameTime;
-	UpdatedComponent->AddWorldOffset(DesiredMove, false);
+	
+	FVector DesiredMove = Fixed2DToVector(Velocity * FixedDt);
+	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	
 	UpdateCapsule();
 }
@@ -36,12 +33,6 @@ void UFighterMovementComponent::UpdateCapsule()
 {
 	FollowCapsule = CollisionCapsule;
 	CollisionCapsule.UpdateCenter(GetOwner()->GetActorLocation());
-}
-
-void UFighterMovementComponent::SetVelocity(const FVector& InVelocity)
-{
-	PreviousVelocity = Velocity;
-	Velocity = InVelocity;
 }
 
 void UFighterMovementComponent::ApplyMovementPhysics()
@@ -113,15 +104,25 @@ void UFighterMovementComponent::UpdateJumpRise()
 		return;
 	}
 
-	const float Alpha = static_cast<float>(HopCurrentFrame) / static_cast<float>(CurrentHopData.Frames);
-	const float HeightRatio = CurrentHopData.Curve->GetFloatValue(Alpha);
+	const FIXED_32 Alpha =
+		FloatToFixed(static_cast<float>(HopCurrentFrame) / static_cast<float>(CurrentHopData.Frames));
+	const FIXED_32 HeightRatio =
+		FloatToFixed(CurrentHopData.Curve->GetFloatValue(FixedToFloat(Alpha)));
 
-	const float CurrentHeight = HeightRatio * CurrentHopData.Height;
-	const float PrevAlpha = static_cast<float>(HopCurrentFrame - 1) / static_cast<float>(CurrentHopData.Frames);
-	const float PrevHeight = CurrentHopData.Curve->GetFloatValue(FMath::Clamp(PrevAlpha, 0.f, 1.f)) * CurrentHopData.Height;
-	const float DeltaHeight = CurrentHeight - PrevHeight;
+	const FIXED_32 CurrentHeight = HeightRatio * CurrentHopData.Height;
 
-	Velocity.Z = DeltaHeight / FixedFrameTime;
+	const FIXED_32 PrevAlpha =
+		FloatToFixed(static_cast<float>(HopCurrentFrame - 1) / static_cast<float>(CurrentHopData.Frames))
+		.Clamp(FloatToFixed(0.f), FloatToFixed(1.f));
+
+	const FIXED_32 PrevHeightRatio =
+		FloatToFixed(CurrentHopData.Curve->GetFloatValue(FixedToFloat(PrevAlpha)));
+
+	const FIXED_32 PrevHeight = PrevHeightRatio * CurrentHopData.Height;
+
+	const FIXED_32 DeltaHeight = CurrentHeight - PrevHeight;
+
+	Velocity.Z = DeltaHeight / FixedDt;
 	HopCurrentFrame++;
 
 	if (HopCurrentFrame >= CurrentHopData.Frames)
@@ -146,27 +147,25 @@ void UFighterMovementComponent::ResetJumpCount()
 void UFighterMovementComponent::ApplyGroundFriction()
 {
 	if (!bCanApplyGroundFriction) return;
+
+	Velocity.X *= GroundFriction;
 	
-	float GroundVelocityX = Velocity.X;
-	GroundVelocityX *= GroundFriction;
-	// Snap to 0 if it's really low to avoid endless sliding
-	if (FMath::Abs(GroundVelocityX) < 0.5f)
+	const FIXED_32 MinVelocity = FIXED_32(0.01f);
+	if (Velocity.X.Abs() < MinVelocity)
 	{
-		GroundVelocityX = 0.f;
+		Velocity.X = FIXED_32(0.f);
 	}
-	Velocity.X = GroundVelocityX;
 }
 
-void UFighterMovementComponent::ApplyCustomFriction(float Friction)
+void UFighterMovementComponent::ApplyCustomFriction(FIXED_32 Friction)
 {
-	float GroundVelocityX = Velocity.X;
-	GroundVelocityX *= Friction;
-	// Snap to 0 if it's really low to avoid endless sliding
-	if (FMath::Abs(GroundVelocityX) < 0.5f)
+	Velocity.X *= Friction;
+	
+	const FIXED_32 MinVelocity = FIXED_32(0.01f);
+	if (Velocity.X.Abs() < MinVelocity)
 	{
-		GroundVelocityX = 0.f;
+		Velocity.X = FIXED_32(0.f);
 	}
-	Velocity.X = GroundVelocityX;
 }
 
 #pragma region Falling/Landing
@@ -230,14 +229,14 @@ void UFighterMovementComponent::ProcessLanded()
 
 #pragma endregion
 
-FVector UFighterMovementComponent::FindFurthestGroundedPosition() const
+FVector UFighterMovementComponent::FindFurthestGroundedPosition(float InDirection) const
 {
 	constexpr float FixedDeltaTime = 1.f / 60.f;
 	const float StepSize = 0.5f;               // Tune this to go closer or coarser
 	const int MaxSteps = 30;                  // Maximum look-ahead steps
 
 	const FVector Start = CollisionCapsule.GetBottom();
-	const float Direction = FMath::Sign(PreviousVelocity.X);
+	const float Direction = InDirection;
 
 	FVector LastGrounded = Start;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PawnMovementComponent.h"
+#include "Components/ActorComponent.h"
 #include "FighterCapsule.h"
 #include "Jump.h"
 #include "SafeMath.h"
@@ -19,22 +19,23 @@ enum class EFighterMovementMode : uint8
 class AFighterPawn;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class PFTEMPLATE_API UFighterMovementComponent : public UPawnMovementComponent
+class PFTEMPLATE_API UFighterMovementComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	UFighterMovementComponent();
 
+	FFixedVector2D Velocity;
+
 	UFUNCTION(BlueprintCallable)
 	EFighterMovementMode GetCurrentMode() {return CurrentMovementMode;}
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetMovementMode(EFighterMovementMode NewMode);
-
-	// Core Overrides
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void InitFMC(AFighterPawn* InFighterPawn);
+	void TickFMC();
 
 	virtual void ApplyMovementPhysics();
 	
@@ -75,11 +76,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EHopType, FHopData> HopDataMap;
-	
+
 	UFUNCTION(BlueprintCallable)
-	void SetVelocity(const FFixedVector2D& InVelocity);
+	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
+
+	UFUNCTION(BlueprintCallable)
 	FFixedVector2D GetVelocity() const { return Velocity; }
-	FFixedVector2D PreviousVelocity;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 RunSpeed = 1200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 DashSpeed = 1400.f;
@@ -104,7 +106,7 @@ public:
 	void SnapToNearestGroundBehindStep(FIXED_32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	FFixedVector2D FindFurthestGroundedPosition() const;
+	FFixedVector2D FindFurthestGroundedPosition(float Direction) const;
 	
 	void ProcessLanded();
 
