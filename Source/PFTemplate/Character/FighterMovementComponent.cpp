@@ -92,7 +92,7 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 	HopCurrentFrame = 0;
 
 	Velocity.Z = 0.f;
-	Velocity.X = FMath::Clamp(Velocity.X, -MaxAirSpeed, MaxAirSpeed);
+	Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed, MaxAirSpeed);
 	SetMovementMode(EFighterMovementMode::JumpingUp);
 	JumpsRemaining--;
 
@@ -198,7 +198,7 @@ void UFighterMovementComponent::ApplyAirDrift(FIXED_32 StickX)
 	const FIXED_32 TargetSpeed = StickX * MaxAirSpeed;
 
 	// Apply acceleration toward target speed
-	if (!FMath::IsNearlyEqual(CurrentVelocity.X, TargetSpeed, 0.1f))
+	if (CurrentVelocity.X < TargetSpeed)
 	{
 		const FIXED_32 DeltaSpeed = (TargetSpeed - CurrentVelocity.X) * AirAcceleration * FixedDt;
 		CurrentVelocity.X += DeltaSpeed.Sign();
@@ -239,13 +239,12 @@ FFixedVector2D UFighterMovementComponent::FindFurthestGroundedPosition(int32 InD
 	const int32 MaxSteps = 30;                  // Maximum look-ahead steps
 
 	const FFixedVector2D Start = CollisionCapsule.GetBottom();
-	const float Direction = InDirection;
 
 	FFixedVector2D LastGrounded = Start;
 
 	for (int32 i = 1; i <= MaxSteps; ++i)
 	{
-		FFixedVector2D TestPos = Start + FFixedVector2D(Direction * i * StepSize, 0.f);
+		FFixedVector2D TestPos = Start + FFixedVector2D(InDirection * i * StepSize, 0.f);
 		FFixedVector2D TraceStart = TestPos + FFixedVector2D(FIXED_32(), 10.f);
 		FFixedVector2D TraceEnd   = TestPos - FFixedVector2D(FIXED_32(), 20.f);
 		
@@ -321,8 +320,8 @@ void UFighterMovementComponent::HandleLedgeOrFall(bool bPreventFall)
 
 bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 {
-	const float FacingDir = FighterPawnRef->IsFacingRight() ? 1.f : -1.f;
-	constexpr float ProbeSpeed = 300.f;
+	const int32 FacingDir = FighterPawnRef->IsFacingRight() ? 1 : -1;
+	constexpr FIXED_32 ProbeSpeed = 300.f;
 	
 	return !WillStayGroundedNextFrame(ProbeSpeed, FacingDir);
 }

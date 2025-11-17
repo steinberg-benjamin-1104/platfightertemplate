@@ -150,9 +150,9 @@ bool AFighterPawn::IsFacingRight() const
 	return (FMath::IsNearlyEqual(Yaw, -90.f, 1.0f));
 }
 
-void AFighterPawn::SetFacingDirection(float Direction)
+void AFighterPawn::SetFacingDirection(int32 inDirection)
 {
-	float DesiredYaw = (Direction >= 0.f) ? -90.f : 90.f;
+	float DesiredYaw = inDirection == 1 ? -90.f : 90.f;
 	if (CharacterMesh)
 	{
 		CharacterMesh->SetRelativeRotation(FRotator(0.f, DesiredYaw, 0.f));
@@ -161,11 +161,7 @@ void AFighterPawn::SetFacingDirection(float Direction)
 
 void AFighterPawn::SwitchFacingDirection()
 {
-	if (!CharacterMesh) return;
-
-	// Flip the current facing direction
-	float NewDirection = IsFacingRight() ? -1.f : 1.f;
-	SetFacingDirection(NewDirection);
+	SetFacingDirection(IsFacingRight() ? -1 : 1);
 }
 
 void AFighterPawn::FaceInstigator()

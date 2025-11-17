@@ -102,10 +102,10 @@ public:
 	bool IsFacingRight() const;
 
 	UFUNCTION(BlueprintPure, Category = "Movement")
-	float GetFacingDirection() const {return IsFacingRight() ? 1.f : -1.f;}
+	int32 GetFacingDirection() const {return IsFacingRight() ? 1 : -1;}
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void SetFacingDirection(float Direction);
+	void SetFacingDirection(int32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SwitchFacingDirection();
@@ -155,7 +155,7 @@ public:
 
 	virtual void WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigator) override;
 
-	virtual FVector CenterLocation() override {return MovementComponent->GetCenter();}
+	virtual FVector CenterLocation() override {return Fixed2DToVector(MovementComponent->GetCenter());}
 
 	UFUNCTION(BlueprintPure, Category = "Mesh")
 	FVector GetBoneLocation(FName BoneName) const;
@@ -215,5 +215,5 @@ private:
 
 	UPROPERTY() UCharacterPanelWidget* CharacterPanel;
 	
-	float ShakeSign = 1.f;
+	int32 ShakeSign = 1;
 };
