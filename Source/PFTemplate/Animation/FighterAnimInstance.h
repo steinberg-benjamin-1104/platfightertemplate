@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "AnimPlaybackData.h"
+#include "SafeMath.h"
 #include "FighterAnimInstance.generated.h"
 
 UCLASS()

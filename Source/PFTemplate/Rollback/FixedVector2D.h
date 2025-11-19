@@ -29,11 +29,6 @@ struct FFixedVector2D
     FIXED_32 LengthSquared() const { return Dot(*this); }
     FIXED_32 Length() const { return LengthSquared().Sqrt(); }
     FFixedVector2D GetSafeNormal() const;
-
-    inline FFixedVector2D operator*(FIXED_32 s, const FFixedVector2D& v) const
-    {
-        return { v.X * s, v.Z * s };
-    }
     
     friend uint32 GetTypeHash(const FFixedVector2D& V)
     {
@@ -56,4 +51,9 @@ FORCEINLINE FVector Fixed2DToVector(const FFixedVector2D& V)
 FORCEINLINE FFixedVector2D VectorToFixed2D(const FVector& V)
 {
     return FFixedVector2D(FloatToFixed(V.X), FloatToFixed(V.Z));
+}
+
+FORCEINLINE FFixedVector2D operator*(FIXED_32 s, const FFixedVector2D& v)
+{
+    return { v.X * s, v.Z * s };
 }

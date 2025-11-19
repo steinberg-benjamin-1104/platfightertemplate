@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "SafeMath.h"
 #include "ShieldComponent.generated.h"
 
 UCLASS()
@@ -17,19 +18,14 @@ public:
 	void SetShieldActive(bool bActive);
 	bool IsActive() const { return bIsActive; }
 
-	void ApplyDamage(float Amount);
+	void ApplyDamage(int32 Amount);
 	
 	bool IsBroken() const { return ShieldHealth <= 0.f; }
 	void ResetHealth() {ShieldHealth = MaxShieldHealth;}
-	float GetHealthPercent() const { return ShieldHealth / MaxShieldHealth; }
+	FIXED_32 GetHealthPercent() const { return ShieldHealth / MaxShieldHealth; }
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Shield|Visual")
-	float ShieldHeight = 80.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Shield|Visual")
-	float ShieldScale = 1.7f;
-
+	
 	UPROPERTY()
 	UMaterialInstanceDynamic* ShieldMaterial;
 	
@@ -37,21 +33,12 @@ private:
 
 	UPROPERTY() UStaticMeshComponent* ShieldMesh;
 	
-	UPROPERTY(EditAnywhere)
-	float MaxShieldHealth = 60.f;
-
-	UPROPERTY()
-	float ShieldHealth;
-
-	UPROPERTY(EditAnywhere)
-	float RegenRate = 0.05f;
-
-	UPROPERTY(EditAnywhere)
-	float DegenerationRate = 0.3f;
+	FIXED_32 MaxShieldHealth = 600.f;
+	FIXED_32 ShieldHealth;
+	FIXED_32 RegenRate = 0.05f;
+	FIXED_32 DegenerationRate = 0.3f;
 
 	bool bIsActive = false;
-	
-	float BaseTranslucency = 0.7f;
 
 	void UpdateMaterial();
 };

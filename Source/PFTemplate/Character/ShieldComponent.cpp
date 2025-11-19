@@ -25,9 +25,9 @@ void UShieldComponent::SetShieldActive(bool bActive)
 	if (bActive) UpdateMaterial();
 }
 
-void UShieldComponent::ApplyDamage(float Amount)
+void UShieldComponent::ApplyDamage(int32 Amount)
 {
-	ShieldHealth = FMath::Max(0.f, ShieldHealth - Amount);
+	ShieldHealth = FixedMax(FIXED_32(0), ShieldHealth - FIXED_32(Amount));
 	UpdateMaterial();
 }
 
@@ -35,19 +35,17 @@ void UShieldComponent::UpdateShield()
 {
 	if (bIsActive)
 	{
-		ShieldHealth = FMath::Max(0.f, ShieldHealth - DegenerationRate);
+		ShieldHealth = FixedMax(FIXED_32(0), ShieldHealth - DegenerationRate);
 		UpdateMaterial();
 	}
 	else
 	{
-		ShieldHealth = FMath::Min(MaxShieldHealth, ShieldHealth + RegenRate);
+		ShieldHealth = FixedMin(FIXED_32(0), ShieldHealth + RegenRate);
 	}
 }
 
 void UShieldComponent::UpdateMaterial()
 {
 	if (!ShieldMaterial) return;
-
-	const float HealthAlpha = ShieldHealth / MaxShieldHealth;
-	ShieldMaterial->SetScalarParameterValue(TEXT("Alpha"), HealthAlpha);
+	ShieldMaterial->SetScalarParameterValue(TEXT("Alpha"), FixedToFloat(ShieldHealth / MaxShieldHealth));
 }

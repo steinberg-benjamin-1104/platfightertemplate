@@ -18,7 +18,8 @@ void UFighterAnimInstance::AdvanceFrame()
 	if (BlendAlpha < 1.f)
 	{
 		BlendFrameCounter++;
-		BlendAlpha = static_cast<float>(BlendFrameCounter) / static_cast<float>(BlendTotalFrames);
+		FIXED_32 TempAlpha = FIXED_32(BlendFrameCounter) / FIXED_32(BlendTotalFrames);
+		BlendAlpha = FixedToFloat(TempAlpha);
 
 		if (BlendFrameCounter >= BlendTotalFrames) BlendAlpha = 1.f;
 	}

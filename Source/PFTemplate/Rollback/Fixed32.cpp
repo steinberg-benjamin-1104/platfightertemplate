@@ -64,15 +64,14 @@ FIXED_32 FIXED_32::MulHigh(FIXED_32 b) const
 
 FIXED_32 FIXED_32::poly5(FIXED_32 x2)
 {
-	// coefficients as Q32.32
-	static const FIXED_32 c1(0xFFFFFFFFD5555555LL); // -1/6
-	static const FIXED_32 c2(0x02222222LL);         //  1/120
-	static const FIXED_32 c3(0xFFFFFFFFF2FF30LL);   // -1/5040
-	
+	static const FIXED_32 c1 = FromRaw(0xFFFFFFFFD5555555LL); // -1/6
+	static const FIXED_32 c2 = FromRaw(0x0000000002222222LL); //  1/120
+	static const FIXED_32 c3 = FromRaw(0xFFFFFFFFF2FF30LL);   // -1/5040
+
 	FIXED_32 t = c3;
 	t = t.MulHigh(x2) + c2;
 	t = t.MulHigh(x2) + c1;
-	t = t.MulHigh(x2) + FIXED_32(ONE); // 1.0 in Q32.32
+	t = t.MulHigh(x2) + FIXED_32(1.0f);   // 1.0 as float → Q32.32
 	return t;
 }
 
