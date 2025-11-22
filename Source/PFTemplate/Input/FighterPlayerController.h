@@ -16,7 +16,7 @@ class PFTEMPLATE_API AFighterPlayerController : public APlayerController
 
 public:
 	AFighterPlayerController();
-	void UpdateInput();
+	void UpdateInput(FFighterInput &NewInput);
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -51,7 +51,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* ParryAction;
 	
-	FFighterInput BuildInput() const;
+	FFighterInput BuildInput();
 	FFixedVector2D ReadStick() const;
 
 	bool IsPressed(const UInputAction* Action) const;
@@ -61,4 +61,9 @@ private:
 	/* cached pawn (cast once) */
 	UPROPERTY()
 	AFighterPawn* FighterPawn = nullptr;
+
+	float DEAD_ZONE = 0.1f;
+
+	TArray<FFighterInput> InputHistory;
+	EInputButton PrevButtonsDown = EInputButton::None;
 };

@@ -44,6 +44,7 @@ public:
 	UFUNCTION(BlueprintCallable) virtual bool Attack() {return false;}
 	UFUNCTION(BlueprintCallable) virtual bool AttackRelease() {return false;}
 	UFUNCTION(BlueprintCallable) virtual bool Special() {return false;}
+	UFUNCTION(BlueprintCallable) virtual bool SpecialRelease() {return false;}
 	UFUNCTION(BlueprintCallable) virtual bool ShieldPressed() {return false;}
 	UFUNCTION(BlueprintCallable) virtual bool ShieldReleased() {return false;}
 	UFUNCTION(BlueprintCallable) virtual bool Grab() {return false;}

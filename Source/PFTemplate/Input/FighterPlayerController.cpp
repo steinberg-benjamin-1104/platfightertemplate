@@ -6,7 +6,7 @@
 
 AFighterPlayerController::AFighterPlayerController()
 {
-    PrimaryActorTick.bCanEverTick = false;   // <-  MANUAL TICK ONLY
+    PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
@@ -29,31 +29,31 @@ void AFighterPlayerController::ApplyInputMappingContext()
     }
 }
 
-void AFighterPlayerController::UpdateInput()
+void AFighterPlayerController::UpdateInput(FFighterInput &NewInput)
 {
-    if (!FighterPawn) return;
-
-    static int32 TempFrame = 0; // CHANGE THIS
-    FFighterInput In = BuildInput();
-    FighterPawn->SubmitInput(In, TempFrame); //input buffer is stored here for some reason?
-    ++TempFrame;
+    InputHistory[0] = NewInput;
+    NewInput = BuildInput();
 }
 
-FFighterInput AFighterPlayerController::BuildInput() const
+FFighterInput AFighterPlayerController::BuildInput()
 {
-    FFighterInput In;
-    In.Stick = ReadStick();
+    FFighterInput Out;
 
-    In.Buttons = 0;
-    if (IsPressed(AttackAction))  In.Buttons |= FFighterInput::Attack;
-    if (IsPressed(SpecialAction)) In.Buttons |= FFighterInput::Special;
-    if (IsPressed(ShieldAction))  In.Buttons |= FFighterInput::Shield;
-    if (IsPressed(GrabAction))    In.Buttons |= FFighterInput::Grab;
-    if (IsPressed(JumpAction))    In.Buttons |= FFighterInput::Jump;
-    if (IsPressed(ParryAction))   In.Buttons |= FFighterInput::Parry;
-    if (IsPressed(WalkHotkey))    In.Buttons |= FFighterInput::Walk;
+    Out.LeftStick.X = FloatToFixed(GetVec2(MoveAction).X);
+    Out.LeftStick.Z = FloatToFixed(GetVec2(MoveAction).Y);
 
-    return In;
+    EInputButton Current = EInputButton::None;
+
+    if (IsPressed(AttackAction))  Current |= EInputButton::Attack;
+    if (IsPressed(SpecialAction)) Current |= EInputButton::Special;
+    if (IsPressed(ShieldAction))  Current |= EInputButton::Shield;
+
+    Out.ButtonsDown = Current;
+    Out.ButtonsPressed = Current & ~PrevButtonsDown;
+
+    PrevButtonsDown = Current;
+
+    return Out;
 }
 
 FFixedVector2D AFighterPlayerController::ReadStick() const
@@ -73,8 +73,7 @@ FFixedVector2D AFighterPlayerController::ReadStick() const
 bool AFighterPlayerController::IsPressed(const UInputAction* Action) const
 {
     const UEnhancedInputComponent* IC = Cast<UEnhancedInputComponent>(InputComponent);
-    if (!IC || !Action)
-        return false;
+    if (!IC || !Action) return false;
 
     return IC->GetBoundActionValue(Action).Get<bool>();
 }
@@ -82,8 +81,7 @@ bool AFighterPlayerController::IsPressed(const UInputAction* Action) const
 FVector2D AFighterPlayerController::GetVec2(const UInputAction* Action) const
 {
     const UEnhancedInputComponent* IC = Cast<UEnhancedInputComponent>(InputComponent);
-    if (!IC || !Action)
-        return FVector2D::ZeroVector;
+    if (!IC || !Action) return FVector2D::ZeroVector;
 
     return IC->GetBoundActionValue(Action).Get<FVector2D>();
 }

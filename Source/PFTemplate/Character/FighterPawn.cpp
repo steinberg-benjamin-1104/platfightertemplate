@@ -6,6 +6,7 @@
 #include "FrameScriptRunner.h"
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
+#include "FighterInput.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Hitstop Called"));
 
@@ -73,26 +74,24 @@ void AFighterPawn::PossessedBy(AController* NewController)
 
 #pragma region BattleManager
 
-void AFighterPawn::UpdateStick()
+void AFighterPawn::InputPhase()
 {
-	if (FPC) FPC->UpdateStick();
+	FFighterInput NewInput;
+	if (FPC) FPC->UpdateInput(NewInput);
+	InputBuffer.Push(NewInput);
 }
 
 void AFighterPawn::UpdateState()
 {
 	if (StateMachine) StateMachine->TickCurrentState();
-}
-
-void AFighterPawn::InputPhase()
-{
-	if (FPC) FPC->UpdateInput();
-	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
+	//process inputs here?
 }
 
 void AFighterPawn::UpdateAnimation()
 {
 	if (!CharacterMesh || !FighterAnimInstance || bStopAnimUpdates) return;
 
+	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
 	FighterAnimInstance->AdvanceFrame();
 	
 	CharacterMesh->TickPose(1.f/60.f, true);

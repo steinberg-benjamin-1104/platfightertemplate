@@ -13,6 +13,7 @@
 #include "FighterMovementComponent.h"
 #include "BoneVectorAxis.h"
 #include "SafeMath.h"
+#include "InputBuffer.h"
 
 #include "FighterPawn.generated.h"
 
@@ -33,9 +34,8 @@ public:
 	AFighterPawn();
 
 	//simulated tick phases
-	void UpdateStick();
-	void UpdateState();
 	void InputPhase();
+	void UpdateState();
 	void UpdateAnimation();
 	void CollisionPhase();
 	void ProcessCollisions();
@@ -67,6 +67,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UShieldComponent* ShieldComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FInputBuffer InputBuffer;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action")
 	FAction CurrentAction;
 
@@ -77,26 +80,6 @@ public:
 	bool SetCurrentAction(FName ActionName, int BlendTime = 0);
 
 	UPROPERTY() AFighterPlayerController* FPC = nullptr;
-
-	FStickInt8 GetPlayerStickInput() const
-	{
-		return FPC ? FPC->GetCurrentStickValue() : FStickInt8::ZeroVector;
-	}
-
-	bool IsFlickActive() const
-	{
-		return FPC ? FPC->IsFlickActive() : false;
-	}
-
-	EStickDirection GetStickDirection() const
-	{
-		return FPC ? FPC->GetStickDirection() : EStickDirection::Neutral;
-	}
-
-	FStickInputTracker* GetStickTracker() const
-	{
-		return FPC ? &FPC->StickTracker : nullptr;
-	}
 
 	UFUNCTION(BlueprintPure, Category = "Movement")
 	bool IsFacingRight() const;
