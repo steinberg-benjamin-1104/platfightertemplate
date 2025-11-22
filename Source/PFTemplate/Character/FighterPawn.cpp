@@ -74,24 +74,23 @@ void AFighterPawn::PossessedBy(AController* NewController)
 
 #pragma region BattleManager
 
-void AFighterPawn::InputPhase()
+void AFighterPawn::InputPhase(int CurrentFrame)
 {
 	FFighterInput NewInput;
-	if (FPC) FPC->UpdateInput(NewInput);
-	InputBuffer.Push(NewInput);
+	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
+	if (StateMachine) StateMachine->TickCurrentState();
 }
 
 void AFighterPawn::UpdateState()
 {
-	if (StateMachine) StateMachine->TickCurrentState();
-	//process inputs here?
+	
 }
 
 void AFighterPawn::UpdateAnimation()
 {
-	if (!CharacterMesh || !FighterAnimInstance || bStopAnimUpdates) return;
-
 	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
+	if (!CharacterMesh || !FighterAnimInstance || bStopAnimUpdates) return;
+	
 	FighterAnimInstance->AdvanceFrame();
 	
 	CharacterMesh->TickPose(1.f/60.f, true);

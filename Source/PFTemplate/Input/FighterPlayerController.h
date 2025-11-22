@@ -16,7 +16,7 @@ class PFTEMPLATE_API AFighterPlayerController : public APlayerController
 
 public:
 	AFighterPlayerController();
-	void UpdateInput(FFighterInput &NewInput);
+	void UpdateInput(int32 Frame, FFighterInput &NewInput);
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -56,6 +56,8 @@ protected:
 
 	bool IsPressed(const UInputAction* Action) const;
 	FVector2D GetVec2(const UInputAction* Action) const;
+
+	FFighterInput GetInputByFrame(int32 FrameNumber) const {return InputHistory[FrameNumber];}
 
 private:
 	/* cached pawn (cast once) */

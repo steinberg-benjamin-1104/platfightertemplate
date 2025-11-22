@@ -29,10 +29,10 @@ void AFighterPlayerController::ApplyInputMappingContext()
     }
 }
 
-void AFighterPlayerController::UpdateInput(FFighterInput &NewInput)
+void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput &NewInput)
 {
-    InputHistory[0] = NewInput;
     NewInput = BuildInput();
+    InputHistory[Frame] = NewInput;
 }
 
 FFighterInput AFighterPlayerController::BuildInput()

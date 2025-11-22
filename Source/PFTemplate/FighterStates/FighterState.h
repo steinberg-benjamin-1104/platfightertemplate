@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-
+#include "FighterInput.h"
 #include "FighterState.generated.h"
 
 class AFighterPawn;
@@ -33,22 +33,17 @@ public:
 		StateMachine = InStateMachine;
 	}
 	
-	// State Management
-	UFUNCTION(BlueprintCallable) virtual void OnEnter(){}
+	UFUNCTION(BlueprintCallable) virtual void OnEnter() {}
 	UFUNCTION(BlueprintCallable) virtual void OnExit() {}
 	UFUNCTION(BlueprintCallable) virtual bool CanEnterState() const { return true; }
 	UFUNCTION(BlueprintCallable) virtual bool CanExitState() const { return true; }
-	UFUNCTION(BlueprintCallable) virtual void Tick() {}
-
-	// Inputs
-	UFUNCTION(BlueprintCallable) virtual bool Attack() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool AttackRelease() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool Special() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool SpecialRelease() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool ShieldPressed() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool ShieldReleased() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool Grab() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool JumpPressed() {return false;}
-	UFUNCTION(BlueprintCallable) virtual bool JumpReleased() {return false;}
-	UFUNCTION(BlueprintCallable) virtual void Parry() {}
+	UFUNCTION(BlueprintCallable) virtual bool HandleButtonInput(FFighterInput &Input) {}
+	UFUNCTION(BlueprintCallable) virtual bool HandleStickInput(FFighterInput &Input) {}
+	UFUNCTION(BlueprintCallable) virtual bool HandlePhysics(FFighterInput &Input) {}
+	UFUNCTION(BlueprintCallable) virtual void Tick(FFighterInput &Input)
+	{
+		if (HandleButtonInput(Input)) return;
+		if (HandleStickInput(Input)) return;
+		if (HandlePhysics()) return;
+	}
 };

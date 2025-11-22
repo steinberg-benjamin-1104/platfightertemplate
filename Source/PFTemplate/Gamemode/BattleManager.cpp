@@ -11,11 +11,9 @@ void ABattleManager::Tick(float DeltaTime)
 {
 	if (!bCanTick) return;
 
-	for (AFighterPawn* F : Fighters) F->UpdateStick();
+	for (AFighterPawn* F : Fighters) F->InputPhase(BattleFrame);
 
 	for (AFighterPawn* F : Fighters) F->UpdateState();
-
-	for (AFighterPawn* F : Fighters) F->InputPhase();
 	
 	for (AFighterPawn* F : Fighters) F->UpdateAnimation();
 	
@@ -28,6 +26,8 @@ void ABattleManager::Tick(float DeltaTime)
 	for (AFighterPawn* F : Fighters) F->FighterDebug();
 
 	BattleCamera->UpdateCamera();
+
+	BattleFrame++;
 }
 
 void ABattleManager::StartBattle()

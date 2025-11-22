@@ -297,7 +297,7 @@ void UFighterMovementComponent::HaltVerticalVelocity()
 	Velocity.X = FIXED_32(0.f);
 }
 
-void UFighterMovementComponent::HandleLedgeOrFall(bool bPreventFall)
+void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall)
 {
 	const FIXED_32 CurrentSpeed = Velocity.X.Abs();
 	int32 Direction = Velocity.X.Sign();

@@ -59,10 +59,9 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	CurrentStateKey = "Idle";
 	CurrentState = StateMap[CurrentStateKey];
 	CurrentState->OnEnter();
-	TickCurrentState();
 }
 
-bool UFighterStateMachine::TryChangeState(FName NewState)
+bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &TransitionInput)
 {
 	if (!StateMap.Contains(NewState) || !FighterPawnRef)
 	{
@@ -77,19 +76,21 @@ bool UFighterStateMachine::TryChangeState(FName NewState)
 		CurrentStateKey = NewState;
 		CurrentState->OnEnter();
 		FramesInState = 0;
-		StateMap[NewState]->Tick();
+		FFighterInput NewInput = TransitionInput.ClearPressed();
+		//clear buffer i think here?
+		StateMap[NewState]->Tick(NewInput);
 
 		return true;
 	}
 	return false;
 }
 
-void UFighterStateMachine::TickCurrentState()
+void UFighterStateMachine::TickCurrentState(FFighterInput &Input)
 {
 	if (CurrentState && FighterPawnRef)
 	{
 		FramesInState++;
-		CurrentState->Tick();
+		CurrentState->Tick(Input);
 	}
 }
 

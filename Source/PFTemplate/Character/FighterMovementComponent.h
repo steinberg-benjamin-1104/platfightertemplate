@@ -116,7 +116,7 @@ public:
 	void HaltVerticalVelocity();
 	void StopMovementCompletely(bool bStopCollision = false);
 	
-	void HandleLedgeOrFall(bool bPreventFall);
+	void PreventLedgeFall(bool bPreventFall);
 
 	bool IsStandingOnFacingLedge() const;
 	

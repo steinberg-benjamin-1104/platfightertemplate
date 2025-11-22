@@ -30,4 +30,5 @@ private:
 	static constexpr float FixedFrameTime = 1.0f / 60.0f;
 	bool bCanTick = false;
 	bool bShowDebugInfo = true;
+	int32 BattleFrame = 0;
 };

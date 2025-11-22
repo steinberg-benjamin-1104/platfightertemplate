@@ -7,96 +7,69 @@ void UIdleState::OnExit()
 	bOnLedge = false;
 }
 
-void UIdleState::Tick()
+bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 {
-	MoveComp->ApplyGroundFriction();
-	MoveComp->HandleLedgeOrFall(false);
 
+	MoveComp->ApplyGroundFriction();
+	MoveComp->PreventLedgeFall(false);
+	
 	if (MoveComp->IsAirborne())
 	{
 		FighterPawnRef->SetCurrentAction("Falling");
-		FighterPawnRef->StateMachine->TryChangeState("Falling");
-		return;
-	}
-	
-	if (!FighterPawnRef->GetStickTracker()) return;
-	
-	if (FighterPawnRef->GetStickTracker()->isFlickHorizontal())
-	{
-		FighterPawnRef->StateMachine->TryChangeState("Dash");
-		return;
+		FighterPawnRef->StateMachine->TryChangeState("Falling", NewInput);
+		return true;
 	}
 
-	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
-	const int8 AbsStickX = FMath::Abs(StickInput.X);
-	constexpr int8 WalkThreshold = 13;
-
-	if (AbsStickX > WalkThreshold)
-	{
-		StateMachine->TryChangeState("Walking");
-		return;
-	}
-
-	if (MoveComp->IsStandingOnFacingLedge() && FMath::IsNearlyZero(MoveComp->GetVelocity().X) && !bOnLedge)
+	if (MoveComp->IsStandingOnFacingLedge() && (MoveComp->GetVelocity().X == FIXED_32(0.f)) && !bOnLedge)
 	{
 		FighterPawnRef->SetCurrentAction("Teeter");
 		bOnLedge = true;
 	}
+
+	return false;
 }
 
-bool UIdleState::JumpPressed()
+bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 {
-	return StateMachine->TryChangeState("JumpSquat");
-}
-
-bool UIdleState::Attack()
-{
-	FStickInputTracker& Tracker = *FighterPawnRef->GetStickTracker();
-	Tracker.CaptureStickDir();
-	EStickDirection Dir = Tracker.GetCapturedDir();
-	FName MoveName;
-
-	if (Tracker.IsFlickActive()) // Handle smash attacks
+	if (NewInput.IsPressed(EInputButton::Jump))
 	{
-		switch (Dir)
-		{
-		case EStickDirection::Neutral: MoveName = "Fsmash1"; break;
-		case EStickDirection::Up:      MoveName = "Upsmash1"; break;
-		case EStickDirection::Down:    MoveName = "Dsmash1"; break;
-		case EStickDirection::Left:
-			FighterPawnRef->SetFacingDirection(-1.f);
-			MoveName = "Fsmash1";
-			break;
-		case EStickDirection::Right:
-			FighterPawnRef->SetFacingDirection(1.f);
-			MoveName = "Fsmash1";
-			break;
-		default: MoveName = "Fsmash1"; break;
-		}
+		StateMachine->TryChangeState("JumpSquat", NewInput);
+		return true;
 	}
-	else
+
+	if (NewInput.IsPressed(EInputButton::Shield) || NewInput.IsHeld(EInputButton::Shield))
 	{
-		switch (Dir)
-		{
-		case EStickDirection::Neutral: MoveName = "Jab1"; break;
-		case EStickDirection::Up:      MoveName = "Uptilt1"; break;
-		case EStickDirection::Down:    MoveName = "Dtilt1"; break;
-		case EStickDirection::Left:
-			FighterPawnRef->SetFacingDirection(-1.f);
-			MoveName = "Ftilt1";
-			break;
-		case EStickDirection::Right:
-			FighterPawnRef->SetFacingDirection(1.f);
-			MoveName = "Ftilt1";
-			break;
-		default: MoveName = "Jab1"; break;
-		}
+		StateMachine->TryChangeState("Shield", NewInput);
+		return true;
 	}
-	
-	return FighterPawnRef->SetCurrentAction(MoveName);
+
+	if (NewInput.IsPressed(EInputButton::Attack))
+	{
+		StateMachine->TryChangeState("GroundAttack", NewInput); //possibly need to update
+		return true;
+	}
+
+	return false;
 }
 
-bool UIdleState::ShieldPressed()
+bool UIdleState::HandleStickInput(FFighterInput& NewInput)
 {
-	return StateMachine->TryChangeState("Shield");
+	// if (!FighterPawnRef->GetStickTracker()) return;
+	//
+	// if (FighterPawnRef->GetStickTracker()->isFlickHorizontal())
+	// {
+	// 	FighterPawnRef->StateMachine->TryChangeState("Dash");
+	// 	return;
+	// }
+	// 	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
+	// 	const int8 AbsStickX = FMath::Abs(StickInput.X);
+	// 	constexpr int8 WalkThreshold = 13;
+	//
+	// 	if (AbsStickX > WalkThreshold)
+	// 	{
+	// 		StateMachine->TryChangeState("Walking");
+	// 		return;
+	// 	}
+
+	return false;
 }

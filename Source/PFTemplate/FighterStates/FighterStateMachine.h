@@ -21,9 +21,9 @@ public:
 	int FramesInState = 0;
 	
 	void Initialize(AFighterPawn* InOwner);
-	bool TryChangeState(FName NewState);
+	bool TryChangeState(FName NewState, FFighterInput &TransitionInput);
 	void AddState(FName StateName, UFighterState* State);
-	void TickCurrentState();
+	void TickCurrentState(FFighterInput &Input);
 	void ShowStateDebug();
 
 	// Input proxies

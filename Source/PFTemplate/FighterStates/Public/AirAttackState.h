@@ -10,7 +10,7 @@ class PFTEMPLATE_API UAirAttackState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void Tick() override;
+	virtual void Tick(FFighterInput &NewInput) override;
 
 	virtual FString GetStateName() override { return "AirAttack"; }
 };
