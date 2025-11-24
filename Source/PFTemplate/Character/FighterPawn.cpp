@@ -78,7 +78,6 @@ void AFighterPawn::InputPhase(int CurrentFrame)
 {
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
-	StickTracker.
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
 }
 
@@ -124,9 +123,10 @@ void AFighterPawn::ProcessCollisions()
 void AFighterPawn::ShieldPhase()
 {
 	ShieldComponent->UpdateShield();
+	FFighterInput None;
 	if (ShieldComponent->IsBroken())
 	{
-		StateMachine->TryChangeState("Shieldbreak");
+		StateMachine->TryChangeState("Shieldbreak", None);
 	}
 }
 
@@ -198,11 +198,6 @@ bool AFighterPawn::SetCurrentAction(FName ActionName, int BlendTime)
 	FrameScriptRunner->LoadScript(NewAction, NumFrames);
 
 	FighterAnimInstance->SetAnimationSequence(NewAction.AnimSequence, NewAction.bIsLoop, NumFrames, BlendTime);
-	
-	if (!NewAction.TargetState.IsNone())
-	{
-		StateMachine->TryChangeState(NewAction.TargetState);
-	}
 
 	return true;
 }
@@ -238,8 +233,9 @@ void AFighterPawn::InitiateKnockback()
 		ShieldComponent->ApplyDamage(StoredDamageInfo.Damage);
 		return;
 	}
+	FFighterInput None;
 	ApplyDamage(StoredDamageInfo.Damage);
-	StateMachine->TryChangeState("Hitstop");
+	StateMachine->TryChangeState("Hitstop", None);
 }
 
 void AFighterPawn::ApplyDamage(int32 Damage)

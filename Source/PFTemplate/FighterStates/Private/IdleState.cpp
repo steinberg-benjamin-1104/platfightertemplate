@@ -31,19 +31,21 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 
 bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 {
-	if (NewInput.IsPressed(EInputButton::Jump))
+	FButtonState &ButtonState = NewInput.Button;
+	
+	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
 		StateMachine->TryChangeState("JumpSquat", NewInput);
 		return true;
 	}
 
-	if (NewInput.IsPressed(EInputButton::Shield) || NewInput.IsHeld(EInputButton::Shield))
+	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
 		StateMachine->TryChangeState("Shield", NewInput);
 		return true;
 	}
 
-	if (NewInput.IsPressed(EInputButton::Attack))
+	if (ButtonState.IsPressed(EInputButton::Attack))
 	{
 		StateMachine->TryChangeState("GroundAttack", NewInput); //possibly need to update
 		return true;
@@ -54,22 +56,18 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 
 bool UIdleState::HandleStickInput(FFighterInput& NewInput)
 {
-	// if (!FighterPawnRef->GetStickTracker()) return;
-	//
-	// if (FighterPawnRef->GetStickTracker()->isFlickHorizontal())
-	// {
-	// 	FighterPawnRef->StateMachine->TryChangeState("Dash");
-	// 	return;
-	// }
-	// 	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
-	// 	const int8 AbsStickX = FMath::Abs(StickInput.X);
-	// 	constexpr int8 WalkThreshold = 13;
-	//
-	// 	if (AbsStickX > WalkThreshold)
-	// 	{
-	// 		StateMachine->TryChangeState("Walking");
-	// 		return;
-	// 	}
+	FStickState &StickState = NewInput.Stick;
+	if (StickState.bFlick) //requires update
+	{
+		FighterPawnRef->StateMachine->TryChangeState("Dash", NewInput);
+		return true;
+	}
+	
+	if (StickState.bWalking)
+	{
+		StateMachine->TryChangeState("Walking", NewInput);
+		return true;
+	}
 
 	return false;
 }

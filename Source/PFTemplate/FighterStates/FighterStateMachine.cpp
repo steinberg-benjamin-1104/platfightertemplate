@@ -76,8 +76,8 @@ bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &Transit
 		CurrentStateKey = NewState;
 		CurrentState->OnEnter();
 		FramesInState = 0;
-		FFighterInput NewInput = TransitionInput.ClearPressed();
-		//clear buffer i think here?
+		FFighterInput NewInput;
+		NewInput.Button = TransitionInput.Button.ClearPressed();
 		StateMap[NewState]->Tick(NewInput);
 
 		return true;
@@ -104,50 +104,6 @@ void UFighterStateMachine::ShowStateDebug()
 	);
 }
 
-bool UFighterStateMachine::Attack() const
-{
-	return CurrentState->Attack();
-}
-
-void UFighterStateMachine::AttackReleased() const
-{
-	CurrentState->AttackRelease();
-}
-
-bool UFighterStateMachine::Special() const
-{
-	return CurrentState->Special();
-}
-
-bool UFighterStateMachine::Shield() const
-{
-	return CurrentState->ShieldPressed();
-}
-
-void UFighterStateMachine::ShieldReleased() const
-{
-	CurrentState->ShieldReleased();
-}
-
-bool UFighterStateMachine::Grab() const
-{
-	return CurrentState->Grab();
-}
-
-bool UFighterStateMachine::JumpPressed() const
-{
-	return CurrentState->JumpPressed();
-}
-
-void UFighterStateMachine::JumpReleased() const
-{
-	CurrentState->JumpReleased();
-}
-
-void UFighterStateMachine::Parry() const
-{
-	CurrentState->Parry();
-}
 void UFighterStateMachine::AddState(FName StateName, UFighterState* State)
 {
 	if (!State || StateMap.Contains(StateName)) return;
