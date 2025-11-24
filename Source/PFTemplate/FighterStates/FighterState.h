@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "FighterInput.h"
+#include "ButtonState.h"
 #include "FighterState.generated.h"
 
 class AFighterPawn;

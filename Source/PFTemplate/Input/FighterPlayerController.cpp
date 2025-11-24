@@ -39,17 +39,18 @@ FFighterInput AFighterPlayerController::BuildInput()
 {
     FFighterInput Out;
 
-    Out.LeftStick.X = FloatToFixed(GetVec2(MoveAction).X);
-    Out.LeftStick.Z = FloatToFixed(GetVec2(MoveAction).Y);
-
+    FIXED_32 X = FloatToFixed(GetVec2(MoveAction).X);
+    FIXED_32 Y = FloatToFixed(GetVec2(MoveAction).Y);
+    UpdateStickState(Out.Stick, FFixedVector2D(X, Y));
+    
     EInputButton Current = EInputButton::None;
 
     if (IsPressed(AttackAction))  Current |= EInputButton::Attack;
     if (IsPressed(SpecialAction)) Current |= EInputButton::Special;
     if (IsPressed(ShieldAction))  Current |= EInputButton::Shield;
 
-    Out.ButtonsDown = Current;
-    Out.ButtonsPressed = Current & ~PrevButtonsDown;
+    Out.Button.ButtonsHeld = Current;
+    Out.Button.ButtonsPressed = Current & ~PrevButtonsDown;
 
     PrevButtonsDown = Current;
 

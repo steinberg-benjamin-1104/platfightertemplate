@@ -6,7 +6,7 @@
 #include "FrameScriptRunner.h"
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
-#include "FighterInput.h"
+#include "ButtonState.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Hitstop Called"));
 
@@ -78,7 +78,8 @@ void AFighterPawn::InputPhase(int CurrentFrame)
 {
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
-	if (StateMachine) StateMachine->TickCurrentState();
+	StickTracker.
+	if (StateMachine) StateMachine->TickCurrentState(NewInput);
 }
 
 void AFighterPawn::UpdateState()

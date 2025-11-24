@@ -13,7 +13,7 @@
 #include "FighterMovementComponent.h"
 #include "BoneVectorAxis.h"
 #include "SafeMath.h"
-#include "InputBuffer.h"
+#include "StickTracker.h"
 
 #include "FighterPawn.generated.h"
 
@@ -68,7 +68,7 @@ public:
 	UShieldComponent* ShieldComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FInputBuffer InputBuffer;
+	FStickTracker StickTracker;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action")
 	FAction CurrentAction;
