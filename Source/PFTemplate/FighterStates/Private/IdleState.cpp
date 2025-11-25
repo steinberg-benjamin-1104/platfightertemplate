@@ -47,7 +47,7 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 
 	if (ButtonState.IsPressed(EInputButton::Attack))
 	{
-		StateMachine->TryChangeState("GroundAttack", NewInput); //possibly need to update
+		//determine animation and state from data datatable
 		return true;
 	}
 
