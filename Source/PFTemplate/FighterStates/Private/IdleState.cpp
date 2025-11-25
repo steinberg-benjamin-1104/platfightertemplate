@@ -57,7 +57,7 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 bool UIdleState::HandleStickInput(FFighterInput& NewInput)
 {
 	FStickState &StickState = NewInput.Stick;
-	if (StickState.bFlick) //requires update
+	if (StickState.bFlick)
 	{
 		FighterPawnRef->StateMachine->TryChangeState("Dash", NewInput);
 		return true;
