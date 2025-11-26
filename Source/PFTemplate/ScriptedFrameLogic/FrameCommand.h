@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "EFrameCommandType.h"
+#include "HitboxData.h"
 #include "FrameCommand.generated.h"
 
 USTRUCT(BlueprintType)
@@ -11,6 +12,9 @@ struct FFrameCommand
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EFrameCommandType Command = EFrameCommandType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FHitboxGroup HitboxCollection;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 FrameExecution = -1;

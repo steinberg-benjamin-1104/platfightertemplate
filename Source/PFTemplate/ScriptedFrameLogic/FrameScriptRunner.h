@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "FrameCommand.h"
-#include "Action.h"
+#include "Animation.h"
 #include "FrameScriptRunner.generated.h"
 
 class AFighterPawn;

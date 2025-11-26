@@ -5,7 +5,7 @@
 #include "FighterStateMachine.h"
 #include "HitboxManagerComponent.h"
 #include "FighterPlayerController.h"
-#include "Action.h"
+#include "Animation.h"
 #include "FrameScriptRunner.h"
 #include "ShieldComponent.h"
 #include "Hittable.h"
