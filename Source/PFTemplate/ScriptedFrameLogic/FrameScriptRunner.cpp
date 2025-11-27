@@ -6,9 +6,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 
-void UFrameScriptRunnerComponent::LoadScript(const FAction& NewAction, int inDuration)
+void UFrameScriptRunnerComponent::LoadScript(const FAnimation& NewAni, int inDuration)
 {
-	CurrentAction = NewAction;
+	CurrentAction = NewAni;
 	CommandIndex = 0;
 	Duration = inDuration;
 	CurrentFrame = 0;

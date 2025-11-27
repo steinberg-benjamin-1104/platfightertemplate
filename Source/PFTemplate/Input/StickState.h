@@ -17,7 +17,7 @@ struct FStickState
 	bool bUpThisFrame = false;
 
 	bool bFlick = false;                
-	FFixedVector2D FlickDirection = FFixedVector2D();
+	FFixedVector2D FlickPosition = FFixedVector2D();
 
 	bool bWalking = false;              
 
@@ -54,7 +54,7 @@ inline void UpdateStickState(FStickState& S, FFixedVector2D NewStickInput)
 	{
 		S.FlickBufferFrames = S.MaxFlickBufferFrames;
 		S.bFlick = true;
-		S.FlickDirection = S.Current;
+		S.FlickPosition = S.Current;
 	}
 	else
 	{
@@ -66,7 +66,7 @@ inline void UpdateStickState(FStickState& S, FFixedVector2D NewStickInput)
 		else
 		{
 			S.bFlick = false;
-			S.FlickDirection = FFixedVector2D();
+			S.FlickPosition = FFixedVector2D();
 		}
 	}
 

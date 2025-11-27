@@ -16,14 +16,14 @@ class PFTEMPLATE_API UFrameScriptRunnerComponent : public UActorComponent
 
 public:
 	void Initialize(AFighterPawn* pawn) {FighterPawnRef = pawn;}
-	void LoadScript(const FAction& NewAction, int inDuration);
+	void LoadScript(const FAnimation& NewAnimation, int inDuration);
 	void TickScript();
 	bool IsFinished() const;
 	bool AttackNotify() const {return bAttackNotify;}
 	void ResetAttackNotify() {bAttackNotify = false;}
 
 private:
-	FAction CurrentAction;
+	FAnimation CurrentAction; //dup
 	UPROPERTY() AFighterPawn* FighterPawnRef;
 	int32 Duration = 0;
 	int32 CurrentFrame = 0;

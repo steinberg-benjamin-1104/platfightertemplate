@@ -1,17 +1,20 @@
 #pragma once
-#include "Animation.h"
 #include "Engine/DataTable.h"
 #include "ButtonState.h"
+#include "StickDirection.h"
 #include "AttackDefinition.generated.h"
 
 USTRUCT(BlueprintType)
 struct FAttackDefinition : public FTableRowBase
 {
-	FAnimation Animation;
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FDataTableRowHandle AnimationRow;
+	
 	TArray<FName> ValidStates;
 	bool bFlickInput = false;
 	EInputButton InputButton = EInputButton::None;
-	//stick input direction
+	EStickDir StickDir = EStickDir::Center;
 	FName TargetState = NAME_None;
-	bool bGroundOnly = true;
 };

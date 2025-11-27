@@ -1,5 +1,6 @@
 #include "IdleState.h"
 #include "FighterPawn.h"
+#include "AttackDefinition.h"
 #include "FighterMovementComponent.h"
 
 void UIdleState::OnExit()
@@ -15,14 +16,14 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 	
 	if (MoveComp->IsAirborne())
 	{
-		FighterPawnRef->SetCurrentAction("Falling");
+		FighterPawnRef->SetCurrentAnimation("Falling");
 		FighterPawnRef->StateMachine->TryChangeState("Falling", NewInput);
 		return true;
 	}
 
 	if (MoveComp->IsStandingOnFacingLedge() && (MoveComp->GetVelocity().X == FIXED_32(0.f)) && !bOnLedge)
 	{
-		FighterPawnRef->SetCurrentAction("Teeter");
+		FighterPawnRef->SetCurrentAnimation("Teeter");
 		bOnLedge = true;
 	}
 
@@ -32,6 +33,7 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 {
 	FButtonState &ButtonState = NewInput.Button;
+	FStickState &StickState = NewInput.Stick;
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
@@ -47,8 +49,20 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 
 	if (ButtonState.IsPressed(EInputButton::Attack))
 	{
-		StateMachine->TryChangeState("GroundAttack", NewInput);
-		return true;
+		FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPosition : StickState.Current;
+		EStickDir StickDir = GetStickDirection(StickPos, FighterPawnRef->IsFacingRight());
+		if (const FAttackDefinition* Attack = FighterPawnRef->DetermineAttack(EInputButton::Attack, StickState.bFlick, StickDir))
+		{
+			const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
+			FighterPawnRef->SetCurrentAnimation(Anim);
+			StateMachine->TryChangeState(Attack->TargetState, NewInput);
+			//clear buffer
+			return true;
+		}
+		else
+		{
+			
+		}
 	}
 
 	return false;

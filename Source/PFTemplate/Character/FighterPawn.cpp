@@ -7,6 +7,7 @@
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
 #include "ButtonState.h"
+#include "AttackDefinition.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Hitstop Called"));
 
@@ -60,7 +61,7 @@ void AFighterPawn::BeginPlay()
 	ShieldComponent->InitShield(ShieldMesh);
 	
 	InitHurtboxes();
-	SetCurrentAction("Idle");
+	SetCurrentAnimation("Idle");
 }
 
 void AFighterPawn::PossessedBy(AController* NewController)
@@ -172,34 +173,80 @@ void AFighterPawn::FaceInstigator()
 
 #pragma region Actions
 
-FAction AFighterPawn::GetActionByName(FName MoveName) const
+FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
 {
-	if (!ActionTable) return FAction();
+	if (!AnimationTable) return FAnimation();
 
 	static const FString Context = TEXT("Move Lookup");
-	const FAction* Row = ActionTable->FindRow<FAction>(MoveName, Context, true);
+	const FAnimation* Row = AnimationTable->FindRow<FAnimation>(MoveName, Context, true);
 
 	if (Row)
 	{
 		return *Row;
 	}
-	return FAction(); // failsafe
+	return FAnimation(); // failsafe
 }
 
-bool AFighterPawn::SetCurrentAction(FName ActionName, int BlendTime)
+bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 {
-	const FAction NewAction = GetActionByName(ActionName);
+	const FAnimation NewAni = GetAnimationByName(AniName);
 
-	if (!NewAction.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
 
-	const int32 NumFrames = NewAction.AnimSequence->GetNumberOfSampledKeys();
-	CurrentAction = NewAction;
+	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
+	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAction, NumFrames);
+	FrameScriptRunner->LoadScript(NewAni, NumFrames);
 
-	FighterAnimInstance->SetAnimationSequence(NewAction.AnimSequence, NewAction.bIsLoop, NumFrames, BlendTime);
+	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 
 	return true;
+}
+
+bool AFighterPawn::SetCurrentAnimation(const FAnimation* NewAni, int BlendTime)
+{
+	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+
+	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
+	CurrentAnimation = NewAni;
+
+	FrameScriptRunner->LoadScript(NewAni, NumFrames);
+
+	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
+
+	return true;
+}
+
+const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const
+{
+	if (!AttackTable)
+		return nullptr;
+
+	const FName CurrentState = StateMachine->CurrentStateKey;
+
+	TArray<FAttackDefinition*> Rows;
+	AttackTable->GetAllRows<FAttackDefinition>(TEXT("AttackLookup"), Rows);
+
+	for (const FAttackDefinition* Def : Rows)
+	{
+		if (Def->ValidStates.Num() > 0 && !Def->ValidStates.Contains(CurrentState))
+			continue;
+		
+		if (Def->InputButton != EInputButton::None &&
+			Def->InputButton != InputButton)
+			continue;
+		
+		if (Def->bFlickInput != bFlickInput)
+			continue;
+		
+		if (Def->StickDir != EStickDir::Center &&
+			Def->StickDir != StickDir)
+			continue;
+		
+		return Def;
+	}
+
+	return nullptr;
 }
 
 #pragma endregion

@@ -13,7 +13,6 @@
 #include "FighterMovementComponent.h"
 #include "BoneVectorAxis.h"
 #include "SafeMath.h"
-#include "StickTracker.h"
 
 #include "FighterPawn.generated.h"
 
@@ -67,17 +66,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UShieldComponent* ShieldComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FStickTracker StickTracker;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	FAnimation CurrentAnimation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action")
-	FAction CurrentAction;
-
-	UFUNCTION(BlueprintPure, Category = "Action")
-	FAction GetCurrentAction() const {return CurrentAction; }
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	FAnimation GetCurrentAnimation() const {return CurrentAnimation; }
 	
-	UFUNCTION(BlueprintCallable, Category = "Action")
-	bool SetCurrentAction(FName ActionName, int BlendTime = 0);
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool SetCurrentAnimation(FName AnimationName, int32 BlendTime = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool SetCurrentAnimation(const FAnimation* NewAnimation, int32 BlendTime = 0);
 
 	UPROPERTY() AFighterPlayerController* FPC = nullptr;
 
@@ -100,11 +99,14 @@ public:
 
 	void InitHurtboxes();
 	
-	//Attacks
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data")
-	UDataTable* ActionTable;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animations")
+	UDataTable* AnimationTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attacks")
+	UDataTable* AttackTable;
 	
-	FAction GetActionByName(FName MoveName) const;
+	FAnimation GetAnimationByName(FName MoveName) const;
+	const FAttackDefinition* DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const;
 
 	bool bStopAnimUpdates = false;
 	bool bStopMvmtUpdates = false;
