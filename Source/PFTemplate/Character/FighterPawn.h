@@ -90,7 +90,7 @@ public:
 	void SetFacingDirection(int32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void SwitchFacingDirection();
+	void FlipFacingDirection();
 
 	UFUNCTION(BlueprintCallable, Category = "Hurtbox")
 	void ToggleAllHurtboxesInvulnerable(bool bEnable);

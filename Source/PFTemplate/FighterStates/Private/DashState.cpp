@@ -1,6 +1,8 @@
 #include "DashState.h"
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
+#include "StickDirection.h"
+#include "AttackDefinition.h"
 
 void UDashState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine)
 {
@@ -8,108 +10,90 @@ void UDashState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponen
 	DashDuration = MoveComp->DashDuration;
 }
 
-void UDashState::OnEnter()
+void UDashState::OnEnter(FFighterInput& NewInput)
 {
-	StartDash();
-	FighterPawnRef->SetCurrentAction("Dash");
-}
+	FighterPawnRef->SetCurrentAnimation("Dash");
 
-void UDashState::StartDash()
-{
-	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
-	DashDirection = (StickInput.X > 0) ? 1.f : -1.f;
+	EStickDir StickDir = GetStickDirection(NewInput.Stick.Current, FighterPawnRef->IsFacingRight());
 	
-	FighterPawnRef->SetFacingDirection(DashDirection);
-}
-
-void UDashState::Tick()
-{
-	Super::Tick();
-
-	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
-
-	if (StickInput.X != 0)
-	{
-		const float StickDir = (StickInput.X > 0.f) ? 1.f : -1.f;
-		if (StickDir != DashDirection)
-			StartDash();
-	}
-
-	ApplyDashVelocity();
-	MoveComp->HandleLedgeOrFall(false);
-
-	if (MoveComp->IsAirborne())
-	{
-		FighterPawnRef->SetCurrentAction("Falling");
-		FighterPawnRef->StateMachine->TryChangeState("Falling");
-		
-		return;
-	}
-	
-	HandleDashEnd(StickInput);
-}
-
-void UDashState::ApplyDashVelocity()
-{
-	FVector Velocity = MoveComp->GetVelocity();
-	Velocity.X = DashDirection * MoveComp->DashSpeed;
+	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
+	FFixedVector2D Velocity = MoveComp->GetVelocity();
+	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->DashSpeed;
 	MoveComp->SetVelocity(Velocity);
 }
 
-void UDashState::HandleDashEnd(const FStickInt8& StickInput)
+bool UDashState::HandleStickInput(FFighterInput& Input)
 {
-	const int32 StickDir = FMath::Sign(StickInput.X);
+	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
 	
-	if (StateMachine->FramesInState == DashDuration)
+	if (StickDir == EStickDir::Backward && Input.Stick.bFlick)
 	{
-		if (StickDir == DashDirection)
-		{
-			StateMachine->TryChangeState("Run");
-		}
-		else
-		{
-			FighterPawnRef->SetCurrentAction("Idle", 3);
-			StateMachine->TryChangeState("Idle");
-		}
+		StateMachine->TryChangeState("Dash", Input);
+		return true;
 	}
+	return false;
 }
 
-void UDashState::OnExit()
+bool UDashState::HandlePhysics(FFighterInput& Input)
 {
-	Super::OnExit();
-}
+	MoveComp->PreventLedgeFall(false);
 
-bool UDashState::JumpPressed()
-{
-	return StateMachine->TryChangeState("JumpSquat");
-}
-
-bool UDashState::ShieldPressed()
-{
-	MoveComp->SetVelocity(FVector(0, 0, 0));
-	return StateMachine->TryChangeState("Shield");
-}
-
-bool UDashState::Attack()
-{
-	FStickInputTracker& Tracker = *FighterPawnRef->GetStickTracker();
-	
-	if (StateMachine->FramesInState < 4)
+	if (MoveComp->IsAirborne())
 	{
-		FighterPawnRef->SetCurrentAction("Fsmash1");
-		MoveComp->HaltHorizontalVelocity();
+		FighterPawnRef->SetCurrentAnimation("Falling");
+		FighterPawnRef->StateMachine->TryChangeState("Falling", Input);
+		
+		return true;
+	}
+	return false;
+}
+
+bool UDashState::HandleButtonInput(FFighterInput& NewInput)
+{
+	FButtonState &ButtonState = NewInput.Button;
+	FStickState &StickState = NewInput.Stick;
+	
+	if (ButtonState.IsPressed(EInputButton::Jump))
+	{
+		StateMachine->TryChangeState("JumpSquat", NewInput);
 		return true;
 	}
 
-	// Up-flick: perform up smash
-	if (Tracker.IsFlickActive() && Tracker.GetCapturedDir() == EStickDirection::Up)
+	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
-		FighterPawnRef->SetCurrentAction("Upsmash1");
+		//stop x velocity here
+		StateMachine->TryChangeState("Shield", NewInput);
 		return true;
 	}
-	
-	FighterPawnRef->SetCurrentAction("DashAttack1");
-	MoveComp->bCanApplyGroundFriction = false;
 
-	return true;
+	if (ButtonState.IsPressed(EInputButton::Attack))
+	{
+		//create attack function, this shit too long
+	}
+
+	return false;
+}
+
+
+bool UDashState::HandleTimer(FFighterInput& NewInput, int32 FramesInState)
+{
+	if (FramesInState == DashDuration)
+	{
+		EStickDir StickDir = GetStickDirection(NewInput.Stick.Current, FighterPawnRef->IsFacingRight());
+		if (StickDir == EStickDir::Forward)
+		{
+			StateMachine->TryChangeState("Run", NewInput);
+			return true;
+		}
+		if (StickDir == EStickDir::Backward && NewInput.Stick.bFlick)
+		{
+			StateMachine->TryChangeState("Dash", NewInput);
+			return true;
+		}
+		
+		FighterPawnRef->SetCurrentAnimation("Idle", 3);
+		StateMachine->TryChangeState("Idle", NewInput);
+	}
+
+	return false;
 }

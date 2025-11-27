@@ -159,7 +159,7 @@ void AFighterPawn::SetFacingDirection(int32 inDirection)
 	}
 }
 
-void AFighterPawn::SwitchFacingDirection()
+void AFighterPawn::FlipFacingDirection()
 {
 	SetFacingDirection(IsFacingRight() ? -1 : 1);
 }

@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "FighterState.h"
-#include "Input.h"
 
 #include "DashState.generated.h"
 
@@ -15,12 +14,11 @@ class PFTEMPLATE_API UDashState : public UFighterState
 public:
 
 	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine) override;
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual void OnExit() override;
-	virtual bool JumpPressed() override;
-	virtual bool ShieldPressed() override;
-	virtual bool Attack() override;
+	virtual void OnEnter(FFighterInput& NewInput) override;
+	virtual bool HandleStickInput(FFighterInput& NewInput) override;
+	virtual bool HandlePhysics(FFighterInput& NewInput) override;
+	virtual bool HandleButtonInput(FFighterInput& NewInput) override;
+	virtual bool HandleTimer(FFighterInput& NewInput, int32 FramesInState) override;
 
 	virtual FString GetStateName() override {return "Dash";}
 
@@ -28,8 +26,4 @@ private:
 	float DashDirection;
 	bool bHasSnappedToLedge = false;
 	int DashDuration;
-
-	void StartDash();
-	void ApplyDashVelocity();
-	void HandleDashEnd(const FStickInt8& StickInput);
 };

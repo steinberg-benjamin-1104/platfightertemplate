@@ -2,7 +2,7 @@
 #include "FighterPawn.h"
 #include "FighterState.h"
 #include "IdleState.h"
-#include "AttackState.h"
+#include "BaseAttackState.h"
 #include "JumpSquatState.h"
 #include "DashState.h"
 #include "RunState.h"
@@ -26,7 +26,7 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	FighterPawnRef = InOwner;
 
 	StateMap.Add("Idle", NewObject<UIdleState>(this));
-	StateMap.Add("GroundAttack", NewObject<UAttackState>(this));
+	StateMap.Add("BaseAttack", NewObject<UBaseAttackState>(this));
 	StateMap.Add("JumpSquat", NewObject<UJumpSquatState>(this));
 	StateMap.Add("Dash", NewObject<UDashState>(this));
 	StateMap.Add("Run", NewObject<URunState>(this));
@@ -58,7 +58,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 
 	CurrentStateKey = "Idle";
 	CurrentState = StateMap[CurrentStateKey];
-	CurrentState->OnEnter();
+	FFighterInput NewInput;
+	CurrentState->OnEnter(NewInput);
 }
 
 bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &TransitionInput)
@@ -74,11 +75,11 @@ bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &Transit
 		CurrentState->OnExit();
 		CurrentState = StateMap[NewState];
 		CurrentStateKey = NewState;
-		CurrentState->OnEnter();
-		FramesInState = 0;
+		CurrentState->OnEnter(TransitionInput);
+		FramesInState = -1;
 		FFighterInput NewInput;
 		NewInput.Button = TransitionInput.Button.ClearPressed();
-		StateMap[NewState]->Tick(NewInput);
+		TickCurrentState(NewInput);
 
 		return true;
 	}
@@ -90,7 +91,7 @@ void UFighterStateMachine::TickCurrentState(FFighterInput &Input)
 	if (CurrentState && FighterPawnRef)
 	{
 		FramesInState++;
-		CurrentState->Tick(Input);
+		CurrentState->Tick(Input, FramesInState);
 	}
 }
 
