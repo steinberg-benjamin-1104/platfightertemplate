@@ -3,9 +3,9 @@
 #include "FighterMovementComponent.h"
 #include "FrameScriptRunner.h"
 
-void UBaseAttackState::Tick(FFighterInput& NewInput)
+void UBaseAttackState::Tick(FFighterInput& NewInput, int32 FramesInState)
 {
-	Super::Tick(NewInput);
+	Super::Tick(NewInput, FramesInState);
 
 	if (FighterPawnRef->FrameScriptRunner->IsFinished())
 	{

@@ -13,15 +13,12 @@ class PFTEMPLATE_API UFallingState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual bool Attack() override;
-	virtual bool JumpPressed() override;
+	virtual void OnEnter(FFighterInput& NewInput) override;
+	virtual bool HandleButtonInput(FFighterInput& NewInput) override;
+	virtual bool HandlePhysics(FFighterInput& Input) override;
+	virtual bool HandleStickInput(FFighterInput& Input) override;
 	virtual void OnExit() override;
 	virtual FString GetStateName() override {return "Falling";}
-
-protected:
-	virtual void OnLand();
 	
 private:
 	ALedge* DetectNearbyLedge() const;

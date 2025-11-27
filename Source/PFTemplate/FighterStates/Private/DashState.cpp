@@ -51,7 +51,6 @@ bool UDashState::HandlePhysics(FFighterInput& Input)
 bool UDashState::HandleButtonInput(FFighterInput& NewInput)
 {
 	FButtonState &ButtonState = NewInput.Button;
-	FStickState &StickState = NewInput.Stick;
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
@@ -61,14 +60,14 @@ bool UDashState::HandleButtonInput(FFighterInput& NewInput)
 
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
-		//stop x velocity here
+		MoveComp->HaltHorizontalVelocity();
 		StateMachine->TryChangeState("Shield", NewInput);
 		return true;
 	}
 
 	if (ButtonState.IsPressed(EInputButton::Attack))
 	{
-		//create attack function, this shit too long
+		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
 	}
 
 	return false;

@@ -33,7 +33,6 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 {
 	FButtonState &ButtonState = NewInput.Button;
-	FStickState &StickState = NewInput.Stick;
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
@@ -49,20 +48,12 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 
 	if (ButtonState.IsPressed(EInputButton::Attack))
 	{
-		FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPosition : StickState.Current;
-		EStickDir StickDir = GetStickDirection(StickPos, FighterPawnRef->IsFacingRight());
-		if (const FAttackDefinition* Attack = FighterPawnRef->DetermineAttack(EInputButton::Attack, StickState.bFlick, StickDir))
-		{
-			const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
-			FighterPawnRef->SetCurrentAnimation(Anim);
-			StateMachine->TryChangeState(Attack->TargetState, NewInput);
-			//clear buffer
-			return true;
-		}
-		else
-		{
-			
-		}
+		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
+	}
+
+	if (ButtonState.IsPressed(EInputButton::Special))
+	{
+		return FighterPawnRef->TryStartAttack(EInputButton::Special, NewInput);
 	}
 
 	return false;

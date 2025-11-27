@@ -403,3 +403,21 @@ void AFighterPawn::FreezePlayer(bool bFreeze)
 	bStopAnimUpdates = bFreeze;
 	bStopMvmtUpdates = bFreeze;
 }
+
+bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
+{
+	const FStickState& StickState = Input.Stick;
+	
+	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPosition : StickState.Current;
+	const EStickDir StickDir = GetStickDirection(StickPos, IsFacingRight());
+	
+	const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir);
+	if (!Attack) return false;
+	
+	const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
+	SetCurrentAnimation(Anim);
+	
+	StateMachine->TryChangeState(Attack->TargetState, Input);
+	
+	return true;
+}

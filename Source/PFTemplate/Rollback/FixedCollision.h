@@ -87,3 +87,37 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 	}
 	return Out;
 }
+
+template<typename T>
+static T* FixedOverlapBoxFirstActorOfClass(const UWorld* World,
+										   const FFixedVector2D& Center,
+										   const FFixedVector2D& HalfExtent)
+{
+	TArray<FOverlapResult> Overlaps;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(FixedOverlapBoxFirstActorOfClass), false);
+
+	World->OverlapMultiByChannel(
+		Overlaps,
+		Fixed2DToVector(Center),
+		FQuat::Identity,
+		Channel,
+		FCollisionShape::MakeBox(FVector(
+			FixedToFloat(HalfExtent.X),
+			FixedToFloat(HalfExtent.Z),
+			0.f)),
+		Params
+	);
+
+	for (const FOverlapResult& O : Overlaps)
+	{
+		if (AActor* A = O.GetActor())
+		{
+			if (T* Casted = Cast<T>(A))
+			{
+				return Casted;
+			}
+		}
+	}
+
+	return nullptr;
+}

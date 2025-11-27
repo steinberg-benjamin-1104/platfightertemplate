@@ -13,10 +13,11 @@ class PFTEMPLATE_API UJumpSquatState : public UFighterState
 
 public:
 
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual bool JumpReleased() override;
+	virtual void OnEnter(FFighterInput& Input) override;
 	virtual void OnExit() override;
+	virtual bool HandlePhysics(FFighterInput& Input) override;
+	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
+	virtual bool HandleButtonInput(FFighterInput& Input) override;
 
 	virtual FString GetStateName() override {return "JumpSquat";}
 
