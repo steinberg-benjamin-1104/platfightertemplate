@@ -84,6 +84,15 @@ FORCEINLINE FIXED_32 operator*(int32 lhs, const FIXED_32& rhs)
 {
     return rhs * lhs;
 }
+FORCEINLINE FIXED_32 operator/(const FIXED_32& lhs, int32 rhs)
+{
+    return FIXED_32::FromRaw(lhs.v / rhs);
+}
+
+FORCEINLINE FIXED_32 operator/(int32 lhs, const FIXED_32& rhs)
+{
+    return FIXED_32::FromRaw((lhs << 32) / rhs.v);
+}
 
 // helpers
 FORCEINLINE float  FixedToFloat(FIXED_32 f)   { return (float)(f.v / 4294967296.0); }

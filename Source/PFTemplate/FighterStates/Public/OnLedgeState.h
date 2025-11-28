@@ -11,16 +11,13 @@ class PFTEMPLATE_API UOnLedgeState : public UFighterState
 
 public:
 
-	virtual void OnEnter() override;
+	virtual void OnEnter(FFighterInput& Input) override;
 	virtual void OnExit() override;
-	virtual void Tick() override;
-	virtual bool Attack() override;
-	virtual bool ShieldPressed() override;
-	virtual bool JumpPressed() override;
-
+	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
+	virtual bool HandleButtonInput(FFighterInput& Input) override;
 	virtual FString GetStateName() override {return "On Ledge";}
 
 private:
-	int DelayAction = 60;
+	int DelayAction = 30;
 	bool Actionable = false;
 };

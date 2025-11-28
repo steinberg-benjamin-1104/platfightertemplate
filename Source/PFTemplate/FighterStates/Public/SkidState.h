@@ -10,14 +10,14 @@ class PFTEMPLATE_API USkidState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual bool JumpPressed() override;
+	virtual void OnEnter(FFighterInput& Input) override;
+	virtual bool HandlePhysics(FFighterInput& Input) override;
+	virtual bool HandleButtonInput(FFighterInput& Input) override;
+	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
 
 	virtual FString GetStateName() override {return "Skid";}
 
 private:
-	int Duration = 25;
-	float SkidFriction = 0.f;
-	float InitialSkidDirection = 0.f;
+	FIXED_32 Reduction;
+	int32 SkidDuration;
 };

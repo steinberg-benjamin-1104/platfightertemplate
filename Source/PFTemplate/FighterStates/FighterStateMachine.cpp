@@ -8,7 +8,7 @@
 #include "RunState.h"
 #include "WalkingState.h"
 #include "SkidState.h"
-#include "HeavyAttackState.h"
+#include "ChargeHeavyState.h"
 #include "JumpUpState.h"
 #include "FallingState.h"
 #include "AirAttackState.h"
@@ -32,7 +32,7 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("Run", NewObject<URunState>(this));
 	StateMap.Add("Walking", NewObject<UWalkingState>(this));
 	StateMap.Add("Skid", NewObject<USkidState>(this));
-	StateMap.Add("HeavyAttack", NewObject<UHeavyAttackState>(this));
+	StateMap.Add("ChargeHeavy", NewObject<UChargeHeavyState>(this));
 	StateMap.Add("JumpUp", NewObject<UJumpUpState>(this));
 	StateMap.Add("Falling", NewObject<UFallingState>(this));
 	StateMap.Add("AirAttack", NewObject<UAirAttackState>(this));

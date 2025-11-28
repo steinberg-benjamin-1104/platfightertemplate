@@ -13,10 +13,11 @@ class PFTEMPLATE_API UShieldState : public UFighterState
 public:
 
 	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine) override;
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual bool JumpPressed() override;
-	virtual bool ShieldReleased() override;
+	virtual void OnEnter(FFighterInput& Input) override;
+	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
+	virtual bool HandleButtonInput(FFighterInput& Input) override;
+	virtual bool HandleStickInput(FFighterInput& Input) override;
+	virtual bool HandlePhysics(FFighterInput& Input) override;
 	virtual void OnExit() override;
 
 	virtual FString GetStateName() override {return "Shield";}

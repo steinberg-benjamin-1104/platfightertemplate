@@ -10,8 +10,8 @@ class PFTEMPLATE_API UShieldbreakState : public UFighterState
     GENERATED_BODY()
     
 public:
-    void OnEnter() override;
-    void Tick() override;
+    void OnEnter(FFighterInput& Input) override;
+    bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
     void OnExit() override;
 
 private:

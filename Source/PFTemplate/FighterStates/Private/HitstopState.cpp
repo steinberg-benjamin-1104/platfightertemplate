@@ -4,9 +4,9 @@
 #include "FighterPawn.h"
 #include "HitboxData.h"
 
-void UHitstopState::OnEnter()
+void UHitstopState::OnEnter(FFighterInput& Input)
 {
-	FighterPawnRef->SetCurrentAction("Hitstop");
+	FighterPawnRef->SetCurrentAnimation("Hitstop");
 	FighterPawnRef->FaceInstigator();
 	FighterPawnRef->UpdateAnimation();
 	FighterPawnRef->FreezePlayer(true);
@@ -15,15 +15,20 @@ void UHitstopState::OnEnter()
 	MoveComp->StopMovementCompletely();
 }
 
-void UHitstopState::Tick()
+bool UHitstopState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	if (StateMachine->FramesInState == Duration)
+	if (FramesInState == Duration)
 	{
-		StateMachine->TryChangeState("Knockback");
-		return;
+		StateMachine->TryChangeState("Knockback", Input);
+		return true;
 	}
-	
+	return false;
+}
+
+bool UHitstopState::HandlePhysics(FFighterInput& Input)
+{
 	FighterPawnRef->ShakeMesh();
+	return false;
 }
 
 void UHitstopState::OnExit()

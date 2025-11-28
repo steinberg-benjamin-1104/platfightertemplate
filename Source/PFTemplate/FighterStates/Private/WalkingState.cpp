@@ -2,32 +2,49 @@
 #include "WalkingState.h"
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
+#include "StickDirection.h"
 
-void UWalkingState::OnEnter()
+void UWalkingState::OnEnter(FFighterInput& Input)
 {
-	FighterPawnRef->SetCurrentAction("Walk");
+	FighterPawnRef->SetCurrentAnimation("Walk");
+	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+
+	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
+
+	FFixedVector2D Velocity;
+	Velocity.X = MoveComp->WalkSpeed * FighterPawnRef->GetFacingDirection();
+	MoveComp->SetVelocity(Velocity);
 }
 
-void UWalkingState::Tick()
+bool UWalkingState::HandlePhysics(FFighterInput& Input)
 {
-	const FStickInt8 StickInput = FighterPawnRef->GetPlayerStickInput();
-	const int8 StickX = StickInput.X;
+	MoveComp->PreventLedgeFall(true);
+	return false;
+}
 
-	// Go idle if no movement input
-	if (StickX == 0)
+bool UWalkingState::HandleStickInput(FFighterInput& Input)
+{
+	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+
+	FStickState &StickState = Input.Stick;
+	if (StickState.bFlick)
 	{
-		FighterPawnRef->SetCurrentAction("Idle", 3);
-		StateMachine->TryChangeState("Idle");
-		return;
+		FighterPawnRef->StateMachine->TryChangeState("Dash", Input);
+		return true;
+	}
+	
+	if (StickDir == EStickDir::Center)
+	{
+		FighterPawnRef->SetCurrentAnimation("Idle", 3);
+		StateMachine->TryChangeState("Idle", Input);
+		return true;
 	}
 
-	// Determine direction (+1 or -1)
-	const int8 StickDir = (StickX > 0) ? 1 : -1;
-	FighterPawnRef->SetFacingDirection(StickDir);
+	if (StickDir == EStickDir::Backward)
+	{
+		StateMachine->TryChangeState("Walk", Input);
+		return true;
+	}
 
-	// Apply walking movement
-	FVector Velocity = MoveComp->GetVelocity();
-	Velocity.X = StickDir * MoveComp->WalkSpeed;
-	MoveComp->SetVelocity(Velocity);
-	MoveComp->HandleLedgeOrFall(true);
+	return false;
 }

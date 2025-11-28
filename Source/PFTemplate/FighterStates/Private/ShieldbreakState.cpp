@@ -1,21 +1,23 @@
 #include "ShieldbreakState.h"
 #include "Fighterpawn.h"
 
-void UShieldbreakState::OnEnter()
+void UShieldbreakState::OnEnter(FFighterInput& Input)
 {
 	FighterPawnRef->ShieldComponent->ResetHealth();
-	FighterPawnRef->SetCurrentAction("Shieldbreak");
+	FighterPawnRef->SetCurrentAnimation("Shieldbreak");
 }
 
-void UShieldbreakState::Tick()
+bool UShieldbreakState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	if (StateMachine->FramesInState == Duration)
+	if (FramesInState == Duration)
 	{
-		StateMachine->TryChangeState("Idle");
+		StateMachine->TryChangeState("Idle", Input);
+		return true;
 	}
+	return false;
 }
 
 void UShieldbreakState::OnExit()
 {
-	FighterPawnRef->SetCurrentAction("Idle");
+	FighterPawnRef->SetCurrentAnimation("Idle");
 }

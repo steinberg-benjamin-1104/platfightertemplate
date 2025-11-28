@@ -8,87 +8,65 @@ void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCompon
 	ShieldComponent = InFighterPawn->ShieldComponent;
 }
 
-void UShieldState::OnEnter()
+void UShieldState::OnEnter(FFighterInput& Input)
 {
-	FighterPawnRef->SetCurrentAction("Shield", 5);
+	FighterPawnRef->SetCurrentAnimation("Shield", 5);
 }
 
-void UShieldState::Tick()
+bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	MoveComp->ApplyGroundFriction();
-	MoveComp->HandleLedgeOrFall(false);
-
-	if (MoveComp->IsAirborne())
-	{
-		FighterPawnRef->StateMachine->TryChangeState("Falling");
-		return;
-	}
-
-	if (StateMachine->FramesInState == StartupFrames)
+	if (FramesInState == StartupFrames)
 	{
 		ShieldComponent->SetShieldActive(true);
 	}
-	
-	if (StateMachine->FramesInState >= StartupFrames + MinHoldFrames)
-	{
-		if (!FighterPawnRef->FPC->IsShieldHeld())
-		{
-			ShieldReleased();
-		}
-	}
 
-	if (StateMachine->FramesInState >= FramesToEnd && InEndLag)
+	if (FramesInState >= FramesToEnd && InEndLag)
 	{
-		FighterPawnRef->StateMachine->TryChangeState("Idle");
-		return;
+		FighterPawnRef->SetCurrentAnimation("Idle");
+		StateMachine->TryChangeState("Idle", Input);
+		return true;
 	}
-	
-	// FStickInputTracker& Tracker = *FighterPawnRef->GetStickTracker();
-	// Tracker.CaptureStickDir();
-	// EStickDirection Dir = Tracker.GetCapturedDir();
-	//
-	// if (Tracker.isFlickHorizontal())
-	// {
-	// 	const float Facing = FighterPawnRef->GetFacingDirection();
-	// 	bool bRollForward = (Dir == EStickDirection::Right && Facing > 0.f) ||
-	// 						(Dir == EStickDirection::Left && Facing < 0.f);
-	//
-	// 	if (bRollForward)
-	// 	{
-	// 		FighterPawnRef->SetFacingDirection(-Facing);
-	// 		FighterPawnRef->SetCurrentAction("FRoll");
-	// 	}
-	// 	else
-	// 	{
-	// 		FighterPawnRef->SetFacingDirection(Facing);
-	// 		FighterPawnRef->SetCurrentAction("BRoll");
-	// 	}
-	// 	StateMachine->TryChangeState("Attacking");
-	// 	MoveComp->bCanApplyGroundFriction = false;
-	// 	return;
-	// }
-	//
-	// if (Tracker.WasDownJustPressedThisFrame())
-	// {
-	// 	MoveComp->HaltHorizontalVelocity();
-	// 	FighterPawnRef->SetCurrentAction("Parry"); //no spotdodge in this game
-	// 	StateMachine->TryChangeState("Attacking");
-	// }
+	return false;
 }
 
-bool UShieldState::JumpPressed()
+bool UShieldState::HandleButtonInput(FFighterInput& Input)
 {
-	return StateMachine->TryChangeState("JumpSquat");
+	FButtonState &ButtonState = Input.Button;
+	
+	if (ButtonState.IsPressed(EInputButton::Jump))
+	{
+		StateMachine->TryChangeState("JumpSquat", Input);
+		return true;
+	}
+
+	if (!ButtonState.IsPressed(EInputButton::Shield))
+	{
+		if (!ShieldComponent->IsActive() || InEndLag) return false;
+		FramesToEnd = StateMachine->FramesInState + EndLagFrames;
+		ShieldComponent->SetShieldActive(false);
+		InEndLag = true;
+		FighterPawnRef->SetCurrentAnimation("ShieldRelease", 3);
+		return true;
+	}
+	return false;
 }
 
-bool UShieldState::ShieldReleased()
+bool UShieldState::HandleStickInput(FFighterInput& Input)
 {
-	if (!ShieldComponent->IsActive() || InEndLag) return false;
-	FramesToEnd = StateMachine->FramesInState + EndLagFrames;
-	ShieldComponent->SetShieldActive(false);
-	InEndLag = true;
-	FighterPawnRef->SetCurrentAction("ShieldRelease", 3);
-	return true;
+	return false;
+}
+
+bool UShieldState::HandlePhysics(FFighterInput& Input)
+{
+	MoveComp->ApplyGroundFriction();
+	MoveComp->PreventLedgeFall(false);
+	if (MoveComp->IsAirborne())
+	{
+		FighterPawnRef->SetCurrentAnimation("Falling");
+		StateMachine->TryChangeState("Falling", Input);
+		return true;
+	}
+	return false;
 }
 
 void UShieldState::OnExit()

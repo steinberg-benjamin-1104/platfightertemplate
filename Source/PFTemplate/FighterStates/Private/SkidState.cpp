@@ -2,51 +2,48 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void USkidState::OnEnter()
+void USkidState::OnEnter(FFighterInput& Input)
 {
-	FighterPawnRef->SwitchFacingDirection();
-
-	FighterPawnRef->SetCurrentAction("Skid");
-
-	const float InitialSpeed = FMath::Max(FMath::Abs(MoveComp->Velocity.X), 1.f);
-	const float EndSpeed = 5.f;
-
-	SkidFriction = FMath::Pow(EndSpeed / InitialSpeed, 1.0f / Duration);
-	SkidFriction = FMath::Clamp(SkidFriction, 0.90f, 0.99f);
-
-	InitialSkidDirection = (MoveComp->Velocity.X > 0.f) ? 1.f : -1.f;
+	FighterPawnRef->FlipFacingDirection();
+	FighterPawnRef->SetCurrentAnimation("Skid");
+	Reduction = MoveComp->GetVelocity().X.Abs() / SkidDuration;
 }
 
-void USkidState::Tick()
+bool USkidState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	Super::Tick();
-
-	if (SkidFriction > 0.f)
+	if (FramesInState == SkidDuration)
 	{
-		FVector Velocity = MoveComp->GetVelocity();
-		Velocity.X *= SkidFriction;
-
-		if (FMath::Abs(Velocity.X) < 1.f) Velocity.X = 0.f;
-
-		MoveComp->SetVelocity(Velocity);
+		FighterPawnRef->SetCurrentAnimation("Idle");
+		StateMachine->TryChangeState("Idle", Input);
+		return true;
 	}
-
-	MoveComp->HandleLedgeOrFall(true);
-
-	if (StateMachine->FramesInState == Duration)
-	{
-		const int8 StickX = FighterPawnRef->GetPlayerStickInput().X;
-
-		if (StickX * InitialSkidDirection < 0) StateMachine->TryChangeState("Dash");
-		else
-		{
-			FighterPawnRef->SetCurrentAction("Idle", 3);
-			StateMachine->TryChangeState("Idle");
-		}
-	}
+	return false;
 }
 
-bool USkidState::JumpPressed()
+bool USkidState::HandlePhysics(FFighterInput& Input)
 {
-	return StateMachine->TryChangeState("JumpSquat");
+	FFixedVector2D Velocity = MoveComp->GetVelocity();
+	Velocity.X -= Reduction * MoveComp->GetVelocity().X.Sign();
+	MoveComp->SetVelocity(Velocity);
+	MoveComp->PreventLedgeFall(true);
+	return false;
+}
+
+bool USkidState::HandleButtonInput(FFighterInput& NewInput)
+{
+	FButtonState &ButtonState = NewInput.Button;
+	
+	if (ButtonState.IsPressed(EInputButton::Jump))
+	{
+		StateMachine->TryChangeState("JumpSquat", NewInput);
+		return true;
+	}
+
+	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
+	{
+		StateMachine->TryChangeState("Shield", NewInput);
+		return true;
+	}
+
+	return false;
 }
