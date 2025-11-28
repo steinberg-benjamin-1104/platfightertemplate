@@ -12,15 +12,10 @@ class PFTEMPLATE_API URunState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void OnEnter() override;
-	virtual void Tick() override;
-	virtual bool JumpPressed() override;
-	virtual bool ShieldPressed() override;
-	virtual bool Attack() override;
+	virtual void OnEnter(FFighterInput& Input) override;
+	virtual bool HandleButtonInput(FFighterInput& Input) override;
+	virtual bool HandleStickInput(FFighterInput& Input) override;
+	virtual bool HandlePhysics(FFighterInput& Input) override;
 	
 	virtual FString GetStateName() override {return "Running";}
-
-private:
-	void ApplyRunVelocity(UFighterMovementComponent* MoveComp);
-	void HandleInputTransitions(UFighterMovementComponent* MoveComp);
 };

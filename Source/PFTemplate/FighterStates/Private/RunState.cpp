@@ -1,77 +1,67 @@
 #include "RunState.h"
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
+#include "StickDirection.h"
 
-void URunState::OnEnter()
+void URunState::OnEnter(FFighterInput& NewInput)
 {
-	FighterPawnRef->SetCurrentAction("Run");
-}
-
-void URunState::Tick()
-{
-	ApplyRunVelocity(MoveComp);
-	MoveComp->HandleLedgeOrFall(false);
-
-	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
-	{
-		FighterPawnRef->SetCurrentAction("Falling");
-		FighterPawnRef->StateMachine->TryChangeState("Falling");
-		return;
-	}
-
-	HandleInputTransitions(MoveComp);
-}
-
-void URunState::ApplyRunVelocity(UFighterMovementComponent* MoveComp)
-{
-	const float Direction = FighterPawnRef->IsFacingRight() ? 1.f : -1.f;
-	FVector Velocity = MoveComp->GetVelocity();
-	Velocity.X = Direction * MoveComp->RunSpeed;
+	FighterPawnRef->SetCurrentAnimation("Run");
+	FFixedVector2D Velocity = MoveComp->GetVelocity();
+	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->RunSpeed;
 	MoveComp->SetVelocity(Velocity);
 }
 
-void URunState::HandleInputTransitions(UFighterMovementComponent* MoveComp)
+bool URunState::HandleStickInput(FFighterInput& Input)
 {
-	const FStickInt8 Stick = FighterPawnRef->GetPlayerStickInput();
-	const float Direction = FighterPawnRef->GetFacingDirection();
-
-	const bool bHoldingForward = (Stick.X * Direction) > 0;
-	const bool bHoldingOpposite = (Stick.X * Direction) < 0;
-
-	if (!bHoldingForward && !bHoldingOpposite)
+	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+	if (StickDir == EStickDir::Center)
 	{
-		FighterPawnRef->SetCurrentAction("Idle", 3);
-		StateMachine->TryChangeState("Idle");
-	}
-	else if (bHoldingOpposite)
-	{
-		StateMachine->TryChangeState("Skid");
-	}
-}
-
-bool URunState::JumpPressed()
-{
-	return StateMachine->TryChangeState("JumpSquat");
-}
-
-bool URunState::ShieldPressed()
-{
-	return StateMachine->TryChangeState("Shield");
-}
-
-bool URunState::Attack()
-{
-	FStickInputTracker& Tracker = *FighterPawnRef->GetStickTracker();
-	
-	// Up-flick: perform up smash
-	if (Tracker.IsFlickActive() && Tracker.GetCapturedDir() == EStickDirection::Up)
-	{
-		FighterPawnRef->SetCurrentAction("Upsmash1");
+		FighterPawnRef->SetCurrentAnimation("Idle", 3);
+		StateMachine->TryChangeState("Idle", Input);
 		return true;
 	}
-	
-	FighterPawnRef->SetCurrentAction("DashAttack1");
-	MoveComp->bCanApplyGroundFriction = false;
+	if (StickDir == EStickDir::Backward)
+	{
+		StateMachine->TryChangeState("Skid", Input);
+		return true;
+	}
+	return false;
+}
 
-	return true;
+bool URunState::HandleButtonInput(FFighterInput& NewInput)
+{
+	FButtonState &ButtonState = NewInput.Button;
+	
+	if (ButtonState.IsPressed(EInputButton::Jump))
+	{
+		StateMachine->TryChangeState("JumpSquat", NewInput);
+		return true;
+	}
+
+	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
+	{
+		MoveComp->HaltHorizontalVelocity();
+		StateMachine->TryChangeState("Shield", NewInput);
+		return true;
+	}
+
+	if (ButtonState.IsPressed(EInputButton::Attack))
+	{
+		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
+	}
+
+	return false;
+}
+
+bool URunState::HandlePhysics(FFighterInput& Input)
+{
+	MoveComp->PreventLedgeFall(false);
+	
+	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
+	{
+		FighterPawnRef->SetCurrentAnimation("Falling");
+		FighterPawnRef->StateMachine->TryChangeState("Falling", Input);
+		return true;
+	}
+	return false;
 }
