@@ -6,39 +6,34 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 
-void UFrameScriptRunnerComponent::LoadScript(const FAnimation& NewAni, int inDuration)
+void UFrameScriptRunnerComponent::LoadScript(const TArray<FFrameCommand>& NewCommands, int inDuration, bool bNewLoop)
 {
-	CurrentAction = NewAni;
+	Commands = NewCommands;
 	CommandIndex = 0;
 	Duration = inDuration;
 	CurrentFrame = 0;
-	ResetAttackNotify();
 	bIsFinished = false;
+	bLoop = bNewLoop;
 }
 
-void UFrameScriptRunnerComponent::TickScript()
+void UFrameScriptRunnerComponent::TickScript(FFighterInput &Input)
 {
 	++CurrentFrame;
-	while (CommandIndex < CurrentAction.Commands.Num())
+	while (CommandIndex < Commands.Num())
 	{
-		const FFrameCommand& Cmd = CurrentAction.Commands[CommandIndex];
+		const FFrameCommand& Cmd = Commands[CommandIndex];
 
 		if (Cmd.FrameExecution > CurrentFrame)
 			break;
 
-		ExecuteCommand(Cmd);
+		ExecuteCommand(Cmd, Input);
 		++CommandIndex;
 	}
 
 	if (Duration > 0 && CurrentFrame >= Duration)
 	{
-		if (CurrentAction.bIsLoop) CommandIndex = 0;
-		else
-		{
-			if (CurrentAction.OnFinishCmd.Command != EFrameCommandType::None)
-				ExecuteCommand(CurrentAction.OnFinishCmd);
-			bIsFinished = true;
-		}
+		if (bLoop) CommandIndex = 0;
+		else bIsFinished = true;
 	}
 }
 
@@ -47,29 +42,27 @@ bool UFrameScriptRunnerComponent::IsFinished() const
 	return bIsFinished;
 }
 
-void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd)
+void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFighterInput& Input)
 {
 	if (!FighterPawnRef) return;
 
 	switch (Cmd.Command)
 	{
-		case EFrameCommandType::SetCurrentAction:
+		case EFrameCommandType::SetCurrentAnimation:
 		{
-			FighterPawnRef->SetCurrentAction(Cmd.NameParam, Cmd.IntParam);
+			FighterPawnRef->SetCurrentAnimation(Cmd.NameParam, Cmd.IntParam);
+			break;
 		}
 
 		case EFrameCommandType::TryChangeState:
 		{
-			FighterPawnRef->StateMachine->TryChangeState(Cmd.NameParam);
+			FighterPawnRef->StateMachine->TryChangeState(Cmd.NameParam, Input);
+			break;
 		}
 		
 		case EFrameCommandType::SpawnHitboxes:
 		{
-			if (CurrentAction.HitboxCollection.IsValidIndex(Cmd.IntParam))
-			{
-				const FHitboxGroup& HitboxGroup = CurrentAction.HitboxCollection[Cmd.IntParam];
-				FighterPawnRef->GetHitboxManager()->ActivateHitboxes(HitboxGroup);
-			}
+			FighterPawnRef->GetHitboxManager()->ActivateHitboxes(Cmd.HitboxGroup);
 			break;
 		}
 
@@ -108,23 +101,16 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd)
                 }
 			break;
 		}
-			
-		case EFrameCommandType::AttackNotify:
-		{
-			bAttackNotify = true;
-			break;
-		}
 
 		case EFrameCommandType::SetVelocity:
 		{
-			const float Direction = FighterPawnRef->GetFacingDirection();
-			FighterPawnRef->MovementComponent->SetVelocity(FVector(Cmd.VectorParam.X * Direction, 0.f, Cmd.VectorParam.Y));
+			//figure out later
 			break;
 		}
 
 		case EFrameCommandType::StopVelocity:
 		{
-			FighterPawnRef->MovementComponent->SetVelocity(FVector::ZeroVector);
+			//figure out later
 			break;
 		}
 

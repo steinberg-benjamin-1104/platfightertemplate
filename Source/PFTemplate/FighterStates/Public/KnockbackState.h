@@ -27,15 +27,14 @@ private:
 	void InitKnockback(float h, float d, float KBG, float BKB, float a, float x);
 	FVector CalcReflect(const FVector& InVel, const FVector& Normal);
 	
-	int Duration;
+	int32 Duration;
 	bool bTumble = false;
 	bool bSliding = false;
-	float weight = 100.f;
-	float gravity = 98.f;
-	static constexpr float FixedFrameTime = 1.0f / 60.0f;
+	FIXED_32 weight = 100.f;
+	FIXED_32 gravity = 98.f;
 	bool IsMeteor() {return (LaunchAngle >= 225.f && LaunchAngle <= 315.f) || (LaunchAngle <= -45.f && LaunchAngle >= -135.f);}
 	
-	float LaunchSpeed;
+	FIXED_32 LaunchSpeed;
 	float LaunchAngle;
 	FHitResult DoCollisionCheck(FVector &InVelocity);
 

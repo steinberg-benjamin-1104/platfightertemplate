@@ -6,13 +6,12 @@ UENUM(BlueprintType)
 enum class EFrameCommandType : uint8
 {
 	None UMETA(DisplayName = "None"),
-	SetCurrentAction UMETA(DisplayName = "SetCurrentAction"),
+	SetCurrentAnimation UMETA(DisplayName = "SetCurrentAnimation"),
 	TryChangeState UMETA(DisplayName = "TryChangeState"),
 	SpawnHitboxes UMETA(DisplayName = "Spawn Hitbox"),
 	ClearHitboxes UMETA(DisplayName = "Clear Hitboxes"),
 	PlaySound UMETA(DisplayName = "Play Sound"),
 	PlayVFX UMETA(DisplayName = "Trigger VFX"),
-	AttackNotify UMETA(DisplayName = "AttackNotify"),
 	SetVelocity UMETA(DisplayName = "Set Velocity"),
 	StopVelocity UMETA(DisplayName = "Stop Velocity"),
 	ToggleHurtboxI UMETA(DisplayName = "Toggle Hurtbox Invulnerability"),

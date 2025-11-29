@@ -3,31 +3,37 @@
 #include "FighterMovementComponent.h"
 #include "FrameScriptRunner.h"
 
-void UAirAttackState::Tick()
+bool UAirAttackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	// Transition to Falling when script finishes
 	if (FighterPawnRef->FrameScriptRunner->IsFinished())
 	{
-		FighterPawnRef->SetCurrentAction("Falling", 5);
-		StateMachine->TryChangeState("Falling");
-		return;
+		FighterPawnRef->SetCurrentAnimation("Falling", 5);
+		StateMachine->TryChangeState("Falling", Input);
+		return true;
 	}
-	
-	// Check for landing (transition to Idle)
+	return false;
+}
+
+
+bool UAirAttackState::HandlePhysics(FFighterInput& Input)
+{
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Grounded)
 	{
-		FighterPawnRef->SetCurrentAction("Landing");
-		StateMachine->TryChangeState("Idle");
+		FighterPawnRef->SetCurrentAnimation("Landing");
+		StateMachine->TryChangeState("Idle", Input);
 		FighterPawnRef->GetHitboxManager()->DeactivateHitboxes(true);
-		return;
+		return true;
 	}
+	return false;
+}
 
-	// Fast-fall check
-	if (!MoveComp->bIsFastFalling && FighterPawnRef->GetStickTracker()->WasDownJustPressedThisFrame() && MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
+bool UAirAttackState::HandleStickInput(FFighterInput& Input)
+{
+	if (!MoveComp->bIsFastFalling && Input.Stick.bDownThisFrame)
 	{
 		MoveComp->bIsFastFalling = true;
 	}
-
-	const float StickX = FighterPawnRef->GetPlayerStickInput().ToFloat().X;
-	MoveComp->ApplyAirDrift(StickX);
+	
+	MoveComp->ApplyAirDrift(Input.Stick.Current.X);
+	return false;
 }

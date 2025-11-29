@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "EFrameCommandType.h"
 #include "HitboxData.h"
+#include "SafeMath.h"
 #include "FrameCommand.generated.h"
 
 USTRUCT(BlueprintType)
@@ -14,7 +15,7 @@ struct FFrameCommand
 	EFrameCommandType Command = EFrameCommandType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FHitboxGroup HitboxCollection;
+	FHitboxGroup HitboxGroup;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 FrameExecution = -1;
@@ -24,9 +25,8 @@ struct FFrameCommand
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 IntParam = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D VectorParam = { 0.f, 0.f };
+	
+	FFixedVector2D VectorParam = FFixedVector2D();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName NameParam = "none";

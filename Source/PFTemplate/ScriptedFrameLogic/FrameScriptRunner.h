@@ -16,22 +16,20 @@ class PFTEMPLATE_API UFrameScriptRunnerComponent : public UActorComponent
 
 public:
 	void Initialize(AFighterPawn* pawn) {FighterPawnRef = pawn;}
-	void LoadScript(const FAnimation& NewAnimation, int inDuration);
-	void TickScript();
+	void LoadScript(const TArray<FFrameCommand>& Commands, int inDuration, bool bNewLoop);
+	void TickScript(FFighterInput& Input);
 	bool IsFinished() const;
-	bool AttackNotify() const {return bAttackNotify;}
-	void ResetAttackNotify() {bAttackNotify = false;}
 
 private:
-	FAnimation CurrentAction; //dup
+	UPROPERTY() TArray<FFrameCommand> Commands;
 	UPROPERTY() AFighterPawn* FighterPawnRef;
 	int32 Duration = 0;
 	int32 CurrentFrame = 0;
 	
 	int32 CommandIndex = 0;
-
-	bool bAttackNotify = false;
+	
 	bool bIsFinished = false;
+	bool bLoop = false;
 
-	void ExecuteCommand(const FFrameCommand& Cmd);
+	void ExecuteCommand(const FFrameCommand& Cmd, FFighterInput& Input);
 };

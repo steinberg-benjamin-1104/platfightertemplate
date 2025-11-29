@@ -33,12 +33,12 @@ public:
 	AFighterPawn();
 
 	//simulated tick phases
-	void InputPhase(int CurrentFrame);
-	void UpdateState();
-	void UpdateAnimation();
-	void CollisionPhase();
+	void PreCollisionPhase(int CurrentFrame);
+	void UpdateAnimation(FFighterInput& Input);
+	void DetectCollisions();
 	void ProcessCollisions();
 	void ShieldPhase();
+	void PostCollisionPhase();
 	void FighterDebug();
 
 	UFUNCTION(BlueprintPure, Category = "Component Getters")

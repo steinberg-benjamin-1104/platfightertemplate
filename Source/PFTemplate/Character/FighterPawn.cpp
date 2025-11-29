@@ -75,21 +75,18 @@ void AFighterPawn::PossessedBy(AController* NewController)
 
 #pragma region BattleManager
 
-void AFighterPawn::InputPhase(int CurrentFrame)
+void AFighterPawn::PreCollisionPhase(int CurrentFrame)
 {
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
-}
-
-void AFighterPawn::UpdateState()
-{
-	
-}
-
-void AFighterPawn::UpdateAnimation()
-{
 	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
+	UpdateAnimation(NewInput);
+	DetectCollisions();
+}
+
+void AFighterPawn::UpdateAnimation(FFighterInput &Input)
+{
 	if (!CharacterMesh || !FighterAnimInstance || bStopAnimUpdates) return;
 	
 	FighterAnimInstance->AdvanceFrame();
@@ -108,13 +105,19 @@ void AFighterPawn::UpdateAnimation()
 		}
 	}
 	
-	FrameScriptRunner->TickScript();
+	FrameScriptRunner->TickScript(Input);
 }
 
-void AFighterPawn::CollisionPhase()
+void AFighterPawn::DetectCollisions()
 {
 	if (HitboxManager) HitboxManager->ScanActiveHitboxes();
 }
+
+void AFighterPawn::PostCollisionPhase()
+{
+	ShieldPhase();
+}
+
 
 void AFighterPawn::ProcessCollisions()
 {
@@ -196,7 +199,7 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni, NumFrames);
+	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
 
 	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 
@@ -205,14 +208,14 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 
 bool AFighterPawn::SetCurrentAnimation(const FAnimation* NewAni, int BlendTime)
 {
-	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!NewAni->AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
 
-	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
-	CurrentAnimation = NewAni;
+	const int32 NumFrames = NewAni->AnimSequence->GetNumberOfSampledKeys();
+	CurrentAnimation = *NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni, NumFrames);
+	FrameScriptRunner->LoadScript(NewAni->Commands, NumFrames, NewAni->bIsLoop);
 
-	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
+	FighterAnimInstance->SetAnimationSequence(NewAni->AnimSequence, NewAni->bIsLoop, NumFrames, BlendTime);
 
 	return true;
 }

@@ -10,18 +10,13 @@ ABattleManager::ABattleManager()
 void ABattleManager::Tick(float DeltaTime)
 {
 	if (!bCanTick) return;
-
-	for (AFighterPawn* F : Fighters) F->InputPhase(BattleFrame);
-
-	for (AFighterPawn* F : Fighters) F->UpdateState();
 	
-	for (AFighterPawn* F : Fighters) F->UpdateAnimation();
 	
-	for (AFighterPawn* F : Fighters) F->CollisionPhase();
+	for (AFighterPawn* F : Fighters) F->PreCollisionPhase(BattleFrame);
 
 	for (AFighterPawn* F : Fighters) F->ProcessCollisions();
 
-	for (AFighterPawn* F : Fighters) F->ShieldPhase();
+	for (AFighterPawn* F : Fighters) F->PostCollisionPhase();
 
 	for (AFighterPawn* F : Fighters) F->FighterDebug();
 
