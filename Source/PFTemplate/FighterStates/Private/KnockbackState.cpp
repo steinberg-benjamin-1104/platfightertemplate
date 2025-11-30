@@ -40,13 +40,17 @@ void UKnockbackState::OnEnter()
 	FighterPawnRef->SetCurrentAnimation("Knockback", Duration);
 }
 
-void UKnockbackState::Tick()
+bool UKnockbackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (StateMachine->FramesInState == Duration)
 	{
-		StateMachine->TryChangeState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling");
-		return;
+		StateMachine->TryChangeState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling", Input);
+		return true;
 	}
+}
+
+bool UKnockbackState::HandlePhysics(FFighterInput& Input)
+{
 	FVector Velocity;
 	CalcKBPosUpdate(Velocity);
 	const FVector SavedVelocity = Velocity;
@@ -97,6 +101,7 @@ void UKnockbackState::Tick()
 	}
 
 	CompleteKBPosUpdate(Velocity);
+	return false;
 }
 
 void UKnockbackState::CalcKBPosUpdate(FVector &InVelocity)
