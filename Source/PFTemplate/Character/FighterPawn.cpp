@@ -91,11 +91,12 @@ void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 	
 	FighterAnimInstance->AdvanceFrame();
 	
-	CharacterMesh->TickPose(1.f/60.f, true);
+	CharacterMesh->TickPose(FixedToFloat(FixedDt), true);
 	CharacterMesh->RefreshBoneTransforms();
-	CharacterMesh->FinalizeBoneTransform();
-	CharacterMesh->ConditionalUpdateComponentToWorld();
+	CharacterMesh->FinalizeBoneTransform(); 
+	// Update attached weapons/cosmetics only on the render frame
 	CharacterMesh->UpdateChildTransforms(EUpdateTransformFlags::None, ETeleportType::None);
+	CharacterMesh->UpdateComponentToWorld();
 	
 	for (auto& Pair : HurtboxMap)
 	{
@@ -316,12 +317,9 @@ void AFighterPawn::HandleParry()
 
 #pragma region Mesh
 
-FVector AFighterPawn::GetBoneLocation(FName BoneName) const
+FFixedVector2D AFighterPawn::GetBoneLocation(FName BoneName) const
 {
-	if (!CharacterMesh) return FVector::ZeroVector;
-
-	const FVector Loc = CharacterMesh->GetSocketLocation(BoneName);
-	return FVector(Loc.X, 0.0f, Loc.Z) - CharacterMesh->GetRelativeLocation();
+	return VectorToFixed2D(CharacterMesh->GetSocketLocation(BoneName)) - VectorToFixed2D(CharacterMesh->GetRelativeLocation());
 }
 
 FVector AFighterPawn::GetBoneVector(FName BoneName) const

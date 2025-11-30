@@ -9,14 +9,16 @@ void UKnockbackState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCom
 	gravity = InMoveComp->Gravity;
 }
 
-void UKnockbackState::InitKnockback(float h, float d, float KBG, float BKB, float a, float x)
+void UKnockbackState::InitKnockback(int32 h, int32 d, FIXED_32 KBG, int32 BKB, FIXED_32 a, int32 x)
 {
-	const float KnockbackValue = (((h/10 + (h * d/20)) * (200.f / (weight + 100.f) * 1.4f) + 18.f) * KBG) + BKB;
+	const FIXED_32 KnockbackValue = (((h/10 + (h * d/20)) * (FIXED_32(200.f)
+									/ (weight + FIXED_32(100.f)) * FIXED_32(1.4f))
+									+ FIXED_32(18.f)) * KBG) + BKB;
 
 	LaunchSpeed = (KnockbackValue * 0.3);
-	if (x < 0) LaunchAngle = 180.f - a;
+	if (x < 0) LaunchAngle = FIXED_32(180.f) - a;
 	else LaunchAngle = a;
-	Duration = FMath::Floor(KnockbackValue * 0.4);
+	Duration = FixedFloor(KnockbackValue * FIXED_32(0.4f));
 	CheckTumble();
 }
 
@@ -29,13 +31,13 @@ void UKnockbackState::OnEnter()
 	InitKnockback(
 		FighterPawnRef->Health/10,
 		Dam.Damage/10,
-		Dam.KnockbackGrowth,
+		Dam.KnockbackGrowth.ToFixed(),
 		Dam.BaseKnockback,
-		Dam.Angle,
-		FighterPawnRef->GetFacingDirection() * -1.f
+		Dam.Angle.ToFixed(),
+		FighterPawnRef->GetFacingDirection() * -1
 		);
 
-	FighterPawnRef->SetCurrentAction("Knockback", Duration);
+	FighterPawnRef->SetCurrentAnimation("Knockback", Duration);
 }
 
 void UKnockbackState::Tick()

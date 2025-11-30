@@ -28,7 +28,11 @@ struct FFixedVector2D
     FIXED_32 Cross(const FFixedVector2D& o) const { return X * o.Z - Z * o.X; }
     FIXED_32 LengthSquared() const { return Dot(*this); }
     FIXED_32 Length() const { return LengthSquared().Sqrt(); }
-    FFixedVector2D GetSafeNormal() const;
+    FFixedVector2D GetSafeNormal() const
+    {
+        FIXED_32 len = Length();
+        return len.v == 0 ? FFixedVector2D{} : *this / len;
+    }
     
     friend uint32 GetTypeHash(const FFixedVector2D& V)
     {
@@ -43,14 +47,43 @@ struct FFixedVector2D
     }
 };
 
+USTRUCT(BlueprintType)
+struct FVec2TV
+{
+    GENERATED_BODY()
+
+    // These are what the data table will expose
+    UPROPERTY(EditAnywhere)
+    float X = 0.f;
+
+    UPROPERTY(EditAnywhere)
+    float Z = 0.f;
+
+    // Convert to your fixed vector
+    FFixedVector2D ToFixed() const
+    {
+        return FFixedVector2D(X, Z);
+    }
+};
+
 FORCEINLINE FVector Fixed2DToVector(const FFixedVector2D& V)
 {
     return FVector(FixedToFloat(V.X), 0.f, FixedToFloat(V.Z));
 }
 
+FORCEINLINE FVector2D Fixed2DToVector2D(const FFixedVector2D& V)
+{
+    return FVector2D(FixedToFloat(V.X), FixedToFloat(V.Z));
+}
+
 FORCEINLINE FFixedVector2D VectorToFixed2D(const FVector& V)
 {
     return FFixedVector2D(FloatToFixed(V.X), FloatToFixed(V.Z));
+}
+
+FORCEINLINE FFixedVector2D Vector2DToFixed2D(const FVector2D& V)
+{
+    return FFixedVector2D(FloatToFixed(V.X), FloatToFixed(V.Y));
 }
 
 FORCEINLINE FFixedVector2D operator*(FIXED_32 s, const FFixedVector2D& v)

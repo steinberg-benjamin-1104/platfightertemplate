@@ -3,11 +3,8 @@
 #include <stdint.h>
 
 /*  Q32.32 64-bit fixed point  */
-USTRUCT(BlueprintType)
 struct FIXED_32
 {
-    GENERATED_BODY()
-
     int64_t v = 0;  // raw 32.32 value
 
     // construction / conversion
@@ -75,6 +72,18 @@ private:
     static FIXED_32 poly5(FIXED_32 x2);
 };
 
+USTRUCT(BlueprintType)
+struct F32TV
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    float Value = 0.f;
+
+    FIXED_32 ToFixed() const { return FIXED_32(Value); }
+};
+
+
 // safe int32 multipliers
 FORCEINLINE FIXED_32 operator*(const FIXED_32& lhs, int32 rhs)
 {
@@ -102,4 +111,29 @@ FORCEINLINE FIXED_32 FixedMax(FIXED_32 a, FIXED_32 b) { return (a > b) ? a : b; 
 FORCEINLINE FIXED_32 FixedClamp(FIXED_32 v, FIXED_32 min, FIXED_32 max)
 {
     return FixedMax(min, FixedMin(max, v));
+}
+
+FORCEINLINE int32 FixedFloor(const FIXED_32& x)
+{
+    const int64_t raw = x.v;
+    const int64_t whole = raw >> 32;
+
+    if (raw >= 0)
+    {
+        // Positive numbers: shifting already floors.
+        return (int32)whole;
+    }
+    else
+    {
+        // If exactly an integer, just return it.
+        if ((raw & 0xFFFFFFFFLL) == 0)
+        {
+            return (int32)whole;
+        }
+        else
+        {
+            // Negative fractional → floor goes one lower.
+            return (int32)(whole - 1);
+        }
+    }
 }

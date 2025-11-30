@@ -28,16 +28,16 @@ void AHurtbox2D::UpdateLocation()
 	if (!FighterPawnRef || BoneName.IsNone())
 		return;
 	
-	SetActorLocation(FighterPawnRef->GetBoneLocation(BoneName));
+	SetActorLocation(Fixed2DToVector(FighterPawnRef->GetBoneLocation(BoneName)));
 }
 
-void AHurtbox2D::UpdateRotation()
+void AHurtbox2D::UpdateRotation() //need to figure this one out
 {
 	if (!FighterPawnRef || BoneName.IsNone()) return;
 	
-	const FVector BoneLoc = FighterPawnRef->GetBoneLocation(BoneName);
-	const FVector RightVec = FighterPawnRef->GetBoneVector(BoneName);
-	const FVector AddedVectors = BoneLoc - RightVec;
+	const FVector BoneLoc = Fixed2DToVector(FighterPawnRef->GetBoneLocation(BoneName));
+	const FVector VecDir = FighterPawnRef->GetBoneVector(BoneName);
+	const FVector AddedVectors = BoneLoc - VecDir;
 	const float Dist = FVector::Dist({BoneLoc.X, 0.f, BoneLoc.Z}, {AddedVectors.X, 0.f, AddedVectors.Z});
 
 	float FinalRot = 0.f;

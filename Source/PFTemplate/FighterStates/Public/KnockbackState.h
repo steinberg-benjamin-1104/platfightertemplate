@@ -24,7 +24,7 @@ protected:
 	void CompleteKBPosUpdate(FVector &InVelocity);
 
 private:
-	void InitKnockback(float h, float d, float KBG, float BKB, float a, float x);
+	void InitKnockback(int32 health, int32 damage, FIXED_32 KBG, int32 BKB, FIXED_32 Angle, int32 xDir);
 	FVector CalcReflect(const FVector& InVel, const FVector& Normal);
 	
 	int32 Duration;
@@ -35,7 +35,7 @@ private:
 	bool IsMeteor() {return (LaunchAngle >= 225.f && LaunchAngle <= 315.f) || (LaunchAngle <= -45.f && LaunchAngle >= -135.f);}
 	
 	FIXED_32 LaunchSpeed;
-	float LaunchAngle;
+	FIXED_32 LaunchAngle;
 	FHitResult DoCollisionCheck(FVector &InVelocity);
 
 	void CheckTumble() {bTumble = (Duration - StateMachine->FramesInState) > 30;}

@@ -25,8 +25,9 @@ struct FFrameCommand
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 IntParam = 0;
-	
-	FFixedVector2D VectorParam = FFixedVector2D();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVec2TV VectorParam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName NameParam = "none";

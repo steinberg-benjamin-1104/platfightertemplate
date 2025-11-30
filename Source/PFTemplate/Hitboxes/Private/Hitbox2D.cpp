@@ -3,6 +3,7 @@
 #include "Hurtbox2D.h"
 #include "Procedural2DCapsuleComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "SafeMath.h"
 
 AHitbox2D::AHitbox2D()
 {
@@ -40,7 +41,7 @@ void AHitbox2D::UpdateTransform()
     if (!FighterPawnRef) return;
 
     ApplyMaterialForType();
-    SetCapsuleSize(HitboxDefinition.Transform.Size);
+    SetCapsuleSize(Fixed2DToVector2D(HitboxDefinition.Transform.Size.ToFixed()));
     UpdateLocation();
     UpdateRotation();
 }
@@ -49,24 +50,24 @@ void AHitbox2D::UpdateLocation()
 {
     if (!FighterPawnRef) return;
     
-    const FVector BoneWorldLocation = FighterPawnRef->GetBoneLocation(HitboxDefinition.Transform.BoneName);
-    const FVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone;
+    const FFixedVector2D BoneWorldLocation = FighterPawnRef->GetBoneLocation(HitboxDefinition.Transform.BoneName);
+    const FFixedVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone.ToFixed();
     
-    const FVector Offset3D(Offset2D.X * FighterPawnRef->GetFacingDirection(), 0.f, Offset2D.Y);
+    const FFixedVector2D Offset3D(Offset2D.X * FighterPawnRef->GetFacingDirection(), Offset2D.Z);
 
-    const FVector FinalLocation = BoneWorldLocation + Offset3D;
+    const FVector FinalLocation = Fixed2DToVector(BoneWorldLocation + Offset3D);
     SetActorLocation(FinalLocation);
 }
 
 void AHitbox2D::UpdateRotation()
 {
-    float Pitch = HitboxDefinition.Transform.Rotation;
+    FIXED_32 Pitch = HitboxDefinition.Transform.Rotation.ToFixed();
     if (!FighterPawnRef->IsFacingRight())
     {
-        Pitch = 180.f - Pitch;
+        Pitch = FIXED_32(180.f) - Pitch;
     }
 
-    SetActorRotation(FRotator(Pitch, 0.f, 0.f));
+    SetActorRotation(FRotator(FixedToFloat(Pitch), 0.f, 0.f));
 }
 
 void AHitbox2D::ApplyMaterialForType()

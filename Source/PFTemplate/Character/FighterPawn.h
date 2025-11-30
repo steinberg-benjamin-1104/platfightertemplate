@@ -145,7 +145,7 @@ public:
 	virtual FVector CenterLocation() override {return Fixed2DToVector(MovementComponent->GetCenter());}
 
 	UFUNCTION(BlueprintPure, Category = "Mesh")
-	FVector GetBoneLocation(FName BoneName) const;
+	FFixedVector2D GetBoneLocation(FName BoneName) const;
 
 	UFUNCTION(BlueprintPure, Category = "Mesh")
 	FVector GetBoneVector(FName BoneName) const;

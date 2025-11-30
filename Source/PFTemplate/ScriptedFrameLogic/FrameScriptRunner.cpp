@@ -95,7 +95,7 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFigh
                      	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
                      		FighterPawnRef->GetWorld(),
                      		Niagara,
-                     		FighterPawnRef->GetActorLocation()
+                     		Fixed2DToVector(FighterPawnRef->GetFixedLoc())
                      	);
                     }
                 }
