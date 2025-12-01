@@ -22,6 +22,12 @@ struct FFixedVector2D
     FFixedVector2D operator-(const FFixedVector2D& o) const { return {X - o.X, Z - o.Z}; }
     FFixedVector2D operator*(FIXED_32 s) const { return {X * s, Z * s}; }
     FFixedVector2D operator/(FIXED_32 s) const { return {X / s, Z / s}; }
+    FFixedVector2D& operator*=(FIXED_32 s)
+    {
+        X *= s;
+        Z *= s;
+        return *this;
+    }
 
     //utilities
     FIXED_32 Dot  (const FFixedVector2D& o) const { return X * o.X + Z * o.Z; }

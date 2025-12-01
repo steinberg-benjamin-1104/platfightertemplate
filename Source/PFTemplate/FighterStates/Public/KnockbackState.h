@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FighterState.h"
 #include "FighterStateMachine.h"
+#include "SafeMath.h"
 
 #include "KnockbackState.generated.h"
 
@@ -21,24 +22,25 @@ public:
 	virtual FString GetStateName() override {return "KnockbackState";}
 
 protected:
-	void CalcKBPosUpdate(FVector &InVelocity);
-	void CompleteKBPosUpdate(FVector &InVelocity);
+	void CalcKBPosUpdate(FFixedVector2D &InVelocity);
+	void CompleteKBPosUpdate(FFixedVector2D &InVelocity);
 
 private:
 	void InitKnockback(int32 health, int32 damage, FIXED_32 KBG, int32 BKB, FIXED_32 Angle, int32 xDir);
-	FVector CalcReflect(const FVector& InVel, const FVector& Normal);
+	FFixedVector2D CalcReflect(const FFixedVector2D& InVel, const FFixedVector2D& Normal);
 	
 	int32 Duration;
 	bool bTumble = false;
 	bool bSliding = false;
 	FIXED_32 weight = 100.f;
 	FIXED_32 gravity = 98.f;
-	bool IsMeteor() {return (LaunchAngle >= 225.f && LaunchAngle <= 315.f) || (LaunchAngle <= -45.f && LaunchAngle >= -135.f);}
+	bool IsMeteor() {return (LaunchAngle >= FIXED_32(225.f) && LaunchAngle <= FIXED_32(315.f)) ||
+							(LaunchAngle <= FIXED_32(-45.f) && LaunchAngle >= FIXED_32(-135.f));}
 	
 	FIXED_32 LaunchSpeed;
 	FIXED_32 LaunchAngle;
-	FHitResult DoCollisionCheck(FVector &InVelocity);
+	FFixedHitResult DoCollisionCheck(FFixedVector2D &InVelocity);
 
 	void CheckTumble() {bTumble = (Duration - StateMachine->FramesInState) > 30;}
-	void ShowDebugKB(bool bDebug, const FVector &InVelocity);
+	void ShowDebugKB(bool bDebug, const FFixedVector2D &InVelocity);
 };

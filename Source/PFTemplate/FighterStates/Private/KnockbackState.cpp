@@ -1,6 +1,8 @@
 #include "KnockbackState.h"
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
+#include "FixedCollision.h"
+#include "SafeMath.h"
 
 void UKnockbackState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine)
 {
@@ -15,14 +17,14 @@ void UKnockbackState::InitKnockback(int32 h, int32 d, FIXED_32 KBG, int32 BKB, F
 									/ (weight + FIXED_32(100.f)) * FIXED_32(1.4f))
 									+ FIXED_32(18.f)) * KBG) + BKB;
 
-	LaunchSpeed = (KnockbackValue * 0.3);
+	LaunchSpeed = KnockbackValue * FIXED_32(0.3f);
 	if (x < 0) LaunchAngle = FIXED_32(180.f) - a;
 	else LaunchAngle = a;
 	Duration = FixedFloor(KnockbackValue * FIXED_32(0.4f));
 	CheckTumble();
 }
 
-void UKnockbackState::OnEnter()
+void UKnockbackState::OnEnter(FFighterInput& Input)
 {
 	MoveComp->bDoCollisionChecks = false;
 	bSliding = false;
@@ -47,37 +49,34 @@ bool UKnockbackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 		StateMachine->TryChangeState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling", Input);
 		return true;
 	}
+	return false;
 }
 
 bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 {
-	FVector Velocity;
+	FFixedVector2D Velocity;
 	CalcKBPosUpdate(Velocity);
-	const FVector SavedVelocity = Velocity;
+	const FFixedVector2D SavedVelocity = Velocity;
 
-	FHitResult HitResult = DoCollisionCheck(Velocity);
+	FFixedHitResult HitResult = DoCollisionCheck(Velocity);
 	const bool bHit       = HitResult.bBlockingHit;
-	const bool bGroundHit = HitResult.Normal.Z >= 0.7f;
+	const bool bGroundHit = HitResult.Normal.Z >= FIXED_32(0.7f);
 	const bool bIsMeteor  = IsMeteor();
 	
 	// Wall Bounce
 	if (bTumble && bHit && !bGroundHit)
 	{
-		LaunchSpeed *= 0.9f;
-		Velocity *= 0.9f;
+		LaunchSpeed *= FIXED_32(0.9f);
+		Velocity *= FIXED_32(0.9f);
 		Velocity = CalcReflect(SavedVelocity, HitResult.Normal);
 	}
 
 	// Ground Bounce
 	else if (bTumble && bHit && bGroundHit && bIsMeteor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Before Bounce | Velocity: %s"), *SavedVelocity.ToString());
-		
 		Velocity = CalcReflect(SavedVelocity, HitResult.Normal);
-		LaunchSpeed *= 0.4f;
-		Velocity *= 0.4f;
-
-		UE_LOG(LogTemp, Warning, TEXT("After Bounce  | Velocity: %s"), *Velocity.ToString());
+		LaunchSpeed *= FIXED_32(0.4f);
+		Velocity *= FIXED_32(0.4f);
 	}
 	
 	// Begin Slide
@@ -85,55 +84,57 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("EnterSlide"));
 		MoveComp->SetMovementMode(EFighterMovementMode::Grounded);
-		LaunchAngle = FMath::RadiansToDegrees(FMath::Atan2(Velocity.Z, Velocity.X));
-		bSliding = true;
-		FighterPawnRef->SetCurrentAction("Sliding");
+		LaunchAngle = FixedRadiansToDegrees(FixedAtan2(Velocity.Z, Velocity.X)
+);
 
-		Velocity *= 0.95f;
-		LaunchSpeed *= 0.95f;
+		bSliding = true;
+		FighterPawnRef->SetCurrentAnimation("Sliding");
+
+		Velocity *= FIXED_32(0.95f);
+		LaunchSpeed *= FIXED_32(0.95f);
 	}
 
 	// Slide Physics
 	if (bSliding)
 	{
 		Velocity.X *= MoveComp->GroundFriction;
-		Velocity.X = FMath::Clamp(Velocity.X, -498.f, 498.f); // 8.3 * 60
+		Velocity.X = FixedClamp(Velocity.X, FIXED_32(-498.f), FIXED_32(498.f)); // 8.3 * 60
 	}
 
 	CompleteKBPosUpdate(Velocity);
 	return false;
 }
 
-void UKnockbackState::CalcKBPosUpdate(FVector &InVelocity)
+void UKnockbackState::CalcKBPosUpdate(FFixedVector2D& InVelocity)
 {
-	if (LaunchSpeed <= 0.f) LaunchSpeed = 0;
+	if (LaunchSpeed <= FIXED_32(0)) 
+		LaunchSpeed = FIXED_32(0);
 	
-	const float Radians = FMath::DegreesToRadians(LaunchAngle);
-	FVector PosUpdate = FVector
-	(
-		FMath::Cos(Radians) * LaunchSpeed,
-		0.f,
-		FMath::Sin(Radians) * LaunchSpeed
+	FIXED_32 Radians = FixedDegreesToRadians(LaunchAngle);
+	
+	FFixedVector2D PosUpdate(
+		Radians.Cos() * LaunchSpeed,
+		Radians.Sin() * LaunchSpeed
 	);
 	
-	InVelocity = PosUpdate * 60.f; //fixed 60 fps
-	if (InVelocity.Z > MoveComp->TerminalFallVelocity) InVelocity.Z -= gravity * FixedFrameTime;
-	LaunchAngle = FMath::RadiansToDegrees(FMath::Atan2(InVelocity.Z, InVelocity.X));
+	InVelocity = PosUpdate * FIXED_32(60.f);
+	
+	if (InVelocity.Z > MoveComp->TerminalFallVelocity) InVelocity.Z -= gravity * FixedDt;
+	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(InVelocity.Z, InVelocity.X));
 }
 
-FVector UKnockbackState::CalcReflect(const FVector& InVel, const FVector& Normal)
+FFixedVector2D UKnockbackState::CalcReflect(const FFixedVector2D& InVel, const FFixedVector2D& Normal)
 {
-	FVector NewAngle = InVel - 2.f * FVector::DotProduct(InVel, Normal) * Normal;
-	LaunchAngle = FMath::RadiansToDegrees(FMath::Atan2(NewAngle.Z, NewAngle.X));
+	FFixedVector2D NewAngle = InVel - FIXED_32(2.f) * InVel.Dot(Normal) * Normal;
+	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(NewAngle.Z, NewAngle.X));
 	CheckTumble();
 	return NewAngle;
 }
 
-FHitResult UKnockbackState::DoCollisionCheck(FVector &InVelocity)
+FFixedHitResult UKnockbackState::DoCollisionCheck(FFixedVector2D &InVelocity)
 {
-	FHitResult CeilingHit, GroundHit, WallHit;
-
-	// zeroes out velocity in direction of collision check
+	FFixedHitResult CeilingHit, GroundHit, WallHit;
+	
 	bool bWall = MoveComp->PerformWallCollisionCheck(InVelocity, WallHit);
 	bool bGround = MoveComp->PerformGroundCollisionCheck(InVelocity, GroundHit, bWall);
 	bool bCeiling = MoveComp->PerformCeilingCollisionCheck(InVelocity, CeilingHit, bWall);
@@ -141,10 +142,10 @@ FHitResult UKnockbackState::DoCollisionCheck(FVector &InVelocity)
 	if (bGround) return GroundHit;
 	if (bWall) return WallHit;
 	if (bCeiling) return CeilingHit;
-	return FHitResult();
+	return FFixedHitResult();
 }
 
-void UKnockbackState::CompleteKBPosUpdate(FVector& InVelocity)
+void UKnockbackState::CompleteKBPosUpdate(FFixedVector2D& InVelocity)
 {
 	MoveComp->SetVelocity(InVelocity);
 	LaunchSpeed -= 0.51f;
@@ -152,10 +153,10 @@ void UKnockbackState::CompleteKBPosUpdate(FVector& InVelocity)
 }
 
 
-void UKnockbackState::ShowDebugKB(bool bDebug, const FVector &InVelocity)
+void UKnockbackState::ShowDebugKB(bool bDebug, const FFixedVector2D &InVelocity)
 {
 	if (!bDebug) return;
-	FVector NewPos = (InVelocity * FixedFrameTime) + FighterPawnRef->GetActorLocation();
+	FVector NewPos = Fixed2DToVector((InVelocity * FixedDt) + FighterPawnRef->GetFixedLoc());
 	DrawDebugLine(GetWorld(), FighterPawnRef->GetActorLocation(), NewPos, FColor::Cyan, false, 1.f, 0, 2.f);
 }
 
@@ -163,10 +164,10 @@ void UKnockbackState::OnExit()
 {
 	if (!MoveComp->IsGrounded())
 	{
-		MoveComp->SetVelocity(FVector(0.f, 0.f, MoveComp->GetVelocity().Z));
+		MoveComp->HaltHorizontalVelocity();
 		MoveComp->SetMovementMode(EFighterMovementMode::Falling);
-		FighterPawnRef->SetCurrentAction(bTumble ? "Tumble" : "Falling", 8);
+		FighterPawnRef->SetCurrentAnimation(bTumble ? "Tumble" : "Falling", 8);
 	}
-	else FighterPawnRef->SetCurrentAction("Idle", 8);
+	else FighterPawnRef->SetCurrentAnimation("Idle", 8);
 	MoveComp->bDoCollisionChecks = true;
 }

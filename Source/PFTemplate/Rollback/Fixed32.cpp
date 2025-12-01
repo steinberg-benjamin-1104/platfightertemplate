@@ -1,9 +1,6 @@
 #include "FixedVector2D.h"
 #include "Logging/LogMacros.h"
 
-constexpr int64_t ONE  = 1LL << 32;
-constexpr int64_t HALF = 1LL << 31;
-
 FIXED_32 FIXED_32::FromUnits(int32_t whole, uint32_t frac)
 {
 	int64_t w = (int64_t)whole * ONE;

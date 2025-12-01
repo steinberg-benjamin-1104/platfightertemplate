@@ -83,6 +83,14 @@ struct F32TV
     FIXED_32 ToFixed() const { return FIXED_32(Value); }
 };
 
+constexpr int64_t ONE  = 1LL << 32;
+constexpr int64_t HALF = 1LL << 31;
+static const FIXED_32 pi = FIXED_32(3.14159265358979323846f);
+static const FIXED_32 half_pi    = FIXED_32(1.57079632679489661923f);
+static const FIXED_32 atan_p1   = FIXED_32(0.9998660f);
+static const FIXED_32 atan_p2    = FIXED_32(-0.3302995f);
+static const FIXED_32 RAD_TO_DEG = FIXED_32(57.29577951308232f);
+static const FIXED_32 DEG_TO_RAD = FIXED_32(0.017453292519943295f);
 
 // safe int32 multipliers
 FORCEINLINE FIXED_32 operator*(const FIXED_32& lhs, int32 rhs)
@@ -109,6 +117,7 @@ FORCEINLINE FIXED_32 FloatToFixed(float fl)   { return FIXED_32(fl); }
 FORCEINLINE FIXED_32 FixedMin(FIXED_32 a, FIXED_32 b) { return (a < b) ? a : b; }
 FORCEINLINE FIXED_32 FixedMax(FIXED_32 a, FIXED_32 b) { return (a > b) ? a : b; }
 FORCEINLINE FIXED_32 FixedClamp(FIXED_32 v, FIXED_32 min, FIXED_32 max)
+
 {
     return FixedMax(min, FixedMin(max, v));
 }
@@ -136,4 +145,48 @@ FORCEINLINE int32 FixedFloor(const FIXED_32& x)
             return (int32)(whole - 1);
         }
     }
+}
+
+// atan(x) approximation for fixed point
+static FORCEINLINE FIXED_32 FixedAtan(FIXED_32 x)
+{
+    // Polynomial: x * (p1 + p2 * x^2)
+    FIXED_32 x2 = x * x;
+    return x * (atan_p1 + atan_p2 * x2);
+}
+
+static FORCEINLINE FIXED_32 FixedAtan2(FIXED_32 y, FIXED_32 x)
+{
+    if (x.v > 0)
+    {
+        // atan(y/x)
+        return FixedAtan(y / x);
+    }
+    else if (x.v < 0)
+    {
+        if (y.v >= 0)
+        {
+            return FixedAtan(y / x) + PI;
+        }
+        else
+        {
+            return FixedAtan(y / x) - PI;
+        }
+    }
+    else // x == 0
+    {
+        if (y.v > 0)  return HALF_PI;
+        if (y.v < 0)  return -HALF_PI;
+        return FIXED_32(0); // undefined, return 0
+    }
+}
+
+static FORCEINLINE FIXED_32 FixedRadiansToDegrees(FIXED_32 r)
+{
+    return r * RAD_TO_DEG;
+}
+
+FORCEINLINE FIXED_32 FixedDegreesToRadians(FIXED_32 d)
+{
+    return d * DEG_TO_RAD;
 }
