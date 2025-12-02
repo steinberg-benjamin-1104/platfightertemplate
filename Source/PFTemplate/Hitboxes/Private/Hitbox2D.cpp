@@ -61,10 +61,10 @@ void AHitbox2D::UpdateLocation()
 
 void AHitbox2D::UpdateRotation()
 {
-    FIXED_32 Pitch = HitboxDefinition.Transform.Rotation.ToFixed();
+    FFixed_32 Pitch = HitboxDefinition.Transform.Rotation.ToFixed();
     if (!FighterPawnRef->IsFacingRight())
     {
-        Pitch = FIXED_32(180.f) - Pitch;
+        Pitch = FFixed_32(180.f) - Pitch;
     }
 
     SetActorRotation(FRotator(FixedToFloat(Pitch), 0.f, 0.f));

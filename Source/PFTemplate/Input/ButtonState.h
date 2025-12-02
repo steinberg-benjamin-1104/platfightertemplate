@@ -3,29 +3,37 @@
 #include "StickState.h"
 #include "ButtonState.generated.h"
 
-UENUM(BlueprintType)
-enum class EInputButton : uint16
+UENUM()
+enum class EInputButton : uint8
 {
-	None    = 0        UMETA(Hidden),
+	None    = 0      UMETA(Hidden),
 	Attack  = 1 << 0,
 	Special = 1 << 1,
 	Shield  = 1 << 2,
 	Jump    = 1 << 3,
 	Parry   = 1 << 4,
 	Grab    = 1 << 5,
-	Walk    = 1 << 6,
-	Heavy   = 1 << 7,
-	Shorthop= 1 << 8,
-	Fullhop = 1 << 9,
 };
-
 ENUM_CLASS_FLAGS(EInputButton);
+
+UENUM()
+enum class EInputMacros : uint8
+{
+	None     = 0     UMETA(Hidden),
+	Walk     = 1 << 0,
+	Heavy    = 1 << 1,
+	Shorthop = 1 << 2,
+	Fullhop  = 1 << 3,
+};
+ENUM_CLASS_FLAGS(EInputMacros);
 
 USTRUCT()
 struct FButtonState
 {
+	GENERATED_BODY()
 	EInputButton ButtonsPressed = EInputButton::None;
-	EInputButton ButtonsHeld = EInputButton::None;  
+	EInputButton ButtonsHeld = EInputButton::None;
+	EInputMacros MacrosPressed = EInputMacros::None;
 
 	FButtonState ClearPressed() const
 	{

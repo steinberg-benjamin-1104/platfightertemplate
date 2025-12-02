@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "FighterInput.h"
 
 #include "FighterStateMachine.generated.h"
 

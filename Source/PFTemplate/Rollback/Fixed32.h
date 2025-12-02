@@ -1,63 +1,66 @@
 #pragma once
+#ifdef FixedToFloat
+#undef FixedToFloat
+#endif
+
+#ifdef FloatToFixed
+#undef FloatToFixed
+#endif
+
 #include "CoreMinimal.h"
 #include <stdint.h>
 
-/*  Q32.32 64-bit fixed point  */
-struct FIXED_32
+struct FFixed_32
 {
     int64_t v = 0;  // raw 32.32 value
 
     // construction / conversion
-    FIXED_32() = default;
-    explicit FIXED_32(int32_t whole) { v = (int64_t)whole << 32; }
-    FIXED_32(float f) { v = (int64_t)(f * (double)(1ULL << 32)); }
+    FFixed_32() = default;
+    explicit FFixed_32(int32_t whole) { v = (int64_t)whole << 32; }
+    FFixed_32(float f) { v = (int64_t)(f * (double)(1ULL << 32)); }
+    explicit FFixed_32(int64_t Raw) : v(Raw) {}
 
     // factory for raw bits
-    static FIXED_32 FromRaw(int64_t raw) { return FIXED_32(raw); }
+    static FFixed_32 FromRaw(int64_t raw) { return FFixed_32(raw); }
 
-    static FIXED_32 FromUnits(int32_t whole, uint32_t frac);
+    static FFixed_32 FromUnits(int32_t whole, uint32_t frac);
     int32_t GetWhole() const;
     uint32_t GetFrac() const;
 
     // operator overloads
     // addition
-    FIXED_32 operator+(FIXED_32 rhs) const { return FIXED_32(v + rhs.v); }
-    FIXED_32& operator+=(const FIXED_32& rhs) { v += rhs.v; return *this; }
+    FFixed_32 operator+(FFixed_32 rhs) const { return FFixed_32(v + rhs.v); }
+    FFixed_32& operator+=(const FFixed_32& rhs) { v += rhs.v; return *this; }
 
     // subtraction
-    FIXED_32 operator-(FIXED_32 rhs) const { return FIXED_32(v - rhs.v); }
-    FIXED_32& operator-=(const FIXED_32& rhs) { v -= rhs.v; return *this; }
-    FIXED_32 operator-() const { return FIXED_32(-v); }
+    FFixed_32 operator-(FFixed_32 rhs) const { return FFixed_32(v - rhs.v); }
+    FFixed_32& operator-=(const FFixed_32& rhs) { v -= rhs.v; return *this; }
+    FFixed_32 operator-() const { return FFixed_32(-v); }
 
     // multiplication
-    FIXED_32 operator*(FIXED_32 rhs) const;
-    FIXED_32& operator*=(const FIXED_32& rhs) { *this = *this * rhs; return *this; }
+    FFixed_32 operator*(FFixed_32 rhs) const;
+    FFixed_32& operator*=(const FFixed_32& rhs) { *this = *this * rhs; return *this; }
 
     // division
-    FIXED_32 operator/(FIXED_32 rhs) const;
-    FIXED_32& operator/=(const FIXED_32& rhs) { *this = *this / rhs; return *this; }
+    FFixed_32 operator/(FFixed_32 rhs) const;
+    FFixed_32& operator/=(const FFixed_32& rhs) { *this = *this / rhs; return *this; }
 
     // comparison
-    bool operator==(FIXED_32 o) const { return v == o.v; }
-    bool operator!=(FIXED_32 o) const { return v != o.v; }
-    bool operator< (FIXED_32 o) const { return v <  o.v; }
-    bool operator> (FIXED_32 o) const { return v >  o.v; }
-    bool operator<=(FIXED_32 o) const { return v <= o.v; }
-    bool operator>=(FIXED_32 o) const { return v >= o.v; }
+    bool operator==(FFixed_32 o) const { return v == o.v; }
+    bool operator!=(FFixed_32 o) const { return v != o.v; }
+    bool operator< (FFixed_32 o) const { return v <  o.v; }
+    bool operator> (FFixed_32 o) const { return v >  o.v; }
+    bool operator<=(FFixed_32 o) const { return v <= o.v; }
+    bool operator>=(FFixed_32 o) const { return v >= o.v; }
 
-    FIXED_32 Sqrt() const;
-    FIXED_32 Abs() const { return v < 0 ? FIXED_32(-v) : *this; }
+    FFixed_32 Sqrt() const;
+    FFixed_32 Abs() const { return v < 0 ? FFixed_32(-v) : *this; }
     int32 Sign() const { return (v > 0) ? 1 : -1; }
 
-    static constexpr FIXED_32 Pi()        { return FIXED_32(0x3243F6A89LL); }
-    static constexpr FIXED_32 TWO_Pi()    { return FIXED_32(0x6487ED511LL); }
-    static constexpr FIXED_32 HALF_Pi()   { return FIXED_32(0x1921FB544LL); }
-    static constexpr FIXED_32 INV_TWO_Pi(){ return FIXED_32(0x28BE60DCLL); }
+    FFixed_32 Sin() const;
+    FFixed_32 Cos() const;
 
-    FIXED_32 Sin() const;
-    FIXED_32 Cos() const;
-
-    friend uint32 GetTypeHash(FIXED_32 F) { return (uint32)(F.v ^ (F.v >> 32)); }
+    friend uint32 GetTypeHash(FFixed_32 F) { return (uint32)(F.v ^ (F.v >> 32)); }
 
     bool NetSerialize(FArchive& Ar, class UPackageMap*, bool& bOutSuccess)
     {
@@ -67,62 +70,44 @@ struct FIXED_32
     }
 
 private:
-    explicit FIXED_32(int64_t raw) : v(raw) {}
-    FIXED_32 MulHigh(FIXED_32 b) const;
-    static FIXED_32 poly5(FIXED_32 x2);
-};
-
-USTRUCT(BlueprintType)
-struct F32TV
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere)
-    float Value = 0.f;
-
-    FIXED_32 ToFixed() const { return FIXED_32(Value); }
+    FFixed_32 MulHigh(FFixed_32 b) const;
+    static FFixed_32 poly5(FFixed_32 x2);
 };
 
 constexpr int64_t ONE  = 1LL << 32;
 constexpr int64_t HALF = 1LL << 31;
-static const FIXED_32 pi = FIXED_32(3.14159265358979323846f);
-static const FIXED_32 half_pi    = FIXED_32(1.57079632679489661923f);
-static const FIXED_32 atan_p1   = FIXED_32(0.9998660f);
-static const FIXED_32 atan_p2    = FIXED_32(-0.3302995f);
-static const FIXED_32 RAD_TO_DEG = FIXED_32(57.29577951308232f);
-static const FIXED_32 DEG_TO_RAD = FIXED_32(0.017453292519943295f);
+static const FFixed_32 Fixed_Pi = FFixed_32(3.14159265358979323846f);
+static const FFixed_32 half_pi    = FFixed_32(1.57079632679489661923f);
+static const FFixed_32 atan_p1   = FFixed_32(0.9998660f);
+static const FFixed_32 atan_p2    = FFixed_32(-0.3302995f);
+static const FFixed_32 RAD_TO_DEG = FFixed_32(57.29577951308232f);
+static const FFixed_32 DEG_TO_RAD = FFixed_32(0.017453292519943295f);
 
 // safe int32 multipliers
-FORCEINLINE FIXED_32 operator*(const FIXED_32& lhs, int32 rhs)
+FORCEINLINE FFixed_32 operator*(const FFixed_32& lhs, int32 rhs)
 {
-    return FIXED_32::FromRaw(lhs.v * rhs);
+    return FFixed_32::FromRaw(lhs.v * rhs);
 }
-FORCEINLINE FIXED_32 operator*(int32 lhs, const FIXED_32& rhs)
+FORCEINLINE FFixed_32 operator*(int32 lhs, const FFixed_32& rhs)
 {
     return rhs * lhs;
 }
-FORCEINLINE FIXED_32 operator/(const FIXED_32& lhs, int32 rhs)
+FORCEINLINE FFixed_32 operator/(const FFixed_32& lhs, int32 rhs)
 {
-    return FIXED_32::FromRaw(lhs.v / rhs);
+    return FFixed_32::FromRaw(lhs.v / rhs);
 }
 
-FORCEINLINE FIXED_32 operator/(int32 lhs, const FIXED_32& rhs)
-{
-    return FIXED_32::FromRaw((lhs << 32) / rhs.v);
-}
-
-// helpers
-FORCEINLINE float  FixedToFloat(FIXED_32 f)   { return (float)(f.v / 4294967296.0); }
-FORCEINLINE FIXED_32 FloatToFixed(float fl)   { return FIXED_32(fl); }
-FORCEINLINE FIXED_32 FixedMin(FIXED_32 a, FIXED_32 b) { return (a < b) ? a : b; }
-FORCEINLINE FIXED_32 FixedMax(FIXED_32 a, FIXED_32 b) { return (a > b) ? a : b; }
-FORCEINLINE FIXED_32 FixedClamp(FIXED_32 v, FIXED_32 min, FIXED_32 max)
+FORCEINLINE float  FixedToFloat(FFixed_32 f)   { return (float)(f.v / 4294967296.0); }
+FORCEINLINE FFixed_32 FloatToFixed(float fl)   { return FFixed_32(fl); }
+FORCEINLINE FFixed_32 FixedMin(FFixed_32 a, FFixed_32 b) { return (a < b) ? a : b; }
+FORCEINLINE FFixed_32 FixedMax(FFixed_32 a, FFixed_32 b) { return (a > b) ? a : b; }
+FORCEINLINE FFixed_32 FixedClamp(FFixed_32 v, FFixed_32 min, FFixed_32 max)
 
 {
     return FixedMax(min, FixedMin(max, v));
 }
 
-FORCEINLINE int32 FixedFloor(const FIXED_32& x)
+FORCEINLINE int32 FixedFloor(const FFixed_32& x)
 {
     const int64_t raw = x.v;
     const int64_t whole = raw >> 32;
@@ -148,14 +133,14 @@ FORCEINLINE int32 FixedFloor(const FIXED_32& x)
 }
 
 // atan(x) approximation for fixed point
-static FORCEINLINE FIXED_32 FixedAtan(FIXED_32 x)
+static FORCEINLINE FFixed_32 FixedAtan(FFixed_32 x)
 {
     // Polynomial: x * (p1 + p2 * x^2)
-    FIXED_32 x2 = x * x;
+    FFixed_32 x2 = x * x;
     return x * (atan_p1 + atan_p2 * x2);
 }
 
-static FORCEINLINE FIXED_32 FixedAtan2(FIXED_32 y, FIXED_32 x)
+static FORCEINLINE FFixed_32 FixedAtan2(FFixed_32 y, FFixed_32 x)
 {
     if (x.v > 0)
     {
@@ -177,16 +162,16 @@ static FORCEINLINE FIXED_32 FixedAtan2(FIXED_32 y, FIXED_32 x)
     {
         if (y.v > 0)  return HALF_PI;
         if (y.v < 0)  return -HALF_PI;
-        return FIXED_32(0); // undefined, return 0
+        return FFixed_32(0); // undefined, return 0
     }
 }
 
-static FORCEINLINE FIXED_32 FixedRadiansToDegrees(FIXED_32 r)
+static FORCEINLINE FFixed_32 FixedRadiansToDegrees(FFixed_32 r)
 {
     return r * RAD_TO_DEG;
 }
 
-FORCEINLINE FIXED_32 FixedDegreesToRadians(FIXED_32 d)
+FORCEINLINE FFixed_32 FixedDegreesToRadians(FFixed_32 d)
 {
     return d * DEG_TO_RAD;
 }

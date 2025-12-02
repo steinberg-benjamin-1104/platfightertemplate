@@ -1,37 +1,37 @@
-#include "FixedVector2D.h"
+#include "Fixed32.h"
 #include "Logging/LogMacros.h"
 
-FIXED_32 FIXED_32::FromUnits(int32_t whole, uint32_t frac)
+FFixed_32 FFixed_32::FromUnits(int32_t whole, uint32_t frac)
 {
 	int64_t w = (int64_t)whole * ONE;
 	checkSlow(whole == 0 || w / whole == ONE);  // overflow guard
-	return FIXED_32(w + frac);
+	return FFixed_32(w + frac);
 }
 
-int32_t FIXED_32::GetWhole() const
+int32_t FFixed_32::GetWhole() const
 {
 	return static_cast<int32_t>(v >> 32);
 }
 
-uint32_t FIXED_32::GetFrac() const
+uint32_t FFixed_32::GetFrac() const
 {
 	return static_cast<uint32_t>(v & 0xFFFFFFFFu);
 }
 
-FIXED_32 FIXED_32::operator*(FIXED_32 o) const
+FFixed_32 FFixed_32::operator*(FFixed_32 o) const
 {
-	return FIXED_32((int64_t)(((__int128_t)v * (__int128_t)o.v) >> 32));
+	return FFixed_32((int64_t)(((__int128_t)v * (__int128_t)o.v) >> 32));
 }
 
-FIXED_32 FIXED_32::operator/(FIXED_32 o) const
+FFixed_32 FFixed_32::operator/(FFixed_32 o) const
 {
 	checkSlow(o.v != 0);
-	return FIXED_32((int64_t)(((__int128_t)v << 32) / (__int128_t)o.v));
+	return FFixed_32((int64_t)(((__int128_t)v << 32) / (__int128_t)o.v));
 }
 
-FIXED_32 FIXED_32::Sqrt() const
+FFixed_32 FFixed_32::Sqrt() const
 {
-	if (v <= 0) return FIXED_32(0);
+	if (v <= 0) return FFixed_32(0);
 	uint64_t r = (uint64_t)v;
 	uint64_t b = 1ULL << 62;
 	while (b > r) b >>= 2;
@@ -42,10 +42,10 @@ FIXED_32 FIXED_32::Sqrt() const
 		else res >>= 1;
 		b >>= 2;
 	}
-	return FIXED_32((int64_t)(res << 16));  // 32 frac bits → 16 after sqrt
+	return FFixed_32((int64_t)(res << 16));  // 32 frac bits → 16 after sqrt
 }
 
-FIXED_32 FIXED_32::MulHigh(FIXED_32 b) const
+FFixed_32 FFixed_32::MulHigh(FFixed_32 b) const
 {
 	/* portable 64×64→high-64 */
 	uint64_t al = (uint64_t)(uint32_t)v;
@@ -56,43 +56,42 @@ FIXED_32 FIXED_32::MulHigh(FIXED_32 b) const
 	uint64_t lo = al * bl;
 	uint64_t t  = ah * bl + ((lo >> 32) & 0xFFFFFFFFULL);
 	uint64_t hi = ah * bh + (t >> 32);
-	return FIXED_32((int64_t)hi);
+	return FFixed_32((int64_t)hi);
 }
 
-FIXED_32 FIXED_32::poly5(FIXED_32 x2)
+FFixed_32 FFixed_32::poly5(FFixed_32 x2)
 {
-	static const FIXED_32 c1 = FromRaw(0xFFFFFFFFD5555555LL); // -1/6
-	static const FIXED_32 c2 = FromRaw(0x0000000002222222LL); //  1/120
-	static const FIXED_32 c3 = FromRaw(0xFFFFFFFFF2FF30LL);   // -1/5040
+	static const FFixed_32 c1 = FromRaw(0xFFFFFFFFD5555555LL); // -1/6
+	static const FFixed_32 c2 = FromRaw(0x0000000002222222LL); //  1/120
+	static const FFixed_32 c3 = FromRaw(0xFFFFFFFFF2FF30LL);   // -1/5040
 
-	FIXED_32 t = c3;
+	FFixed_32 t = c3;
 	t = t.MulHigh(x2) + c2;
 	t = t.MulHigh(x2) + c1;
-	t = t.MulHigh(x2) + FIXED_32(1.0f);   // 1.0 as float → Q32.32
+	t = t.MulHigh(x2) + FFixed_32(1.0f);   // 1.0 as float → Q32.32
 	return t;
 }
 
-FIXED_32 FIXED_32::Sin() const
+FFixed_32 FFixed_32::Sin() const
 {
-	FIXED_32 y = *this;
-
-	/* 1. range reduce to [-π, π] */
-	int32_t n = (y * INV_TWO_Pi()).GetWhole();
-	y = y - FIXED_32(n) * TWO_Pi();
-	if (y >  Pi()) y = y - TWO_Pi();
-	if (y < -Pi()) y = y + TWO_Pi();
+	FFixed_32 y = *this;
+	
+	int32_t n = (y * (FFixed_32(1) / (FFixed_32(2) * Fixed_Pi))).GetWhole();
+	y = y - FFixed_32(n) * 2*Fixed_Pi;
+	if (y >  Fixed_Pi) y = y - 2*Fixed_Pi;
+	if (y < -Fixed_Pi) y = y + 2*Fixed_Pi;
 
 	/* 2. sin(x) ≈ x * poly5(x²) */
 	bool neg = y.v < 0;
 	y = y.Abs();
-	if (y > HALF_Pi())
-		y = Pi() - y;
+	if (y > half_pi)
+		y = Fixed_Pi - y;
 
-	FIXED_32 x2 = y.MulHigh(y);
+	FFixed_32 x2 = y.MulHigh(y);
 	return (neg ? -y : y).MulHigh(poly5(x2));
 }
 
-FIXED_32 FIXED_32::Cos() const
+FFixed_32 FFixed_32::Cos() const
 {
 	return (*this + HALF_PI()).Sin();
 }

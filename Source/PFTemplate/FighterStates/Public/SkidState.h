@@ -18,6 +18,6 @@ public:
 	virtual FString GetStateName() override {return "Skid";}
 
 private:
-	FIXED_32 Reduction;
+	FFixed_32 Reduction;
 	int32 SkidDuration;
 };

@@ -27,7 +27,7 @@ void UShieldComponent::SetShieldActive(bool bActive)
 
 void UShieldComponent::ApplyDamage(int32 Amount)
 {
-	ShieldHealth = FixedMax(FIXED_32(0), ShieldHealth - FIXED_32(Amount));
+	ShieldHealth = FixedMax(FFixed_32(0), ShieldHealth - FFixed_32(Amount));
 	UpdateMaterial();
 }
 
@@ -35,12 +35,12 @@ void UShieldComponent::UpdateShield()
 {
 	if (bIsActive)
 	{
-		ShieldHealth = FixedMax(FIXED_32(0), ShieldHealth - DegenerationRate);
+		ShieldHealth = FixedMax(FFixed_32(0), ShieldHealth - DegenerationRate);
 		UpdateMaterial();
 	}
 	else
 	{
-		ShieldHealth = FixedMin(FIXED_32(0), ShieldHealth + RegenRate);
+		ShieldHealth = FixedMin(FFixed_32(0), ShieldHealth + RegenRate);
 	}
 }
 

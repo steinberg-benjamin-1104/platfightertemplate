@@ -15,9 +15,9 @@ enum class EStickDir : uint8
 
 FORCEINLINE static EStickDir GetStickDirection(const FFixedVector2D& Stick, bool bFacingRight)
 {
-	const FIXED_32 ZERO = 0.f;
-	FIXED_32 X = Stick.X;
-	FIXED_32 Y = Stick.Z;
+	const FFixed_32 ZERO = 0.f;
+	FFixed_32 X = Stick.X;
+	FFixed_32 Y = Stick.Z;
 	
 	if (X == ZERO && Y == ZERO) return EStickDir::Center;
 

@@ -7,6 +7,7 @@
 USTRUCT()
 struct FFighterInput
 {
+	GENERATED_BODY()
 	FStickState Stick;
 	FButtonState Button;
 };

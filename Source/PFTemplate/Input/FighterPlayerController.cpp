@@ -39,8 +39,8 @@ FFighterInput AFighterPlayerController::BuildInput()
 {
     FFighterInput Out;
 
-    FIXED_32 X = FloatToFixed(GetVec2(MoveAction).X);
-    FIXED_32 Y = FloatToFixed(GetVec2(MoveAction).Y);
+    FFixed_32 X = FloatToFixed(GetVec2(MoveAction).X);
+    FFixed_32 Y = FloatToFixed(GetVec2(MoveAction).Y);
     UpdateStickState(Out.Stick, FFixedVector2D(X, Y));
     
     EInputButton Current = EInputButton::None;
@@ -61,12 +61,12 @@ FFixedVector2D AFighterPlayerController::ReadStick() const
 {
     FVector2D Raw = GetVec2(MoveAction);
     
-    FIXED_32 X = FixedClamp(Raw.X, FIXED_32(-1.f), FIXED_32(1.f));
-    FIXED_32 Z = FixedClamp(Raw.Y, FIXED_32(-1.f), FIXED_32(1.f));
+    FFixed_32 X = FixedClamp(Raw.X, FFixed_32(-1.f), FFixed_32(1.f));
+    FFixed_32 Z = FixedClamp(Raw.Y, FFixed_32(-1.f), FFixed_32(1.f));
 
-    const FIXED_32 Dead(DEAD_ZONE);
-    if (X.Abs() < Dead) X = FIXED_32(0);
-    if (Z.Abs() < Dead) Z = FIXED_32(0);
+    const FFixed_32 Dead(DEAD_ZONE);
+    if (X.Abs() < Dead) X = FFixed_32(0);
+    if (Z.Abs() < Dead) Z = FFixed_32(0);
 
     return FFixedVector2D(X, Z);
 }

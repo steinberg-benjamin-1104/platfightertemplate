@@ -11,16 +11,16 @@ void UKnockbackState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCom
 	gravity = InMoveComp->Gravity;
 }
 
-void UKnockbackState::InitKnockback(int32 h, int32 d, FIXED_32 KBG, int32 BKB, FIXED_32 a, int32 x)
+void UKnockbackState::InitKnockback(int32 h, int32 d, FFixed_32 KBG, int32 BKB, FFixed_32 a, int32 x)
 {
-	const FIXED_32 KnockbackValue = (((h/10 + (h * d/20)) * (FIXED_32(200.f)
-									/ (weight + FIXED_32(100.f)) * FIXED_32(1.4f))
-									+ FIXED_32(18.f)) * KBG) + BKB;
+	const FFixed_32 KnockbackValue = (((h/10 + (h * d/20)) * (FFixed_32(200.f)
+									/ (weight + FFixed_32(100.f)) * FFixed_32(1.4f))
+									+ FFixed_32(18.f)) * KBG) + BKB;
 
-	LaunchSpeed = KnockbackValue * FIXED_32(0.3f);
-	if (x < 0) LaunchAngle = FIXED_32(180.f) - a;
+	LaunchSpeed = KnockbackValue * FFixed_32(0.3f);
+	if (x < 0) LaunchAngle = FFixed_32(180.f) - a;
 	else LaunchAngle = a;
-	Duration = FixedFloor(KnockbackValue * FIXED_32(0.4f));
+	Duration = FixedFloor(KnockbackValue * FFixed_32(0.4f));
 	CheckTumble();
 }
 
@@ -60,14 +60,14 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 
 	FFixedHitResult HitResult = DoCollisionCheck(Velocity);
 	const bool bHit       = HitResult.bBlockingHit;
-	const bool bGroundHit = HitResult.Normal.Z >= FIXED_32(0.7f);
+	const bool bGroundHit = HitResult.Normal.Z >= FFixed_32(0.7f);
 	const bool bIsMeteor  = IsMeteor();
 	
 	// Wall Bounce
 	if (bTumble && bHit && !bGroundHit)
 	{
-		LaunchSpeed *= FIXED_32(0.9f);
-		Velocity *= FIXED_32(0.9f);
+		LaunchSpeed *= FFixed_32(0.9f);
+		Velocity *= FFixed_32(0.9f);
 		Velocity = CalcReflect(SavedVelocity, HitResult.Normal);
 	}
 
@@ -75,8 +75,8 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 	else if (bTumble && bHit && bGroundHit && bIsMeteor)
 	{
 		Velocity = CalcReflect(SavedVelocity, HitResult.Normal);
-		LaunchSpeed *= FIXED_32(0.4f);
-		Velocity *= FIXED_32(0.4f);
+		LaunchSpeed *= FFixed_32(0.4f);
+		Velocity *= FFixed_32(0.4f);
 	}
 	
 	// Begin Slide
@@ -90,15 +90,15 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 		bSliding = true;
 		FighterPawnRef->SetCurrentAnimation("Sliding");
 
-		Velocity *= FIXED_32(0.95f);
-		LaunchSpeed *= FIXED_32(0.95f);
+		Velocity *= FFixed_32(0.95f);
+		LaunchSpeed *= FFixed_32(0.95f);
 	}
 
 	// Slide Physics
 	if (bSliding)
 	{
 		Velocity.X *= MoveComp->GroundFriction;
-		Velocity.X = FixedClamp(Velocity.X, FIXED_32(-498.f), FIXED_32(498.f)); // 8.3 * 60
+		Velocity.X = FixedClamp(Velocity.X, FFixed_32(-498.f), FFixed_32(498.f)); // 8.3 * 60
 	}
 
 	CompleteKBPosUpdate(Velocity);
@@ -107,17 +107,17 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 
 void UKnockbackState::CalcKBPosUpdate(FFixedVector2D& InVelocity)
 {
-	if (LaunchSpeed <= FIXED_32(0)) 
-		LaunchSpeed = FIXED_32(0);
+	if (LaunchSpeed <= FFixed_32(0)) 
+		LaunchSpeed = FFixed_32(0);
 	
-	FIXED_32 Radians = FixedDegreesToRadians(LaunchAngle);
+	FFixed_32 Radians = FixedDegreesToRadians(LaunchAngle);
 	
 	FFixedVector2D PosUpdate(
 		Radians.Cos() * LaunchSpeed,
 		Radians.Sin() * LaunchSpeed
 	);
 	
-	InVelocity = PosUpdate * FIXED_32(60.f);
+	InVelocity = PosUpdate * FFixed_32(60.f);
 	
 	if (InVelocity.Z > MoveComp->TerminalFallVelocity) InVelocity.Z -= gravity * FixedDt;
 	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(InVelocity.Z, InVelocity.X));
@@ -125,7 +125,7 @@ void UKnockbackState::CalcKBPosUpdate(FFixedVector2D& InVelocity)
 
 FFixedVector2D UKnockbackState::CalcReflect(const FFixedVector2D& InVel, const FFixedVector2D& Normal)
 {
-	FFixedVector2D NewAngle = InVel - FIXED_32(2.f) * InVel.Dot(Normal) * Normal;
+	FFixedVector2D NewAngle = InVel - FFixed_32(2.f) * InVel.Dot(Normal) * Normal;
 	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(NewAngle.Z, NewAngle.X));
 	CheckTumble();
 	return NewAngle;

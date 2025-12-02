@@ -6,7 +6,7 @@ struct FFixedHitResult
 {
 	FFixedVector2D Position;
 	FFixedVector2D Normal;
-	FIXED_32        Distance;
+	FFixed_32        Distance;
 	bool            bBlockingHit = false;
 };
 
@@ -64,8 +64,8 @@ static FFixedHitResult FixedSweepBox(const UWorld* World,
 static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 										 const FFixedVector2D& Start,
 										 const FFixedVector2D& End,
-										 FIXED_32 Radius,
-										 FIXED_32 HalfHeight)
+										 FFixed_32 Radius,
+										 FFixed_32 HalfHeight)
 {
 	FHitResult Hit;
 	const bool bHit = World->SweepSingleByChannel(

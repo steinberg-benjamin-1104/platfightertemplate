@@ -18,7 +18,7 @@ struct FHopData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIXED_32 Height = 0.f;
+	FFixed_32BP Height = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Frames = 0;

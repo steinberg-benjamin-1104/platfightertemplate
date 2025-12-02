@@ -5,7 +5,8 @@
 #include "FighterCapsule.h"
 #include "Jump.h"
 #include "SafeMath.h"
-#include "FighterPawn.h"
+#include "SafeMathBP.h"
+#include "FixedCollision.h"
 #include "FighterMovementComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -62,56 +63,44 @@ public:
 	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit, bool bHitWall);
 	
 	void UpdateJumpRise();
-	void ApplyAirDrift(FIXED_32 StickX);
+	void ApplyAirDrift(FFixed_32 StickX);
 	
 	//Divide by 3600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 Gravity = 3600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP Gravity = 3600.f;
 	//Divide by 600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 TerminalFallVelocity = -900.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 AirFriction = 360.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 FastFallMultiplier = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP AirFriction = 360.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP FastFallMultiplier = 1.6f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 AirAcceleration = 3000.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FIXED_32 MaxAirSpeed = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP AirAcceleration = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP MaxAirSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EHopType, FHopData> HopDataMap;
-
-	UFUNCTION(BlueprintCallable)
+	
 	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
-
-	UFUNCTION(BlueprintCallable)
 	FFixedVector2D GetVelocity() const { return Velocity; }
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 RunSpeed = 1200.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 DashSpeed = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP RunSpeed = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP DashSpeed = 1400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int DashDuration = 12;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 WalkSpeed = 500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP WalkSpeed = 500.f;
 
 	//Lower Friction: 0.95, Higher Friction: 0.5
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FIXED_32 GroundFriction = 0.8f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP GroundFriction = 0.8f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int MaxJumpCount = 2;
-	UPROPERTY() int JumpsRemaining = 0;
-	UPROPERTY() bool bIsFastFalling = false;
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
+	int JumpsRemaining = 0;
+	bool bIsFastFalling = false;
 	void ApplyGroundFriction();
-
 	bool bCanApplyGroundFriction = true;
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void ApplyCustomFriction(FIXED_32 Friction);
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void ApplyCustomFriction(FFixed_32 Friction);
 	void SnapToNearestGroundBehindStep(int32 inDirection);
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FFixedVector2D FindFurthestGroundedPosition(int32 Direction) const;
 	
 	void ProcessLanded();
 
-	bool WillStayGroundedNextFrame(FIXED_32 HorizontalSpeed, int32 Direction) const;
+	bool WillStayGroundedNextFrame(FFixed_32 HorizontalSpeed, int32 Direction) const;
 	void HaltHorizontalVelocity();
 	void HaltVerticalVelocity();
 	void StopMovementCompletely(bool bStopCollision = false);

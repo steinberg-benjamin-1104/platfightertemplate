@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "SafeMath.h"
+#include "SafeMathBP.h"
 #include "FighterCapsule.generated.h"
 
 USTRUCT(BlueprintType)
@@ -9,25 +9,25 @@ struct FFighterCapsule
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	FIXED_32 defaultHalfHeight = 90.f;
+	FFixed_32BP defaultHalfHeight = 90.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	FIXED_32 Radius = 30.f;
+	FFixed_32BP Radius = 30.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	FIXED_32 BottomOffset = 25.f;
+	FFixed_32BP BottomOffset = 25.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	FIXED_32 TopOffset = 25.f;
+	FFixed_32BP TopOffset = 25.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CollisionCapsule")
-	FIXED_32 bufferlayer = 0.05f;
+	FFixed_32BP bufferlayer = 0.05f;
 	
 	bool TopLowered = false;
 	bool BottomLifted = false;
 	
 	FFixedVector2D CenterPosition;
-	FIXED_32 HalfHeight;
+	FFixed_32 HalfHeight;
 	
 	FFixedVector2D GetCenter() const {return CenterPosition;}
 	

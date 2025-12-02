@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SafeMath.h"
+#include "SafeMathBP.h"
 
 #include "HitboxData.generated.h"
 
@@ -33,16 +33,16 @@ struct FDamageInfo
 	EHitEffect HitEffect = EHitEffect::Knockback;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	F32TV Angle;
+	FFixed_32BP Angle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 BaseKnockback = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	F32TV KnockbackGrowth;
+	FFixed_32BP KnockbackGrowth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	F32TV HitstopMod;
+	FFixed_32BP HitstopMod;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Priority = 2;
@@ -67,13 +67,13 @@ struct FHitboxTransform
 	FName BoneName = "root";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVec2TV Size;
+	FVec2DBP Size;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	F32TV Rotation;
+	FFixed_32BP Rotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVec2TV LocationFromBone;
+	FVec2DBP LocationFromBone;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EHitboxType HitboxType = EHitboxType::Normal;

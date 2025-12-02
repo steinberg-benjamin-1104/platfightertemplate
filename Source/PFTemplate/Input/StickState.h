@@ -6,6 +6,7 @@
 USTRUCT()
 struct FStickState
 {
+	GENERATED_BODY()
 	// Raw input
 	FFixedVector2D Current = FFixedVector2D();
 	FFixedVector2D Previous = FFixedVector2D();
@@ -22,9 +23,9 @@ struct FStickState
 	bool bWalking = false;              
 
 	// Config
-	FIXED_32 DownThreshold  = FIXED_32(0.5f);
-	FIXED_32 FlickThreshold = FIXED_32(0.7f);
-	FIXED_32 WalkRadius     = FIXED_32(0.4f);
+	FFixed_32 DownThreshold  = FFixed_32(0.5f);
+	FFixed_32 FlickThreshold = FFixed_32(0.7f);
+	FFixed_32 WalkRadius     = FFixed_32(0.4f);
 
 	// Flick buffer (added)
 	int32 FlickBufferFrames = 0;

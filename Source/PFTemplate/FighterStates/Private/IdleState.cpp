@@ -21,7 +21,7 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 		return true;
 	}
 
-	if (MoveComp->IsStandingOnFacingLedge() && (MoveComp->GetVelocity().X == FIXED_32(0.f)) && !bOnLedge)
+	if (MoveComp->IsStandingOnFacingLedge() && (MoveComp->GetVelocity().X == FFixed_32(0.f)) && !bOnLedge)
 	{
 		FighterPawnRef->SetCurrentAnimation("Teeter");
 		bOnLedge = true;

@@ -72,11 +72,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Animation")
 	FAnimation GetCurrentAnimation() const {return CurrentAnimation; }
 	
-	UFUNCTION(BlueprintCallable, Category = "Animation")
 	bool SetCurrentAnimation(FName AnimationName, int32 BlendTime = 0);
-
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	bool SetCurrentAnimation(const FAnimation* NewAnimation, int32 BlendTime = 0);
+	bool SetCurrentAnimation(const FAnimation& NewAnimation, int32 BlendTime = 0);
 
 	UPROPERTY() AFighterPlayerController* FPC = nullptr;
 
@@ -143,8 +140,7 @@ public:
 	virtual void WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigator) override;
 
 	virtual FVector CenterLocation() override {return Fixed2DToVector(MovementComponent->GetCenter());}
-
-	UFUNCTION(BlueprintPure, Category = "Mesh")
+	
 	FFixedVector2D GetBoneLocation(FName BoneName) const;
 
 	UFUNCTION(BlueprintPure, Category = "Mesh")

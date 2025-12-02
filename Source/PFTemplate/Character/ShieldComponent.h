@@ -22,7 +22,7 @@ public:
 	
 	bool IsBroken() const { return ShieldHealth <= 0.f; }
 	void ResetHealth() {ShieldHealth = MaxShieldHealth;}
-	FIXED_32 GetHealthPercent() const { return ShieldHealth / MaxShieldHealth; }
+	FFixed_32 GetHealthPercent() const { return ShieldHealth / MaxShieldHealth; }
 
 protected:
 	
@@ -33,10 +33,10 @@ private:
 
 	UPROPERTY() UStaticMeshComponent* ShieldMesh;
 	
-	FIXED_32 MaxShieldHealth = 600.f;
-	FIXED_32 ShieldHealth;
-	FIXED_32 RegenRate = 0.05f;
-	FIXED_32 DegenerationRate = 0.3f;
+	FFixed_32 MaxShieldHealth = 600.f;
+	FFixed_32 ShieldHealth;
+	FFixed_32 RegenRate = 0.05f;
+	FFixed_32 DegenerationRate = 0.3f;
 
 	bool bIsActive = false;
 

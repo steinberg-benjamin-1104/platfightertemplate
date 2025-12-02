@@ -27,7 +27,7 @@ struct FFrameCommand
 	int32 IntParam = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVec2TV VectorParam;
+	FVec2DBP VectorParam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName NameParam = "none";

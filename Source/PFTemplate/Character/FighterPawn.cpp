@@ -207,16 +207,22 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 	return true;
 }
 
-bool AFighterPawn::SetCurrentAnimation(const FAnimation* NewAni, int BlendTime)
+bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int BlendTime)
 {
-	if (!NewAni->AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) 
+		return false;
 
-	const int32 NumFrames = NewAni->AnimSequence->GetNumberOfSampledKeys();
-	CurrentAnimation = *NewAni;
+	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
+	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni->Commands, NumFrames, NewAni->bIsLoop);
+	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
 
-	FighterAnimInstance->SetAnimationSequence(NewAni->AnimSequence, NewAni->bIsLoop, NumFrames, BlendTime);
+	FighterAnimInstance->SetAnimationSequence(
+		NewAni.AnimSequence,
+		NewAni.bIsLoop,
+		NumFrames,
+		BlendTime
+	);
 
 	return true;
 }
@@ -416,7 +422,7 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 	if (!Attack) return false;
 	
 	const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
-	SetCurrentAnimation(Anim);
+	SetCurrentAnimation(*Anim);
 	
 	StateMachine->TryChangeState(Attack->TargetState, Input);
 	
