@@ -42,5 +42,5 @@ void UHitstopState::OnExit()
 int UHitstopState::CalcHitstop()
 {
 	FDamageInfo DamageInfo = FighterPawnRef->StoredDamageInfo;
-	return FMath::FloorToInt((DamageInfo.Damage/20 + 6) * DamageInfo.HitstopMod);
+	return FixedFloor((DamageInfo.Damage/20 + 6) * DamageInfo.HitstopMod.ToFixed());
 }

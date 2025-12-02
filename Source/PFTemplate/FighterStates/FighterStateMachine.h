@@ -25,15 +25,4 @@ public:
 	void AddState(FName StateName, UFighterState* State);
 	void TickCurrentState(FFighterInput &Input);
 	void ShowStateDebug();
-
-	// Input proxies
-	bool Attack() const;
-	void AttackReleased() const;
-	bool Special() const;
-	bool Shield() const;
-	void ShieldReleased() const;
-	bool Grab() const;
-	bool JumpPressed() const; 
-	void JumpReleased() const;
-	void Parry() const;
 };

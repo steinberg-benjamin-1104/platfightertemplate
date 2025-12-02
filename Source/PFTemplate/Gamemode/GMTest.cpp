@@ -125,10 +125,7 @@ void AGMTest::SetupHUD()
 		UE_LOG(LogTemp, Warning, TEXT("No HUD class declared"));
 		return;
 	}
-
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-
 	HUDWidget->AddToViewport();
 }
 
