@@ -321,7 +321,7 @@ void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall)
 bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 {
 	const int32 FacingDir = FighterPawnRef->IsFacingRight() ? 1 : -1;
-	constexpr FFixed_32 ProbeSpeed = 300.f;
+	FFixed_32 ProbeSpeed = 300.f;
 	
 	return !WillStayGroundedNextFrame(ProbeSpeed, FacingDir);
 }

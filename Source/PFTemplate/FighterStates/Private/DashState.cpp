@@ -18,7 +18,7 @@ void UDashState::OnEnter(FFighterInput& NewInput)
 	
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
-	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->DashSpeed;
+	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->DashSpeed.ToFixed();
 	MoveComp->SetVelocity(Velocity);
 }
 

@@ -93,5 +93,5 @@ FFixed_32 FFixed_32::Sin() const
 
 FFixed_32 FFixed_32::Cos() const
 {
-	return (*this + HALF_PI()).Sin();
+	return (*this + half_pi).Sin();
 }

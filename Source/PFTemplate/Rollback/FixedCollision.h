@@ -1,6 +1,9 @@
 // FixedCollision.h
 #pragma once
+#include "CoreMinimal.h"
 #include "Engine/World.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/OverlapResult.h"
 
 struct FFixedHitResult
 {

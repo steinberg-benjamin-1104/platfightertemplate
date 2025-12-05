@@ -7,7 +7,7 @@ void URunState::OnEnter(FFighterInput& NewInput)
 {
 	FighterPawnRef->SetCurrentAnimation("Run");
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
-	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->RunSpeed;
+	Velocity.X = FighterPawnRef->GetFacingDirection() * MoveComp->RunSpeed.ToFixed();
 	MoveComp->SetVelocity(Velocity);
 }
 

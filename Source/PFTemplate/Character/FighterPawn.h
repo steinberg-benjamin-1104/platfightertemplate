@@ -12,7 +12,8 @@
 #include "CamTarget.h"
 #include "FighterMovementComponent.h"
 #include "BoneVectorAxis.h"
-#include "SafeMath.h"
+#include "AttackDefinition.h"
+#include "StickDirection.h"
 
 #include "FighterPawn.generated.h"
 

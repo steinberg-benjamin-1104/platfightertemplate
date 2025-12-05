@@ -12,7 +12,7 @@ void UWalkingState::OnEnter(FFighterInput& Input)
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 
 	FFixedVector2D Velocity;
-	Velocity.X = MoveComp->WalkSpeed * FighterPawnRef->GetFacingDirection();
+	Velocity.X = MoveComp->WalkSpeed.ToFixed() * FighterPawnRef->GetFacingDirection();
 	MoveComp->SetVelocity(Velocity);
 }
 
