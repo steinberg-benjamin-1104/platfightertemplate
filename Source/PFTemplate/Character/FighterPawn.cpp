@@ -75,20 +75,18 @@ void AFighterPawn::PossessedBy(AController* NewController)
 
 #pragma region BattleManager
 
-void AFighterPawn::PreCollisionPhase(int CurrentFrame)
+void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 {
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
 	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
-	UpdateAnimation(NewInput);
-	DetectCollisions();
+	if ((CharacterMesh && FighterAnimInstance) || bStopAnimUpdates) UpdateAnimation(NewInput);
+	if (HitboxManager) DetectCollisions();
 }
 
 void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 {
-	if (!CharacterMesh || !FighterAnimInstance || bStopAnimUpdates) return;
-	
 	FighterAnimInstance->AdvanceFrame();
 	
 	CharacterMesh->TickPose(FixedToFloat(FixedDt), true);
@@ -111,7 +109,7 @@ void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 
 void AFighterPawn::DetectCollisions()
 {
-	if (HitboxManager) HitboxManager->ScanActiveHitboxes();
+	HitboxManager->ScanActiveHitboxes();
 }
 
 void AFighterPawn::PostCollisionPhase()

@@ -35,12 +35,12 @@ void UShieldComponent::UpdateShield()
 {
 	if (bIsActive)
 	{
-		ShieldHealth = FixedMax(FFixed_32(0), ShieldHealth - DegenerationRate);
+		//ShieldHealth = FixedMax(FFixed_32(0), ShieldHealth - DegenerationRate);
 		UpdateMaterial();
 	}
 	else
 	{
-		ShieldHealth = FixedMin(FFixed_32(0), ShieldHealth + RegenRate);
+		//ShieldHealth = FixedMin(FFixed_32(0), ShieldHealth + RegenRate);
 	}
 }
 

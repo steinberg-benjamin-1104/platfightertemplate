@@ -14,6 +14,8 @@ public:
     bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
     void OnExit() override;
 
+    FString GetStateName() override { return "Shieldbreak";}
+
 private:
     int Duration = 120;
 };

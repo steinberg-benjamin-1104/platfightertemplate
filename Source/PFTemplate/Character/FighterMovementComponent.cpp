@@ -352,18 +352,18 @@ void UFighterMovementComponent::DrawDebugFighterCapsule(const FFighterCapsule& C
 void UFighterMovementComponent::PerformCollisionChecks()
 {
 	FFixedHitResult WallHit, GroundHit, CeilingHit;
-	bool bHitWall = PerformWallCollisionCheck(Velocity, WallHit);
+	//bool bHitWall = PerformWallCollisionCheck(Velocity, WallHit);
 	
 	if (CurrentMovementMode == EFighterMovementMode::Falling)
 	{
-		if (PerformGroundCollisionCheck(Velocity, GroundHit, bHitWall))
+		if (PerformGroundCollisionCheck(Velocity, GroundHit, false)) //change to bHitWall
 		{
 			ProcessLanded();
 			return;
 		}
 	}
 	
-	PerformCeilingCollisionCheck(Velocity, CeilingHit, bHitWall);
+	//PerformCeilingCollisionCheck(Velocity, CeilingHit, bHitWall);
 }
 
 bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelocity, FFixedHitResult& OutHit)

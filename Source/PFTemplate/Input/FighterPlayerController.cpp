@@ -2,7 +2,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "FighterPawn.h"
-#include "SafeMath.h" 
+#include "SafeMath.h"
+#include "Containers/Array.h"
 
 AFighterPlayerController::AFighterPlayerController()
 {
@@ -29,9 +30,15 @@ void AFighterPlayerController::ApplyInputMappingContext()
     }
 }
 
-void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput &NewInput)
+void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput& NewInput)
 {
     NewInput = BuildInput();
+
+    if (!InputHistory.IsValidIndex(Frame))
+    {
+        InputHistory.SetNum(Frame + 1, EAllowShrinking::No);
+    }
+
     InputHistory[Frame] = NewInput;
 }
 

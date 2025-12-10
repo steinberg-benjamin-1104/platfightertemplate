@@ -34,7 +34,7 @@ public:
 	AFighterPawn();
 
 	//simulated tick phases
-	void PreCollisionPhase(int CurrentFrame);
+	void PreCollisionPhase(int32 CurrentFrame);
 	void UpdateAnimation(FFighterInput& Input);
 	void DetectCollisions();
 	void ProcessCollisions();
