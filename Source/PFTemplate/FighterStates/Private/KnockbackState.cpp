@@ -46,7 +46,7 @@ bool UKnockbackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (StateMachine->FramesInState == Duration)
 	{
-		StateMachine->TryChangeState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling", Input);
+		StateMachine->ChangeFighterState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling", Input);
 		return true;
 	}
 	return false;

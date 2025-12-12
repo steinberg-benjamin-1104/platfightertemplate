@@ -17,7 +17,7 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 	if (MoveComp->IsAirborne())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling");
-		FighterPawnRef->StateMachine->TryChangeState("Falling", NewInput);
+		FighterPawnRef->StateMachine->ChangeFighterState("Falling", NewInput);
 		return true;
 	}
 
@@ -36,13 +36,13 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
-		StateMachine->TryChangeState("JumpSquat", NewInput);
+		StateMachine->ChangeFighterState("JumpSquat", NewInput);
 		return true;
 	}
 
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
-		StateMachine->TryChangeState("Shield", NewInput);
+		StateMachine->ChangeFighterState("Shield", NewInput);
 		return true;
 	}
 
@@ -64,15 +64,16 @@ bool UIdleState::HandleStickInput(FFighterInput& NewInput)
 	FStickState &StickState = NewInput.Stick;
 	if (StickState.bFlick)
 	{
-		FighterPawnRef->StateMachine->TryChangeState("Dash", NewInput);
+		FighterPawnRef->StateMachine->ChangeFighterState("Dash", NewInput);
 		return true;
 	}
-	
-	if (StickState.bWalking)
-	{
-		StateMachine->TryChangeState("Walking", NewInput);
-		return true;
-	}
+
+	//active when it's not supposed to be
+	// if (StickState.bWalking)
+	// {
+	// 	StateMachine->ChangeFighterState("Walking", NewInput);
+	// 	return true;
+	// }
 
 	return false;
 }

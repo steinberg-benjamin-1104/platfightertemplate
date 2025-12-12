@@ -62,12 +62,12 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	CurrentState->OnEnter(NewInput);
 }
 
-bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &TransitionInput)
+void UFighterStateMachine::ChangeFighterState(FName NewState, FFighterInput &TransitionInput)
 {
 	if (!StateMap.Contains(NewState) || !FighterPawnRef)
 	{
 		UE_LOG(LogTemp, Error, TEXT("State '%s' does not exist in StateMap!"), *NewState.ToString());
-		return false;
+		return;
 	}
 
 	if (CurrentState->CanExitState() && StateMap[NewState]->CanEnterState())
@@ -80,10 +80,7 @@ bool UFighterStateMachine::TryChangeState(FName NewState, FFighterInput &Transit
 		FFighterInput NewInput;
 		NewInput.Button = TransitionInput.Button.ClearPressed();
 		TickCurrentState(NewInput);
-
-		return true;
 	}
-	return false;
 }
 
 void UFighterStateMachine::TickCurrentState(FFighterInput &Input)

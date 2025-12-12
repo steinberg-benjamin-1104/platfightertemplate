@@ -11,7 +11,7 @@ bool UShieldbreakState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 	return false;

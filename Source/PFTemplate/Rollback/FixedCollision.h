@@ -15,25 +15,56 @@ struct FFixedHitResult
 
 constexpr ECollisionChannel Channel = ECC_WorldStatic;
 
-static FFixedHitResult FixedLineTrace(const UWorld* World,
-									  const FFixedVector2D& Start,
-									  const FFixedVector2D& End)
+static FFixedHitResult FixedLineTrace(
+	const UWorld* World,
+	const FFixedVector2D& Start,
+	const FFixedVector2D& End,
+	bool bDebug = false)
 {
 	FHitResult Hit;
-	const bool bHit = World->LineTraceSingleByChannel(
-						Hit,
-						Fixed2DToVector(Start),
-						Fixed2DToVector(End),
-						Channel);
+
+	const FVector VStart = Fixed2DToVector(Start);
+	const FVector VEnd   = Fixed2DToVector(End);
+
+	const bool bHit = World->LineTraceSingleByChannel(Hit, VStart, VEnd, Channel);
+
+	// Debug visualization
+	if (bDebug)
+	{
+		const FColor LineColor = bHit ? FColor::Green : FColor::Red;
+		DrawDebugLine(World, VStart,
+			VEnd,
+			LineColor,
+			false,
+			1.5f,
+			0,
+			1.5f
+		);
+
+		// Hit point
+		if (bHit)
+		{
+			DrawDebugPoint(
+				World,
+				Hit.Location,
+				10.f,
+				FColor::Yellow,
+				false,
+				1.5f
+			);
+		}
+	}
 
 	FFixedHitResult Out;
 	Out.bBlockingHit = bHit;
+
 	if (bHit)
 	{
-		Out.Position  = VectorToFixed2D(Hit.Location);
-		Out.Normal    = VectorToFixed2D(Hit.Normal);
-		Out.Distance  = FloatToFixed(Hit.Distance);
+		Out.Position = VectorToFixed2D(Hit.Location);
+		Out.Normal   = VectorToFixed2D(Hit.Normal);
+		Out.Distance = FloatToFixed(Hit.Distance);
 	}
+
 	return Out;
 }
 

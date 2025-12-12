@@ -12,7 +12,7 @@ bool UJumpUpState::HandleStickInput(FFighterInput& Input)
 {
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
 	{
-		StateMachine->TryChangeState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling", Input);
 		return true;
 	}
 	return false;

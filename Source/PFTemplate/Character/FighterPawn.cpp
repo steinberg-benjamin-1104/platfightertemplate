@@ -129,7 +129,7 @@ void AFighterPawn::ShieldPhase()
 	FFighterInput None;
 	if (ShieldComponent->IsBroken())
 	{
-		StateMachine->TryChangeState("Shieldbreak", None);
+		StateMachine->ChangeFighterState("Shieldbreak", None);
 	}
 }
 
@@ -290,7 +290,7 @@ void AFighterPawn::InitiateKnockback()
 	}
 	FFighterInput None;
 	ApplyDamage(StoredDamageInfo.Damage);
-	StateMachine->TryChangeState("Hitstop", None);
+	StateMachine->ChangeFighterState("Hitstop", None);
 }
 
 void AFighterPawn::ApplyDamage(int32 Damage)
@@ -422,7 +422,7 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 	const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
 	SetCurrentAnimation(*Anim);
 	
-	StateMachine->TryChangeState(Attack->TargetState, Input);
+	StateMachine->ChangeFighterState(Attack->TargetState, Input);
 	
 	return true;
 }

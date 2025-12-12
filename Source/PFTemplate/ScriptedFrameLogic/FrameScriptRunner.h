@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "FrameCommand.h"
 #include "Animation.h"
+#include "FighterInput.h"
 #include "FrameScriptRunner.generated.h"
 
 class AFighterPawn;

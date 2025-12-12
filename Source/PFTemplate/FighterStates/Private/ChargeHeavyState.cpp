@@ -11,7 +11,7 @@ bool UChargeHeavyState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (StateMachine->FramesInState == MaxHoldDuration)
 	{
-		StateMachine->TryChangeState("BaseAttack", Input); //possibly needs a change here
+		StateMachine->ChangeFighterState("BaseAttack", Input); //possibly needs a change here
 		return true;
 	}
 	return false;
@@ -23,7 +23,7 @@ bool UChargeHeavyState::HandleButtonInput(FFighterInput& Input)
 
 	if (!ButtonState.IsPressed(EInputButton::Attack))
 	{
-		StateMachine->TryChangeState("BaseAttack", Input); //possibly needs a change here
+		StateMachine->ChangeFighterState("BaseAttack", Input); //possibly needs a change here
 		return true;
 	}
 	return false;

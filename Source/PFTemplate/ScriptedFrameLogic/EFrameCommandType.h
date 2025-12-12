@@ -7,7 +7,7 @@ enum class EFrameCommandType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	SetCurrentAnimation UMETA(DisplayName = "SetCurrentAnimation"),
-	TryChangeState UMETA(DisplayName = "TryChangeState"),
+	ChangeFighterState UMETA(DisplayName = "ChangeFighterState"),
 	SpawnHitboxes UMETA(DisplayName = "Spawn Hitbox"),
 	ClearHitboxes UMETA(DisplayName = "Clear Hitboxes"),
 	PlaySound UMETA(DisplayName = "Play Sound"),

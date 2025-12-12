@@ -54,9 +54,9 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFigh
 			break;
 		}
 
-		case EFrameCommandType::TryChangeState:
+		case EFrameCommandType::ChangeFighterState:
 		{
-			FighterPawnRef->StateMachine->TryChangeState(Cmd.NameParam, Input);
+			FighterPawnRef->StateMachine->ChangeFighterState(Cmd.NameParam, Input);
 			break;
 		}
 		

@@ -13,7 +13,6 @@ class PFTEMPLATE_API UFallingState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void OnEnter(FFighterInput& NewInput) override;
 	virtual bool HandleButtonInput(FFighterInput& NewInput) override;
 	virtual bool HandlePhysics(FFighterInput& Input) override;
 	virtual bool HandleStickInput(FFighterInput& Input) override;

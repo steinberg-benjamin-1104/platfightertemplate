@@ -17,12 +17,12 @@ bool URunState::HandleStickInput(FFighterInput& Input)
 	if (StickDir == EStickDir::Center)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 	if (StickDir == EStickDir::Backward)
 	{
-		StateMachine->TryChangeState("Skid", Input);
+		StateMachine->ChangeFighterState("Skid", Input);
 		return true;
 	}
 	return false;
@@ -34,14 +34,14 @@ bool URunState::HandleButtonInput(FFighterInput& NewInput)
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
-		StateMachine->TryChangeState("JumpSquat", NewInput);
+		StateMachine->ChangeFighterState("JumpSquat", NewInput);
 		return true;
 	}
 
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
 		MoveComp->HaltHorizontalVelocity();
-		StateMachine->TryChangeState("Shield", NewInput);
+		StateMachine->ChangeFighterState("Shield", NewInput);
 		return true;
 	}
 
@@ -60,7 +60,7 @@ bool URunState::HandlePhysics(FFighterInput& Input)
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling");
-		FighterPawnRef->StateMachine->TryChangeState("Falling", Input);
+		FighterPawnRef->StateMachine->ChangeFighterState("Falling", Input);
 		return true;
 	}
 	return false;

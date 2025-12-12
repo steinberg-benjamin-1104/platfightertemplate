@@ -14,7 +14,7 @@ bool USkidState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FramesInState == SkidDuration)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle");
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 	return false;
@@ -35,13 +35,13 @@ bool USkidState::HandleButtonInput(FFighterInput& NewInput)
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
-		StateMachine->TryChangeState("JumpSquat", NewInput);
+		StateMachine->ChangeFighterState("JumpSquat", NewInput);
 		return true;
 	}
 
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
-		StateMachine->TryChangeState("Shield", NewInput);
+		StateMachine->ChangeFighterState("Shield", NewInput);
 		return true;
 	}
 

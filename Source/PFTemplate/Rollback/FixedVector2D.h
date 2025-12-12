@@ -74,3 +74,9 @@ FORCEINLINE FFixedVector2D operator*(FFixed_32 s, const FFixedVector2D& v)
 {
     return { v.X * s, v.Z * s };
 }
+
+FORCEINLINE void LogFixedVector2D(const FString& Label, const FFixedVector2D& Vec)
+{
+    const FVector Converted = Fixed2DToVector(Vec);
+    UE_LOG(LogTemp, Warning, TEXT("%s: X=%f, Z=%f"), *Label, Converted.X, Converted.Z);
+}

@@ -19,7 +19,7 @@ bool UHitstopState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->TryChangeState("Knockback", Input);
+		StateMachine->ChangeFighterState("Knockback", Input);
 		return true;
 	}
 	return false;

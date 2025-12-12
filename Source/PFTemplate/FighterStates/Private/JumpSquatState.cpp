@@ -12,7 +12,7 @@ bool UJumpSquatState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->TryChangeState("JumpUp", Input);
+		StateMachine->ChangeFighterState("JumpUp", Input);
 		return true;
 	}
 	return false;

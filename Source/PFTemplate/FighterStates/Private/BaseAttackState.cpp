@@ -10,7 +10,7 @@ void UBaseAttackState::Tick(FFighterInput& NewInput, int32 FramesInState)
 	if (FighterPawnRef->FrameScriptRunner->IsFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 2);
-		StateMachine->TryChangeState("Idle", NewInput);
+		StateMachine->ChangeFighterState("Idle", NewInput);
 	}
 }
 

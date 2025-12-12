@@ -22,7 +22,7 @@ public:
 	int FramesInState = 0;
 	
 	void Initialize(AFighterPawn* InOwner);
-	bool TryChangeState(FName NewState, FFighterInput &TransitionInput);
+	void ChangeFighterState(FName NewState, FFighterInput &TransitionInput);
 	void AddState(FName StateName, UFighterState* State);
 	void TickCurrentState(FFighterInput &Input);
 	void ShowStateDebug();

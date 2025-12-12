@@ -25,7 +25,7 @@ bool UOnLedgeState::HandleButtonInput(FFighterInput& Input)
 	{
 		FighterPawnRef->SetFixedLoc(FighterPawnRef->GetFixedLoc() + FFixedVector2D(0.f, 200.f));
 		MoveComp->DoHop(EHopType::Full);
-		StateMachine->TryChangeState("Rising", Input);
+		StateMachine->ChangeFighterState("Rising", Input);
 		return true;
 	}
 	return false;

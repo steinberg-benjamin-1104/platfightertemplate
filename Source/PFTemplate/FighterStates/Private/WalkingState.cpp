@@ -29,20 +29,20 @@ bool UWalkingState::HandleStickInput(FFighterInput& Input)
 	FStickState &StickState = Input.Stick;
 	if (StickState.bFlick)
 	{
-		FighterPawnRef->StateMachine->TryChangeState("Dash", Input);
+		FighterPawnRef->StateMachine->ChangeFighterState("Dash", Input);
 		return true;
 	}
 	
 	if (StickDir == EStickDir::Center)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 
 	if (StickDir == EStickDir::Backward)
 	{
-		StateMachine->TryChangeState("Walk", Input);
+		StateMachine->ChangeFighterState("Walk", Input);
 		return true;
 	}
 

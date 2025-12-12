@@ -23,7 +23,7 @@ bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FramesInState >= FramesToEnd && InEndLag)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle");
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 	return false;
@@ -35,7 +35,7 @@ bool UShieldState::HandleButtonInput(FFighterInput& Input)
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
-		StateMachine->TryChangeState("JumpSquat", Input);
+		StateMachine->ChangeFighterState("JumpSquat", Input);
 		return true;
 	}
 
@@ -63,7 +63,7 @@ bool UShieldState::HandlePhysics(FFighterInput& Input)
 	if (MoveComp->IsAirborne())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling");
-		StateMachine->TryChangeState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling", Input);
 		return true;
 	}
 	return false;

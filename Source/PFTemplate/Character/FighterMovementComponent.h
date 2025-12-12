@@ -28,7 +28,7 @@ class PFTEMPLATE_API UFighterMovementComponent : public UActorComponent
 public:
 	UFighterMovementComponent();
 
-	FFixedVector2D Velocity;
+	FFixedVector2D Velocity = FFixedVector2D(FFixed_32(0.f), FFixed_32(0.f));
 
 	UFUNCTION(BlueprintCallable)
 	EFighterMovementMode GetCurrentMode() {return CurrentMovementMode;}
@@ -45,6 +45,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsGrounded() const {return CurrentMovementMode == EFighterMovementMode::Grounded;}
+	
 	UFUNCTION(BlueprintPure)
 	bool IsAirborne() {return CurrentMovementMode == EFighterMovementMode::Falling || CurrentMovementMode == EFighterMovementMode::JumpingUp;}
 	
@@ -113,8 +114,6 @@ public:
 	FFighterCapsule CollisionCapsule;
 	
 	FFixedVector2D GetCenter() const {return CollisionCapsule.GetCenter();}
-	
-	void UpdateCapsule();
 
 	bool bDoCollisionChecks = true;
 

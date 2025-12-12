@@ -8,7 +8,7 @@ bool UAirAttackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FighterPawnRef->FrameScriptRunner->IsFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling", 5);
-		StateMachine->TryChangeState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling", Input);
 		return true;
 	}
 	return false;
@@ -20,7 +20,7 @@ bool UAirAttackState::HandlePhysics(FFighterInput& Input)
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Grounded)
 	{
 		FighterPawnRef->SetCurrentAnimation("Landing");
-		StateMachine->TryChangeState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle", Input);
 		FighterPawnRef->GetHitboxManager()->DeactivateHitboxes(true);
 		return true;
 	}
