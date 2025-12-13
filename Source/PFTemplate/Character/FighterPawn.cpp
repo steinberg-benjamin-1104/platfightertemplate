@@ -170,7 +170,7 @@ void AFighterPawn::FaceInstigator()
 
 #pragma endregion
 
-#pragma region Actions
+#pragma region Animation
 
 FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
 {
@@ -179,11 +179,9 @@ FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
 	static const FString Context = TEXT("Move Lookup");
 	const FAnimation* Row = AnimationTable->FindRow<FAnimation>(MoveName, Context, true);
 
-	if (Row)
-	{
-		return *Row;
-	}
-	return FAnimation(); // failsafe
+	if (Row) return *Row;
+	
+	return FAnimation();
 }
 
 bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
@@ -196,11 +194,6 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 	CurrentAnimation = NewAni;
 
 	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
-
-	UE_LOG(LogTemp, Warning, TEXT("Anim %s | Looping=%d"),
-	*AniName.ToString(),
-	NewAni.bIsLoop);
-
 	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 
 	return true;
@@ -215,21 +208,14 @@ bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int BlendTime)
 	CurrentAnimation = NewAni;
 
 	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
-
-	FighterAnimInstance->SetAnimationSequence(
-		NewAni.AnimSequence,
-		NewAni.bIsLoop,
-		NumFrames,
-		BlendTime
-	);
+	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames,BlendTime);
 
 	return true;
 }
 
 const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const
 {
-	if (!AttackTable)
-		return nullptr;
+	if (!AttackTable) return nullptr;
 
 	const FName CurrentState = StateMachine->CurrentStateKey;
 

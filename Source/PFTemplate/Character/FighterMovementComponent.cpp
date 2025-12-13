@@ -431,7 +431,6 @@ bool UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVe
 	{
 		FFixedVector2D NewLocation = OutHit.Position;
 		NewLocation.Z += CollisionCapsule.bufferlayer;
-		LogFixedVector2D("NewLocation", NewLocation);
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
