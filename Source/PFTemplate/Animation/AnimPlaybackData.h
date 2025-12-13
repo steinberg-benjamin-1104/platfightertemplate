@@ -40,16 +40,9 @@ struct FAnimPlaybackData
 
 	void AdvanceFrame()
 	{
-		if (!IsValid())
-			return;
+		if (!IsValid()) return;
 
-		if (bLooping)
-		{
-			Frame = (Frame + 1) % TotalFrames;
-		}
-		else
-		{
-			Frame = FMath::Min(Frame + 1, TotalFrames - 1);
-		}
+		if (bLooping) Frame = (Frame + 1) % TotalFrames;
+		else Frame = FMath::Min(Frame + 1, TotalFrames - 1);
 	}
 };

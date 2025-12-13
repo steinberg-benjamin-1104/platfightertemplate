@@ -45,8 +45,8 @@ public:
 	virtual void Tick(FFighterInput &Input, int32 FramesInState)
 	{
 		if (HandleTimer(Input, FramesInState)) return;
+		if (HandlePhysics(Input)) return;
 		if (HandleButtonInput(Input)) return;
 		if (HandleStickInput(Input)) return;
-		if (HandlePhysics(Input)) return;
 	}
 };

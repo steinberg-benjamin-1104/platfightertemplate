@@ -44,8 +44,8 @@ bool UFallingState::HandlePhysics(FFighterInput& Input)
 {
 	if (MoveComp->IsGrounded())
 	{
-		FighterPawnRef->SetCurrentAnimation("Idle"); //change to Landing
-		//StateMachine->ChangeFighterState("Idle", Input);
+		FighterPawnRef->SetCurrentAnimation("Landing");
+		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
 	return false;

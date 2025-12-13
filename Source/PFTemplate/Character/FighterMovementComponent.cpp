@@ -175,33 +175,33 @@ void UFighterMovementComponent::ApplyCustomFriction(FFixed_32 Friction)
 
 void UFighterMovementComponent::ApplyAirDrift(FFixed_32 StickX)
 {
-	// if (StickX == FFixed_32(0.f)) //no stick input
-	// {
-	// 	FFixed_32 Decel = AirFriction.ToFixed() * FixedDt;
- //    
-	// 	// apply deceleration toward zero
-	// 	if (Velocity.X > FFixed_32(0.f))
-	// 		Velocity.X = FixedMax(0.f, Velocity.X - Decel);
-	// 	else if (Velocity.X < FFixed_32(0.f))
-	// 		Velocity.X = FixedMin(0.f, Velocity.X + Decel);
-	// 	return;
-	// }
-	//
-	// // Compute target speed
-	// const FFixed_32 TargetSpeed = StickX * MaxAirSpeed;
-	//
-	// // Apply acceleration toward target speed
-	// if (Velocity.X < TargetSpeed)
-	// {
-	// 	const FFixed_32 DeltaSpeed = (TargetSpeed - Velocity.X) * AirAcceleration * FixedDt;
-	// 	Velocity.X += DeltaSpeed.Sign();
-	//
-	// 	// Clamp to target
-	// 	if ((TargetSpeed - Velocity.X) * DeltaSpeed < 0.f)
-	// 	{
-	// 		Velocity.X = TargetSpeed;
-	// 	}
-	// }
+	if (StickX == FFixed_32(0.f)) //no stick input
+	{
+		FFixed_32 Decel = AirFriction.ToFixed() * FixedDt;
+    
+		// apply deceleration toward zero
+		if (Velocity.X > FFixed_32(0.f))
+			Velocity.X = FixedMax(0.f, Velocity.X - Decel);
+		else if (Velocity.X < FFixed_32(0.f))
+			Velocity.X = FixedMin(0.f, Velocity.X + Decel);
+		return;
+	}
+	
+	// Compute target speed
+	const FFixed_32 TargetSpeed = StickX * MaxAirSpeed;
+	
+	// Apply acceleration toward target speed
+	if (Velocity.X < TargetSpeed)
+	{
+		const FFixed_32 DeltaSpeed = (TargetSpeed - Velocity.X) * AirAcceleration * FixedDt;
+		Velocity.X += DeltaSpeed.Sign();
+	
+		// Clamp to target
+		if ((TargetSpeed - Velocity.X) * DeltaSpeed < 0.f)
+		{
+			Velocity.X = TargetSpeed;
+		}
+	}
 }
 
 void UFighterMovementComponent::ApplyFallingGravity()
@@ -285,7 +285,7 @@ void UFighterMovementComponent::HaltHorizontalVelocity()
 
 void UFighterMovementComponent::HaltVerticalVelocity()
 {
-	Velocity.X = FFixed_32(0.f);
+	Velocity.Z = FFixed_32(0.f);
 }
 
 void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall)
@@ -425,14 +425,13 @@ bool UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVe
     
 	FFixedVector2D End = Start + FFixedVector2D(0.f, TraceDistanceZ);
 
-	OutHit = FixedLineTrace(GetWorld(), Start, End, true);
+	OutHit = FixedLineTrace(GetWorld(), Start, End);
     
 	if (OutHit.bBlockingHit)
 	{
 		FFixedVector2D NewLocation = OutHit.Position;
-		NewLocation.X -= InVelocity.X * FixedDt;
 		NewLocation.Z += CollisionCapsule.bufferlayer;
-		//LogFixedVector2D("NewLocation", NewLocation);
+		LogFixedVector2D("NewLocation", NewLocation);
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);

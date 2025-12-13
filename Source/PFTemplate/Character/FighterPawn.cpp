@@ -80,20 +80,17 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
-	if (MovementComponent || !bStopMvmtUpdates) MovementComponent->TickFMC();
-	if ((CharacterMesh && FighterAnimInstance) || bStopAnimUpdates) UpdateAnimation(NewInput);
+	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
+	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation(NewInput);
 	if (HitboxManager) DetectCollisions();
 }
 
 void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 {
 	FighterAnimInstance->AdvanceFrame();
-	
-	CharacterMesh->TickPose(FixedToFloat(FixedDt), true);
+	FighterAnimInstance->UpdateAnimation(FixedToFloat(FixedDt), false);
 	CharacterMesh->RefreshBoneTransforms();
-	CharacterMesh->FinalizeBoneTransform(); 
-	// Update attached weapons/cosmetics only on the render frame
-	CharacterMesh->UpdateChildTransforms(EUpdateTransformFlags::None, ETeleportType::None);
+	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
 	
 	for (auto& Pair : HurtboxMap)
@@ -199,6 +196,10 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 	CurrentAnimation = NewAni;
 
 	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
+
+	UE_LOG(LogTemp, Warning, TEXT("Anim %s | Looping=%d"),
+	*AniName.ToString(),
+	NewAni.bIsLoop);
 
 	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 
