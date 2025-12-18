@@ -13,8 +13,7 @@
 void AGMTest::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// If not set in editor, find references dynamically
+	
 	if (!BattleManager)
 	{
 		TArray<AActor*> FoundManagers;
@@ -43,8 +42,6 @@ void AGMTest::BeginPlay()
 	InitBattle();
 }
 
-// AGMTest.cpp
-
 void AGMTest::InitBattle()
 {
 	if (!FighterPawnClass || SpawnPoints.Num() == 0 || !GetWorld()) return;
@@ -62,8 +59,7 @@ void AGMTest::InitBattle()
 		AFighterPawn* NewPawn = SpawnAndPossessPawn(PC, i);
 		if (NewPawn)
 		{
-			// Add panel UI
-			AddCharacterPanelForPawn(NewPawn, PC, i);
+			//AddCharacterPanelForPawn(NewPawn, PC, i);
 		}
 	}
 
@@ -125,8 +121,8 @@ void AGMTest::SetupHUD()
 		UE_LOG(LogTemp, Warning, TEXT("No HUD class declared"));
 		return;
 	}
-	HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-	HUDWidget->AddToViewport();
+	//HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+	//HUDWidget->AddToViewport();
 }
 
 void AGMTest::AddCharacterPanelForPawn(AFighterPawn* NewPawn, APlayerController* PC, int32 PlayerIndex)

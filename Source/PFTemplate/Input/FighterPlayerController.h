@@ -18,8 +18,14 @@ public:
 	AFighterPlayerController();
 	void UpdateInput(int32 Frame, FFighterInput &NewInput);
 
+	void DummyAction(const FInputActionValue&)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pressing Button"));
+	}
+
 protected:
 	virtual void SetupInputComponent() override;
+	virtual void OnPossess(APawn* InPawn) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* IMC;
@@ -62,10 +68,5 @@ private:
 
 	TArray<FFighterInput> InputHistory;
 	EInputButton PrevButtonsDown = EInputButton::None;
-
-	void DummyAction(const FInputActionValue&)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Pressing Button"));
-	}
 
 };

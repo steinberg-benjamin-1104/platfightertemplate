@@ -7,8 +7,7 @@
 
 AFighterPlayerController::AFighterPlayerController()
 {
-    PrimaryActorTick.bCanEverTick = false;
-    PrimaryActorTick.bStartWithTickEnabled = false;
+    
 }
 
 void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput& NewInput)
@@ -61,37 +60,45 @@ FFixedVector2D AFighterPlayerController::ReadStick() const
 
 bool AFighterPlayerController::IsPressed(const UInputAction* Action) const
 {
-    const UEnhancedInputComponent* IC = Cast<UEnhancedInputComponent>(InputComponent);
-    if (!IC || !Action) return false;
+    const UEnhancedPlayerInput* EPI = Cast<UEnhancedPlayerInput>(PlayerInput);
 
-    return IC->GetBoundActionValue(Action).Get<bool>();
+    if (!EPI || !Action) return false;
+
+    return EPI->GetActionValue(Action).Get<bool>();
 }
 
 FVector2D AFighterPlayerController::GetVec2(const UInputAction* Action) const
 {
-    const UEnhancedInputComponent* IC = Cast<UEnhancedInputComponent>(InputComponent);
-    if (!IC || !Action) return FVector2D::ZeroVector;
+    const UEnhancedPlayerInput* EPI = Cast<UEnhancedPlayerInput>(PlayerInput);
 
-    return IC->GetBoundActionValue(Action).Get<FVector2D>();
+    if (!EPI || !Action) return FVector2D::ZeroVector;
+
+    return EPI->GetActionValue(Action).Get<FVector2D>();
 }
 
 void AFighterPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
     
+    if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
+
+    {
+        if (MoveAction) EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (AttackAction) EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (SpecialAction) EIC->BindAction(SpecialAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (ShieldAction) EIC->BindAction(ShieldAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+    }
+}
+
+void AFighterPlayerController::OnPossess(APawn* InPawn)
+{
+    Super::OnPossess(InPawn);
+
     if (ULocalPlayer* LP = GetLocalPlayer())
     {
         if (UEnhancedInputLocalPlayerSubsystem* SubSys = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
         {
             if (IMC) SubSys->AddMappingContext(IMC, 0);
         }
-    }
-    
-    if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
-    {
-        if (MoveAction)    EIC->BindAction(MoveAction,    ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
-        if (AttackAction)  EIC->BindAction(AttackAction,  ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
-        if (SpecialAction) EIC->BindAction(SpecialAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
-        if (ShieldAction)  EIC->BindAction(ShieldAction,  ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
     }
 }
