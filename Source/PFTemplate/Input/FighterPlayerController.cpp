@@ -1,33 +1,14 @@
 #include "FighterPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "FighterPawn.h"
 #include "SafeMath.h"
+#include "InputMappingContext.h"
 #include "Containers/Array.h"
 
 AFighterPlayerController::AFighterPlayerController()
 {
     PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
-}
-
-void AFighterPlayerController::OnPossess(APawn* InPawn)
-{
-    Super::OnPossess(InPawn);
-    FighterPawn = Cast<AFighterPawn>(InPawn);
-    ApplyInputMappingContext();
-}
-
-void AFighterPlayerController::ApplyInputMappingContext()
-{
-    if (ULocalPlayer* LP = GetLocalPlayer())
-    {
-        if (UEnhancedInputLocalPlayerSubsystem* Sub = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
-        {
-            Sub->ClearAllMappings();
-            if (IMC) Sub->AddMappingContext(IMC, 0);
-        }
-    }
 }
 
 void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput& NewInput)
@@ -92,4 +73,25 @@ FVector2D AFighterPlayerController::GetVec2(const UInputAction* Action) const
     if (!IC || !Action) return FVector2D::ZeroVector;
 
     return IC->GetBoundActionValue(Action).Get<FVector2D>();
+}
+
+void AFighterPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+    
+    if (ULocalPlayer* LP = GetLocalPlayer())
+    {
+        if (UEnhancedInputLocalPlayerSubsystem* SubSys = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+        {
+            if (IMC) SubSys->AddMappingContext(IMC, 0);
+        }
+    }
+    
+    if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
+    {
+        if (MoveAction)    EIC->BindAction(MoveAction,    ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (AttackAction)  EIC->BindAction(AttackAction,  ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (SpecialAction) EIC->BindAction(SpecialAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+        if (ShieldAction)  EIC->BindAction(ShieldAction,  ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
+    }
 }

@@ -3,11 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "FighterInput.h"
+#include "InputActionValue.h"
 #include "FighterPlayerController.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
-class AFighterPawn;
 
 UCLASS()
 class PFTEMPLATE_API AFighterPlayerController : public APlayerController
@@ -19,11 +19,8 @@ public:
 	void UpdateInput(int32 Frame, FFighterInput &NewInput);
 
 protected:
-	virtual void OnPossess(APawn* InPawn) override;
-	
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	void ApplyInputMappingContext();
-	
+	virtual void SetupInputComponent() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* IMC;
 
@@ -60,12 +57,15 @@ protected:
 	FFighterInput GetInputByFrame(int32 FrameNumber) const {return InputHistory[FrameNumber];}
 
 private:
-	/* cached pawn (cast once) */
-	UPROPERTY()
-	AFighterPawn* FighterPawn = nullptr;
 
 	float DEAD_ZONE = 0.1f;
 
 	TArray<FFighterInput> InputHistory;
 	EInputButton PrevButtonsDown = EInputButton::None;
+
+	void DummyAction(const FInputActionValue&)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pressing Button"));
+	}
+
 };
