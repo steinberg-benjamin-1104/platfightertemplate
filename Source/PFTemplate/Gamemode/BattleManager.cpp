@@ -1,15 +1,29 @@
 #include "BattleManager.h"
 #include "FighterPawn.h"
 #include "PFCamera.h"
+#include "RollbackSimSubsystem.h"
 
 ABattleManager::ABattleManager()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-void ABattleManager::Tick(float DeltaTime)
+void ABattleManager::BeginPlay()
 {
-	if (!bCanTick) return;
+	Super::BeginPlay();
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (URollbackSimSubsystem* Sim = GI->GetSubsystem<URollbackSimSubsystem>())
+		{
+			Sim->RegisterBattleManager(this);
+		}
+	}
+}
+
+void ABattleManager::StepFrame()
+{
+	if (!bCanUpdate) return;
 	
 	
 	for (AFighterPawn* F : Fighters) F->PreCollisionPhase(BattleFrame);
@@ -27,7 +41,7 @@ void ABattleManager::Tick(float DeltaTime)
 
 void ABattleManager::StartBattle()
 {
-	bCanTick = true;
+	bCanUpdate = true;
 	
 	if (Fighters.Num() > 0 && BattleCamera)
 	{

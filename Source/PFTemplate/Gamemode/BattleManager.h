@@ -22,13 +22,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Battle")
 	APFCamera* BattleCamera;
 
-	virtual void Tick(float DeltaTime) override;
+	void StepFrame();
 
 	void StartBattle();
 
+protected:
+	virtual void BeginPlay() override;
+	
 private:
-	static constexpr float FixedFrameTime = 1.0f / 60.0f;
-	bool bCanTick = false;
+	bool bCanUpdate = false;
 	bool bShowDebugInfo = true;
 	int32 BattleFrame = 0;
 };
