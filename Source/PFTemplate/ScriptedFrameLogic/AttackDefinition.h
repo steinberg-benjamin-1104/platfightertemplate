@@ -19,7 +19,7 @@ struct FAttackDefinition : public FTableRowBase
 	bool bFlickInput = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EInputButton InputButton = EInputButton::None;
+	EMoveButton MoveButton = EMoveButton::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EStickDir StickDir = EStickDir::Center;

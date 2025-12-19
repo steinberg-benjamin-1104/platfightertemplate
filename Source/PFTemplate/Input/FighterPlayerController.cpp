@@ -5,39 +5,27 @@
 #include "InputMappingContext.h"
 #include "Containers/Array.h"
 
-AFighterPlayerController::AFighterPlayerController()
-{
-    
-}
-
 void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput& NewInput)
 {
     NewInput = BuildInput();
-
-    if (!InputHistory.IsValidIndex(Frame))
-    {
-        InputHistory.SetNum(Frame + 1, EAllowShrinking::No);
-    }
-
-    InputHistory[Frame] = NewInput;
 }
 
 FFighterInput AFighterPlayerController::BuildInput()
 {
     FFighterInput Out;
-
+    
     FFixed_32 X = FloatToFixed(GetVec2(MoveAction).X);
     FFixed_32 Y = FloatToFixed(GetVec2(MoveAction).Y);
     UpdateStickState(Out.Stick, FFixedVector2D(X, Y));
     
-    EInputButton Current = EInputButton::None;
+    uint16 Current = 0;
 
-    if (IsPressed(AttackAction))  Current |= EInputButton::Attack;
-    if (IsPressed(SpecialAction)) Current |= EInputButton::Special;
-    if (IsPressed(ShieldAction))  Current |= EInputButton::Shield;
+    if (IsPressed(AttackAction)) Current |= static_cast<uint32>(EInputButton::Attack);
+    if (IsPressed(SpecialAction)) Current |= static_cast<uint32>(EInputButton::Special);
+    if (IsPressed(ShieldAction)) Current |= static_cast<uint32>(EInputButton::Shield);
 
-    Out.Button.ButtonsHeld = Current;
-    Out.Button.ButtonsPressed = Current & ~PrevButtonsDown;
+    Out.Button.Down     = Current;
+    Out.Button.Pressed  = Current & ~PrevButtonsDown;
 
     PrevButtonsDown = Current;
 
@@ -81,7 +69,6 @@ void AFighterPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
     
     if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
-
     {
         if (MoveAction) EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);
         if (AttackAction) EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AFighterPlayerController::DummyAction);

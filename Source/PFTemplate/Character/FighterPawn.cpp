@@ -213,7 +213,7 @@ bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int BlendTime)
 	return true;
 }
 
-const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const
+const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputMask, bool bFlickInput, EStickDir StickDir) const
 {
 	if (!AttackTable) return nullptr;
 
@@ -226,18 +226,20 @@ const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputButton,
 	{
 		if (Def->ValidStates.Num() > 0 && !Def->ValidStates.Contains(CurrentState))
 			continue;
-		
-		if (Def->InputButton != EInputButton::None &&
-			Def->InputButton != InputButton)
+
+		uint16 DefMask = CompileMoveButtonMask(Def->MoveButton);
+
+		// Check if all buttons in the attack definition are pressed
+		if (DefMask != 0 && (static_cast<uint16>(InputMask) & DefMask) != DefMask)
 			continue;
-		
+
 		if (Def->bFlickInput != bFlickInput)
 			continue;
-		
+
 		if (Def->StickDir != EStickDir::Center &&
 			Def->StickDir != StickDir)
 			continue;
-		
+
 		return Def;
 	}
 

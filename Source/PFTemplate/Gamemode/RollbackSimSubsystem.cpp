@@ -5,7 +5,7 @@ void URollbackSimSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	FixedStepTime   = 1.0f / 60.0f;
+	FixedStepTime   = 0.016666667f;
 	TimeAccumulator = 0.0f;
 
 	WorldTickHandle =
@@ -32,8 +32,7 @@ void URollbackSimSubsystem::OnWorldTick(
 	float DeltaSeconds)
 {
 	// Only tick the actual game world
-	if (!World || !World->IsGameWorld())
-		return;
+	if (!World || !World->IsGameWorld()) return;
 
 	TimeAccumulator += DeltaSeconds;
 

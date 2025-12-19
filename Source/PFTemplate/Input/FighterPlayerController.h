@@ -15,13 +15,9 @@ class PFTEMPLATE_API AFighterPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	AFighterPlayerController();
 	void UpdateInput(int32 Frame, FFighterInput &NewInput);
 
-	void DummyAction(const FInputActionValue&)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Pressing Button"));
-	}
+	void DummyAction(const FInputActionValue&){}
 
 protected:
 	virtual void SetupInputComponent() override;
@@ -60,13 +56,10 @@ protected:
 	bool IsPressed(const UInputAction* Action) const;
 	FVector2D GetVec2(const UInputAction* Action) const;
 
-	FFighterInput GetInputByFrame(int32 FrameNumber) const {return InputHistory[FrameNumber];}
-
 private:
 
 	float DEAD_ZONE = 0.1f;
-
-	TArray<FFighterInput> InputHistory;
-	EInputButton PrevButtonsDown = EInputButton::None;
+	
+	uint16 PrevButtonsDown;
 
 };
