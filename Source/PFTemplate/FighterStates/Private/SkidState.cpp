@@ -13,7 +13,7 @@ bool USkidState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
 	if (FramesInState == SkidDuration)
 	{
-		FighterPawnRef->SetCurrentAnimation("Idle");
+		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}

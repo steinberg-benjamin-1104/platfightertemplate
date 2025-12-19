@@ -19,5 +19,5 @@ public:
 
 private:
 	FFixed_32 Reduction;
-	int32 SkidDuration;
+	int32 SkidDuration = 28;
 };
