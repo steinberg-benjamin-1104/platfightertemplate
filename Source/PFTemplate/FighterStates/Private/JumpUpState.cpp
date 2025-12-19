@@ -2,9 +2,14 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
+void UJumpUpState::OnEnter(FFighterInput& Input)
+{
+	FighterPawnRef->SetCurrentAnimation("JumpUp");
+}
+
 bool UJumpUpState::HandlePhysics(FFighterInput& Input)
 {
-	MoveComp->ApplyAirDrift(Input.Stick.Current.X);
+	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
 	return false;
 }
 

@@ -7,7 +7,7 @@
 void UWalkingState::OnEnter(FFighterInput& Input)
 {
 	FighterPawnRef->SetCurrentAnimation("Walk");
-	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
 
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 
@@ -24,7 +24,7 @@ bool UWalkingState::HandlePhysics(FFighterInput& Input)
 
 bool UWalkingState::HandleStickInput(FFighterInput& Input)
 {
-	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
 
 	FStickState &StickState = Input.Stick;
 	if (StickState.bFlick)

@@ -402,7 +402,7 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 {
 	const FStickState& StickState = Input.Stick;
 	
-	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPosition : StickState.Current;
+	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPos : StickState.StickPos;
 	const EStickDir StickDir = GetStickDirection(StickPos, IsFacingRight());
 	
 	const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir);

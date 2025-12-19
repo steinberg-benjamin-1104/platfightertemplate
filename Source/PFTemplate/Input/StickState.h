@@ -7,69 +7,62 @@ USTRUCT()
 struct FStickState
 {
 	GENERATED_BODY()
-	// Raw input
-	FFixedVector2D Current = FFixedVector2D();
-	FFixedVector2D Previous = FFixedVector2D();
-
-	// Derived states
+	
+	FFixedVector2D StickPos = FFixedVector2D();
+	
 	bool bDownThisFrame = false;        
-	bool bLeftThisFrame = false;
-	bool bRightThisFrame = false;
-	bool bUpThisFrame = false;
-
 	bool bFlick = false;                
-	FFixedVector2D FlickPosition = FFixedVector2D();
-
-	bool bWalking = false;              
-
+	
 	// Config
 	FFixed_32 DownThreshold  = FFixed_32(0.5f);
-	FFixed_32 FlickThreshold = FFixed_32(0.7f);
-	FFixed_32 WalkRadius     = FFixed_32(0.4f);
+	FFixed_32 FlickStart = FFixed_32(0.4f);
+	FFixed_32 FlickEnd = FFixed_32(0.7f);
 
 	// Flick buffer (added)
+	FFixedVector2D FlickPos = FFixedVector2D();
 	int32 FlickBufferFrames = 0;
 	int32 MaxFlickBufferFrames = 5;
 
-	void PrepareForNextFrame(FFixedVector2D New)
-	{
-		Previous = Current;
-		Current = New;
-	}
+	void ConsumeFlick() { FlickBufferFrames = 0; }
 };
 
-inline void UpdateStickState(FStickState& S, FFixedVector2D NewStickInput)
+inline void UpdateStickState(FStickState& S, FFixedVector2D New, FFixedVector2D Old)
 {
-	S.PrepareForNextFrame(NewStickInput);
-
-	S.bDownThisFrame  = (S.Current.Z < -S.DownThreshold) && !(S.Previous.Z < -S.DownThreshold);
-	S.bUpThisFrame    = (S.Current.Z >  S.DownThreshold) && !(S.Previous.Z >  S.DownThreshold);
-
-	S.bLeftThisFrame  = (S.Current.X < -S.DownThreshold) && !(S.Previous.X < -S.DownThreshold);
-	S.bRightThisFrame = (S.Current.X >  S.DownThreshold) && !(S.Previous.X >  S.DownThreshold);
-
-	bool FlickX = (S.Current.X.Abs() > S.FlickThreshold && S.Previous.X.Abs() < S.FlickThreshold);
-	bool FlickY = (S.Current.Z.Abs() > S.FlickThreshold && S.Previous.Z.Abs() < S.FlickThreshold);
+	S.StickPos = New;
 	
+	S.bDownThisFrame = false;
+	if ((S.StickPos.Z < -S.DownThreshold) && !(Old.Z < -S.DownThreshold))
+	{
+		S.bDownThisFrame = true;
+	}
+
+	auto FlickAxis = [&](FFixed_32 Curr, FFixed_32 Prev)
+	{
+		const bool bCurrStrong = Curr.Abs() >= S.FlickEnd;
+		const bool bPrevNeutral = Prev.Abs() <= S.FlickStart;
+
+		const bool bSignFlip =
+			Prev.Abs() >= S.FlickEnd &&
+			((Curr > FFixed_32(0)) != (Prev > FFixed_32(0)));
+
+		return bCurrStrong && (bPrevNeutral || bSignFlip);
+	};
+
+	bool FlickX = FlickAxis(S.StickPos.X, Old.X);
+	bool FlickY = FlickAxis(S.StickPos.Z, Old.Z);
+
 	if (FlickX || FlickY)
 	{
 		S.FlickBufferFrames = S.MaxFlickBufferFrames;
 		S.bFlick = true;
-		S.FlickPosition = S.Current;
+		S.FlickPos = S.StickPos;
+	}
+	else if (S.FlickBufferFrames > 0)
+	{
+		S.FlickBufferFrames--;
 	}
 	else
 	{
-		if (S.FlickBufferFrames > 0)
-		{
-			S.FlickBufferFrames--;
-			S.bFlick = true;
-		}
-		else
-		{
-			S.bFlick = false;
-			S.FlickPosition = FFixedVector2D();
-		}
+		S.bFlick = false;
 	}
-
-	S.bWalking = (S.Current.X.Abs() <= S.WalkRadius);
 }

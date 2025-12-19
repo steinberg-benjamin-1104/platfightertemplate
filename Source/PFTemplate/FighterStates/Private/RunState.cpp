@@ -13,16 +13,18 @@ void URunState::OnEnter(FFighterInput& NewInput)
 
 bool URunState::HandleStickInput(FFighterInput& Input)
 {
-	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
+
+	if (StickDir == EStickDir::Backward)
+	{
+		StateMachine->ChangeFighterState("Skid", Input);
+		return true;
+	}
+	
 	if (StickDir == EStickDir::Center)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle", Input);
-		return true;
-	}
-	if (StickDir == EStickDir::Backward)
-	{
-		StateMachine->ChangeFighterState("Skid", Input);
 		return true;
 	}
 	return false;

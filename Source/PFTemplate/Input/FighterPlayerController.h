@@ -61,5 +61,6 @@ private:
 	float DEAD_ZONE = 0.1f;
 	
 	uint16 PrevButtonsDown;
+	FFixedVector2D PrevStick;
 
 };

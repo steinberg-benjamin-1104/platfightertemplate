@@ -14,7 +14,7 @@ void UDashState::OnEnter(FFighterInput& NewInput)
 {
 	FighterPawnRef->SetCurrentAnimation("Dash");
 
-	EStickDir StickDir = GetStickDirection(NewInput.Stick.Current, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(NewInput.Stick.StickPos, FighterPawnRef->IsFacingRight());
 	
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
@@ -24,7 +24,7 @@ void UDashState::OnEnter(FFighterInput& NewInput)
 
 bool UDashState::HandleStickInput(FFighterInput& Input)
 {
-	EStickDir StickDir = GetStickDirection(Input.Stick.Current, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
 	
 	if (StickDir == EStickDir::Backward && Input.Stick.bFlick)
 	{
@@ -78,12 +78,13 @@ bool UDashState::HandleTimer(FFighterInput& NewInput, int32 FramesInState)
 {
 	if (FramesInState == DashDuration)
 	{
-		EStickDir StickDir = GetStickDirection(NewInput.Stick.Current, FighterPawnRef->IsFacingRight());
+		EStickDir StickDir = GetStickDirection(NewInput.Stick.StickPos, FighterPawnRef->IsFacingRight());
 		if (StickDir == EStickDir::Forward)
 		{
 			StateMachine->ChangeFighterState("Run", NewInput);
 			return true;
 		}
+		
 		if (StickDir == EStickDir::Backward && NewInput.Stick.bFlick)
 		{
 			StateMachine->ChangeFighterState("Dash", NewInput);

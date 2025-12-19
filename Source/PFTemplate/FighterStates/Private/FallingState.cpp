@@ -9,18 +9,18 @@ bool UFallingState::HandleButtonInput(FFighterInput& NewInput)
 {
 	FButtonState &ButtonState = NewInput.Button;
 	
-	// if (ButtonState.IsPressed(EInputButton::Jump))
-	// {
-	// 	if (MoveComp->DoHop(EHopType::Air))
-	// 	{
-	// 		FFixedVector2D Velocity = MoveComp->GetVelocity();
-	// 		Velocity.X = NewInput.Stick.Current.X * MoveComp->MaxAirSpeed;
-	// 		MoveComp->SetVelocity(Velocity);
-	// 		
-	// 		StateMachine->ChangeFighterState("Rising", NewInput);
-	// 		return true;
-	// 	}
-	// }
+	if (ButtonState.IsPressed(EInputButton::Jump))
+	{
+		if (MoveComp->DoHop(EHopType::Air))
+		{
+			FFixedVector2D Velocity = MoveComp->GetVelocity();
+			Velocity.X = NewInput.Stick.StickPos.X * MoveComp->MaxAirSpeed;
+			MoveComp->SetVelocity(Velocity);
+			
+			StateMachine->ChangeFighterState("Rising", NewInput);
+			return true;
+		}
+	}
 	
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
@@ -53,23 +53,23 @@ bool UFallingState::HandlePhysics(FFighterInput& Input)
 
 bool UFallingState::HandleStickInput(FFighterInput& Input)
 {
-	// if (!MoveComp->bIsFastFalling && Input.Stick.bDownThisFrame)
-	// {
-	// 	MoveComp->bIsFastFalling = true;
-	// }
-	//
-	// //MoveComp->ApplyAirDrift(Input.Stick.Current.X);
-	//
-	// ALedge* NearbyLedge = DetectNearbyLedge();
-	// if (NearbyLedge)
-	// {
-	// 	float IsRight = NearbyLedge->IsRight ? 1.0f : -1.0f;
-	// 	FighterPawnRef->SetFacingDirection(IsRight * -1.f);
-	// 	FighterPawnRef->SetActorLocation(NearbyLedge->GetActorLocation() + FVector(25.f * IsRight, 0.f, -200.f));
-	// 	FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
-	// 	return true;
-	// }
-	//
+	if (!MoveComp->bIsFastFalling && Input.Stick.bDownThisFrame)
+	{
+		MoveComp->bIsFastFalling = true;
+	}
+	
+	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
+	
+	ALedge* NearbyLedge = DetectNearbyLedge();
+	if (NearbyLedge)
+	{
+		float IsRight = NearbyLedge->IsRight ? 1.0f : -1.0f;
+		FighterPawnRef->SetFacingDirection(IsRight * -1.f);
+		FighterPawnRef->SetActorLocation(NearbyLedge->GetActorLocation() + FVector(25.f * IsRight, 0.f, -200.f));
+		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
+		return true;
+	}
+	
 	return false;
 }
 

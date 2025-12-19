@@ -34,6 +34,6 @@ bool UAirAttackState::HandleStickInput(FFighterInput& Input)
 		MoveComp->bIsFastFalling = true;
 	}
 	
-	MoveComp->ApplyAirDrift(Input.Stick.Current.X);
+	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
 	return false;
 }

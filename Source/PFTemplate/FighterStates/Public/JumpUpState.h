@@ -10,6 +10,7 @@ class PFTEMPLATE_API UJumpUpState : public UFallingState
 	GENERATED_BODY()
 
 public:
+	virtual void OnEnter(FFighterInput& Input) override;
 	virtual bool HandleStickInput(FFighterInput& Input) override;
 	virtual bool HandlePhysics(FFighterInput& Input) override;
 	

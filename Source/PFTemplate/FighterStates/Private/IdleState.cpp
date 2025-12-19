@@ -61,19 +61,22 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 
 bool UIdleState::HandleStickInput(FFighterInput& NewInput)
 {
-	FStickState &StickState = NewInput.Stick;
-	if (StickState.bFlick)
+	FStickState Stick = NewInput.Stick;
+	EStickDir Stickdir = GetStickDirection(Stick.StickPos, FighterPawnRef->IsFacingRight());
+	
+	bool X = (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Forward);
+	if (Stick.bFlick && X)
 	{
+		NewInput.Stick.ConsumeFlick();
 		FighterPawnRef->StateMachine->ChangeFighterState("Dash", NewInput);
 		return true;
 	}
-
-	//active when it's not supposed to be
-	// if (StickState.bWalking)
-	// {
-	// 	StateMachine->ChangeFighterState("Walking", NewInput);
-	// 	return true;
-	// }
+	
+	if (X)
+	{
+		StateMachine->ChangeFighterState("Walking", NewInput);
+		return true;
+	}
 
 	return false;
 }

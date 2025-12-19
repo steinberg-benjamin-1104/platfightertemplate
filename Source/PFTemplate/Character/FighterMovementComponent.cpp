@@ -175,32 +175,35 @@ void UFighterMovementComponent::ApplyCustomFriction(FFixed_32 Friction)
 
 void UFighterMovementComponent::ApplyAirDrift(FFixed_32 StickX)
 {
-	if (StickX == FFixed_32(0.f)) //no stick input
+	if (StickX == FFixed_32(0.f)) // no stick input
 	{
-		FFixed_32 Decel = AirFriction.ToFixed() * FixedDt;
-    
-		// apply deceleration toward zero
+		const FFixed_32 Decel = AirFriction.ToFixed() * FixedDt;
+
 		if (Velocity.X > FFixed_32(0.f))
-			Velocity.X = FixedMax(0.f, Velocity.X - Decel);
+			Velocity.X = FixedMax(FFixed_32(0.f), Velocity.X - Decel);
 		else if (Velocity.X < FFixed_32(0.f))
-			Velocity.X = FixedMin(0.f, Velocity.X + Decel);
+			Velocity.X = FixedMin(FFixed_32(0.f), Velocity.X + Decel);
+
 		return;
 	}
-	
-	// Compute target speed
+
+	// Target horizontal speed
 	const FFixed_32 TargetSpeed = StickX * MaxAirSpeed;
-	
-	// Apply acceleration toward target speed
-	if (Velocity.X < TargetSpeed)
+
+	// Per-frame acceleration amount
+	const FFixed_32 MaxDelta = AirAcceleration * FixedDt;
+
+	// Difference to target
+	const FFixed_32 SpeedDiff = TargetSpeed - Velocity.X;
+
+	// Move toward target speed without overshooting
+	if (SpeedDiff > FFixed_32(0.f))
 	{
-		const FFixed_32 DeltaSpeed = (TargetSpeed - Velocity.X) * AirAcceleration * FixedDt;
-		Velocity.X += DeltaSpeed.Sign();
-	
-		// Clamp to target
-		if ((TargetSpeed - Velocity.X) * DeltaSpeed < 0.f)
-		{
-			Velocity.X = TargetSpeed;
-		}
+		Velocity.X += FixedMin(SpeedDiff, MaxDelta);
+	}
+	else if (SpeedDiff < FFixed_32(0.f))
+	{
+		Velocity.X += FixedMax(SpeedDiff, -MaxDelta);
 	}
 }
 

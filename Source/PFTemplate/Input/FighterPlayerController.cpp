@@ -14,20 +14,23 @@ FFighterInput AFighterPlayerController::BuildInput()
 {
     FFighterInput Out;
     
-    FFixed_32 X = FloatToFixed(GetVec2(MoveAction).X);
-    FFixed_32 Y = FloatToFixed(GetVec2(MoveAction).Y);
-    UpdateStickState(Out.Stick, FFixedVector2D(X, Y));
+    const FFixedVector2D Stick = ReadStick();
+    UpdateStickState(Out.Stick, Stick, PrevStick);
     
     uint16 Current = 0;
 
     if (IsPressed(AttackAction)) Current |= static_cast<uint32>(EInputButton::Attack);
     if (IsPressed(SpecialAction)) Current |= static_cast<uint32>(EInputButton::Special);
     if (IsPressed(ShieldAction)) Current |= static_cast<uint32>(EInputButton::Shield);
+    if (IsPressed(JumpAction)) Current |= static_cast<uint32>(EInputButton::Jump);
+    if (IsPressed(ParryAction)) Current |= static_cast<uint32>(EInputButton::Parry);
+    if (IsPressed(GrabAction)) Current |= static_cast<uint32>(EInputButton::Grab);
 
     Out.Button.Down     = Current;
     Out.Button.Pressed  = Current & ~PrevButtonsDown;
 
     PrevButtonsDown = Current;
+    PrevStick = Stick;
 
     return Out;
 }
