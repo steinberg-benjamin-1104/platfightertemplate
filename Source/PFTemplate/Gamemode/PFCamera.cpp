@@ -55,8 +55,8 @@ void APFCamera::UpdateCamera()
 
     UpdateCameraZoom(TargetBounds);
     UpdateCameraLocation(TargetBounds);
-    // DrawDebugBounds(CalcCameraProjectionBounds(GetActorLocation()));
-    // DrawDebugBounds(CameraBounds);
+    DrawDebugBounds(CalcCameraProjectionBounds(GetActorLocation()));
+    DrawDebugBounds(CameraBounds);
 }
 
 void APFCamera::UpdateCameraLocation(const FBoxBounds& TargetBounds)

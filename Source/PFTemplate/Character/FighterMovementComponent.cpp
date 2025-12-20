@@ -312,6 +312,27 @@ void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall)
 	}
 }
 
+void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall, FFixedVector2D& InVelocity)
+{
+	const FFixed_32 CurrentSpeed = InVelocity.X.Abs();
+	int32 Direction = InVelocity.X.Sign();
+
+	if (!WillStayGroundedNextFrame(CurrentSpeed, Direction))
+	{
+		if (bPreventFall)
+		{
+			InVelocity.X = FFixed_32(0.f);
+			SnapToNearestGroundBehindStep(Direction);
+			SetMovementMode(EFighterMovementMode::Grounded);
+		}
+		else
+		{
+			SetMovementMode(EFighterMovementMode::Falling);
+			JumpsRemaining--;
+		}
+	}
+}
+
 bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 {
 	const int32 FacingDir = FighterPawnRef->IsFacingRight() ? 1 : -1;
@@ -460,4 +481,26 @@ bool UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InV
 		return true;
 	}
 	return false;
+}
+
+void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall)
+{
+	FFixedVector2D TempVelocity = Movement / FixedDt;
+	FFixedHitResult WallHit, GroundHit, CeilingHit;
+	bool bHitWall = PerformWallCollisionCheck(TempVelocity, WallHit);
+	
+	if (CurrentMovementMode == EFighterMovementMode::Falling)
+	{
+		if (PerformGroundCollisionCheck(TempVelocity, GroundHit, bHitWall)) //change to bHitWall
+		{
+			ProcessLanded();
+			return;
+		}
+	}
+	PerformCeilingCollisionCheck(TempVelocity, CeilingHit, bHitWall);
+	PreventLedgeFall(bPreventLedgeFall, Movement);
+	FVector DesiredMove = Fixed2DToVector(TempVelocity * FixedDt);
+	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
+	
+	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
 }

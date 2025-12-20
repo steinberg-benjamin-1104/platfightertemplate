@@ -51,7 +51,7 @@ protected:
 	UInputAction* ParryAction;
 	
 	FFighterInput BuildInput();
-	FFixedVector2D ReadStick() const;
+	FFixedVector2D ReadStick(bool bSmallClamp) const;
 
 	bool IsPressed(const UInputAction* Action) const;
 	FVector2D GetVec2(const UInputAction* Action) const;

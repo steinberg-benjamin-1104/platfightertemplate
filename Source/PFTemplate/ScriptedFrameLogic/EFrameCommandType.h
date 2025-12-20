@@ -12,8 +12,7 @@ enum class EFrameCommandType : uint8
 	ClearHitboxes UMETA(DisplayName = "Clear Hitboxes"),
 	PlaySound UMETA(DisplayName = "Play Sound"),
 	PlayVFX UMETA(DisplayName = "Trigger VFX"),
-	SetVelocity UMETA(DisplayName = "Set Velocity"),
-	StopVelocity UMETA(DisplayName = "Stop Velocity"),
+	SetDisplacement UMETA(DisplayName = "Set Displacement"),
 	ToggleHurtboxI UMETA(DisplayName = "Toggle Hurtbox Invulnerability"),
 	Custom UMETA(DisplayName = "Custom")
 };

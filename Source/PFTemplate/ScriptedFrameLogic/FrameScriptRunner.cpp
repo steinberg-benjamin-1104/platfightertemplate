@@ -102,16 +102,11 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFigh
 			break;
 		}
 
-		case EFrameCommandType::SetVelocity:
+		case EFrameCommandType::SetDisplacement:
 		{
-			//figure out later
-			break;
-		}
-
-		case EFrameCommandType::StopVelocity:
-		{
-			//figure out later
-			break;
+			FFixedVector2D Displacement = Cmd.VectorParam.ToFixed();
+			Displacement.X *= FighterPawnRef->GetFacingDirection();
+			FighterPawnRef->MovementComponent->ManualDisplacement(Displacement, Cmd.BoolParam);
 		}
 
 		case EFrameCommandType::ToggleHurtboxI:

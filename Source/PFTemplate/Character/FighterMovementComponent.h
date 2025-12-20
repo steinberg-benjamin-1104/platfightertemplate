@@ -107,6 +107,7 @@ public:
 	void StopMovementCompletely(bool bStopCollision = false);
 	
 	void PreventLedgeFall(bool bPreventFall);
+	void PreventLedgeFall(bool bPreventFall, FFixedVector2D& InVelocity);
 
 	bool IsStandingOnFacingLedge() const;
 	
@@ -118,6 +119,8 @@ public:
 	bool bDoCollisionChecks = true;
 
 	EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
+
+	void ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall);
 
 protected:
 	

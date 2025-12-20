@@ -25,13 +25,6 @@ bool UWalkingState::HandlePhysics(FFighterInput& Input)
 bool UWalkingState::HandleStickInput(FFighterInput& Input)
 {
 	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
-
-	FStickState &StickState = Input.Stick;
-	if (StickState.bFlick)
-	{
-		FighterPawnRef->StateMachine->ChangeFighterState("Dash", Input);
-		return true;
-	}
 	
 	if (StickDir == EStickDir::Center)
 	{
@@ -42,8 +35,10 @@ bool UWalkingState::HandleStickInput(FFighterInput& Input)
 
 	if (StickDir == EStickDir::Backward)
 	{
-		StateMachine->ChangeFighterState("Walk", Input);
-		return true;
+		FighterPawnRef->FlipFacingDirection();
+		FFixedVector2D Velocity = MoveComp->GetVelocity();
+		Velocity.X = Velocity.X * FFixed_32(-1.f);
+		MoveComp->SetVelocity(Velocity);
 	}
 
 	return false;
