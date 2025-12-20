@@ -7,7 +7,7 @@
 
 struct FFixedHitResult
 {
-	FFixedVector2D Position;
+	FFixedVector2D ImpactPoint;
 	FFixedVector2D Normal;
 	FFixed_32        Distance;
 	bool            bBlockingHit = false;
@@ -60,7 +60,7 @@ static FFixedHitResult FixedLineTrace(
 
 	if (bHit)
 	{
-		Out.Position = VectorToFixed2D(Hit.Location);
+		Out.ImpactPoint = VectorToFixed2D(Hit.Location);
 		Out.Normal   = VectorToFixed2D(Hit.Normal);
 		Out.Distance = FloatToFixed(Hit.Distance);
 	}
@@ -88,7 +88,7 @@ static FFixedHitResult FixedSweepBox(const UWorld* World,
 	Out.bBlockingHit = bHit;
 	if (bHit)
 	{
-		Out.Position  = VectorToFixed2D(Hit.Location);
+		Out.ImpactPoint  = VectorToFixed2D(Hit.Location);
 		Out.Normal    = VectorToFixed2D(Hit.Normal);
 		Out.Distance  = FloatToFixed(Hit.Distance);
 	}
@@ -115,7 +115,7 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 	Out.bBlockingHit = bHit;
 	if (bHit)
 	{
-		Out.Position  = VectorToFixed2D(Hit.Location);
+		Out.ImpactPoint  = VectorToFixed2D(Hit.ImpactPoint);
 		Out.Normal    = VectorToFixed2D(Hit.Normal);
 		Out.Distance  = FloatToFixed(Hit.Distance);
 	}

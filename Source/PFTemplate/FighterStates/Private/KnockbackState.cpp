@@ -135,9 +135,9 @@ FFixedHitResult UKnockbackState::DoCollisionCheck(FFixedVector2D &InVelocity)
 {
 	FFixedHitResult CeilingHit, GroundHit, WallHit;
 	
+	bool bGround = MoveComp->PerformGroundCollisionCheck(InVelocity, GroundHit);
+	bool bCeiling = MoveComp->PerformCeilingCollisionCheck(InVelocity, CeilingHit);
 	bool bWall = MoveComp->PerformWallCollisionCheck(InVelocity, WallHit);
-	bool bGround = MoveComp->PerformGroundCollisionCheck(InVelocity, GroundHit, bWall);
-	bool bCeiling = MoveComp->PerformCeilingCollisionCheck(InVelocity, CeilingHit, bWall);
 
 	if (bGround) return GroundHit;
 	if (bWall) return WallHit;

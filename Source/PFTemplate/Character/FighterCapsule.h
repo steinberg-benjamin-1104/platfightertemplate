@@ -67,4 +67,9 @@ struct FFighterCapsule
 		Bottom.Z -= HalfHeight;
 		return Bottom;
 	}
+
+	FFixed_32 GetRadiusWithBuffer() const
+	{
+		return Radius.ToFixed() + bufferlayer;
+	}
 };

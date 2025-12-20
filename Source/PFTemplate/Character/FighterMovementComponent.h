@@ -60,8 +60,8 @@ public:
 	void ApplyFallingGravity();
 	void PerformCollisionChecks();
 	bool PerformWallCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit);
-	bool PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit, bool bHitWall);
-	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit, bool bHitWall);
+	bool PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit);
+	bool PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult& OutHit);
 	
 	void UpdateJumpRise();
 	void ApplyAirDrift(FFixed_32 StickX);
