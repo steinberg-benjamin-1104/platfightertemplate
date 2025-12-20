@@ -383,12 +383,11 @@ void UFighterMovementComponent::PerformCollisionChecks()
 
 bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelocity, FFixedHitResult& OutHit)
 {
-	const FFixedVector2D Start = CollisionCapsule.GetCenter();
-	const FFixed_32 SmallCheckDist = FFixed_32(0.2f) * CollisionCapsule.Radius;
+	FFixedVector2D Start = CollisionCapsule.GetCenter();
 	const FFixedVector2D TraceDelta = InVelocity * FixedDt;
 
 	// Horizontal velocity case
-	if (InVelocity.X.Abs() != FFixed_32(0.f))
+	if (InVelocity.X != FFixed_32(0.f))
 	{
 		const FFixedVector2D End = Start + TraceDelta;
 		OutHit = FixedSweepCapsule(GetWorld(), Start, End, CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
@@ -396,7 +395,7 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelo
 			if (OutHit.Normal.X.Abs() > FFixed_32(0.5f))
 			{
 				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
-				ActorLoc.X = OutHit.Position.X + OutHit.Normal.X * CollisionCapsule.bufferlayer;
+				ActorLoc.X = OutHit.Position.X + (OutHit.Normal.X * CollisionCapsule.bufferlayer);
 				FighterPawnRef->SetFixedLoc(ActorLoc);
 				InVelocity.X = FFixed_32(0.f);
 				CollisionCapsule.UpdateCenter(ActorLoc);
@@ -406,18 +405,17 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelo
 	}
 	else // No horizontal velocity: check small forward/back traces
 	{
-		const FFixedVector2D ForwardStart  = Start + FFixedVector2D(SmallCheckDist, 0.f);
-		const FFixedVector2D BackwardStart = Start - FFixedVector2D(SmallCheckDist, 0.f);
+		const FFixed_32 SmallCheckDist = FFixed_32(1.f);
+		const FFixedVector2D ForwardEnd  = Start + FFixedVector2D(SmallCheckDist, 0.f);
+		const FFixedVector2D BackwardEnd = Start - FFixedVector2D(SmallCheckDist, 0.f);
 
-		FFixedHitResult ForwardHit  = FixedSweepCapsule(GetWorld(), Start, ForwardStart,  CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
-		FFixedHitResult BackwardHit = FixedSweepCapsule(GetWorld(), Start, BackwardStart, CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
+		FFixedHitResult ForwardHit  = FixedSweepCapsule(GetWorld(), Start, ForwardEnd,  CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
+		FFixedHitResult BackwardHit = FixedSweepCapsule(GetWorld(), Start, BackwardEnd, CollisionCapsule.Radius, CollisionCapsule.HalfHeight);
 
 		const FFixedHitResult* HitToUse = nullptr;
 
-		if (ForwardHit.bBlockingHit)
-			HitToUse = &ForwardHit;
-		else if (BackwardHit.bBlockingHit)
-			HitToUse = &BackwardHit;
+		if (ForwardHit.bBlockingHit) HitToUse = &ForwardHit;
+		else if (BackwardHit.bBlockingHit) HitToUse = &BackwardHit;
 
 		if (HitToUse)
 		{
