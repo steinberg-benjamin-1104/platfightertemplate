@@ -25,7 +25,7 @@ void UFighterMovementComponent::TickFMC()
 	FollowCapsule = CollisionCapsule;
 	ApplyMovementPhysics();
 
-	if (bDoCollisionChecks) PerformCollisionChecks();
+	if (bDoCollisionChecks) PerformCollisionChecks(Velocity);
 	
 	FVector DesiredMove = Fixed2DToVector(Velocity * FixedDt);
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
@@ -364,24 +364,24 @@ void UFighterMovementComponent::DrawDebugFighterCapsule(const FFighterCapsule& C
 	);
 }
 
-void UFighterMovementComponent::PerformCollisionChecks()
+void UFighterMovementComponent::PerformCollisionChecks(FFixedVector2D &InVelocity)
 {
-	FFixedHitResult WallHit, GroundHit, CeilingHit;
-	
-	if (Velocity.Z < FFixed_32(0.f))
+	if (InVelocity.Z < FFixed_32(0.f))
 	{
-		if (PerformGroundCollisionCheck(Velocity, GroundHit))
+		if (PerformGroundCollisionCheck(InVelocity).bBlockingHit)
 		{
 			ProcessLanded();
 		}
 	}
-	else PerformCeilingCollisionCheck(Velocity, CeilingHit);
-	PerformWallCollisionCheck(Velocity, WallHit);
+	else if (InVelocity.Z > FFixed_32(0.f)) PerformCeilingCollisionCheck(InVelocity);
+
+	PerformWallCollisionCheck(InVelocity);
 }
 
-bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelocity, FFixedHitResult& OutHit)
+FFixedHitResult UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelocity)
 {
-	//completely horizontal trace, start at assume new loc Z
+	FFixedHitResult OutHit;
+	
 	const FFixedVector2D Start = CollisionCapsule.GetCenter() + FFixedVector2D(0.f, InVelocity.Z * FixedDt);
 	const FFixedVector2D TraceDelta(InVelocity.X * FixedDt, 0.f);
 	
@@ -398,25 +398,32 @@ bool UFighterMovementComponent::PerformWallCollisionCheck(FFixedVector2D& InVelo
 				FighterPawnRef->SetFixedLoc(ActorLoc);
 				InVelocity.X = FFixed_32(0.f);
 				CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
-				return true;
+				return OutHit;
 			}
 		}
 	}
-	else //no horizontal velocity, but we want to check for walls anyways
+	else // no horizontal velocity, but still check for walls
 	{
 		const FFixed_32 SmallCheckDist = 2.f;
-		FFixedVector2D Temp1(SmallCheckDist, InVelocity.Z);
-		FFixedVector2D Temp2(-SmallCheckDist, InVelocity.Z);
-		if (PerformWallCollisionCheck(Temp1, OutHit)) return true;
-		if (PerformWallCollisionCheck(Temp2, OutHit)) return true;
+
+		FFixedVector2D TempRight(SmallCheckDist, InVelocity.Z);
+		FFixedVector2D TempLeft (-SmallCheckDist, InVelocity.Z);
+
+		FFixedHitResult HitRight = PerformWallCollisionCheck(TempRight);
+		FFixedHitResult HitLeft  = PerformWallCollisionCheck(TempLeft);
+
+		if (HitRight.bBlockingHit) return HitRight;
+		if (HitLeft.bBlockingHit) return HitLeft;
 	}
 
-	return false;
+	return OutHit;
 }
 
-bool UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult &OutHit)
+FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVelocity)
 {
-	if (InVelocity.Z >= FFixed_32(0.f)) return false;
+	FFixedHitResult OutHit;
+	if (InVelocity.Z >= FFixed_32(0.f)) return OutHit;
+	
 	FFixedVector2D Start = CollisionCapsule.GetBottom();
 	Start.X += InVelocity.X * FixedDt;
     
@@ -433,14 +440,15 @@ bool UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVe
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
-		return true;
 	}
-	return false;
+	
+	return OutHit;
 }
 
-bool UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InVelocity, FFixedHitResult &OutHit)
+FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InVelocity)
 {
-	if (InVelocity.Z <= 0.f) return false;
+	FFixedHitResult OutHit;
+	if (InVelocity.Z <= 0.f) return OutHit;
 	FFixedVector2D Start = CollisionCapsule.GetCenter() + FFixedVector2D(InVelocity.X * FixedDt, CollisionCapsule.HalfHeight);
 	FFixedVector2D End = Start + FFixedVector2D(0.f, InVelocity.Z * FixedDt);
 
@@ -453,27 +461,15 @@ bool UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InV
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
-		return true;
 	}
-	return false;
+	return OutHit;
 }
 
 void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall)
 {
 	FFixedVector2D TempVelocity = Movement / FixedDt;
-	FFixedHitResult WallHit, GroundHit, CeilingHit;
-	bool bHitWall = PerformWallCollisionCheck(TempVelocity, WallHit);
-	
-	if (CurrentMovementMode == EFighterMovementMode::Falling)
-	{
-		if (PerformGroundCollisionCheck(TempVelocity, GroundHit)) //change to bHitWall
-		{
-			ProcessLanded();
-			return;
-		}
-	}
-	PerformCeilingCollisionCheck(TempVelocity, CeilingHit);
-	PreventLedgeFall(bPreventLedgeFall, Movement);
+	PerformCollisionChecks(TempVelocity);
+	PreventLedgeFall(bPreventLedgeFall, TempVelocity);
 	FVector DesiredMove = Fixed2DToVector(TempVelocity * FixedDt);
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	

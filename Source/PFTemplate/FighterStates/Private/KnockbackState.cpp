@@ -133,15 +133,13 @@ FFixedVector2D UKnockbackState::CalcReflect(const FFixedVector2D& InVel, const F
 
 FFixedHitResult UKnockbackState::DoCollisionCheck(FFixedVector2D &InVelocity)
 {
-	FFixedHitResult CeilingHit, GroundHit, WallHit;
-	
-	bool bGround = MoveComp->PerformGroundCollisionCheck(InVelocity, GroundHit);
-	bool bCeiling = MoveComp->PerformCeilingCollisionCheck(InVelocity, CeilingHit);
-	bool bWall = MoveComp->PerformWallCollisionCheck(InVelocity, WallHit);
+	FFixedHitResult GroundHit = MoveComp->PerformGroundCollisionCheck(InVelocity);
+	FFixedHitResult CeilingHit = MoveComp->PerformCeilingCollisionCheck(InVelocity);
+	FFixedHitResult WallHit = MoveComp->PerformWallCollisionCheck(InVelocity);
 
-	if (bGround) return GroundHit;
-	if (bWall) return WallHit;
-	if (bCeiling) return CeilingHit;
+	if (GroundHit.bBlockingHit) return GroundHit;
+	if (WallHit.bBlockingHit) return WallHit;
+	if (CeilingHit.bBlockingHit) return CeilingHit;
 	return FFixedHitResult();
 }
 
