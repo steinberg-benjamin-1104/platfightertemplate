@@ -59,8 +59,10 @@ public:
 	void UpdateJumpRise();
 	void ApplyAirDrift(FFixed_32 StickX);
 	
-	//Divide by 3600 to get Smash Values
+	//Divide by 36000 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP Gravity = 3600.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP RisingGravity = 3600.f;
 	//Divide by 600 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
@@ -71,7 +73,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP MaxAirSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EHopType, FHopData> HopDataMap;
+	TMap<EHopType, FJumpData> JumpDataMap;
 	
 	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
 	FFixedVector2D GetVelocity() const { return Velocity; }
@@ -122,7 +124,7 @@ protected:
 	
 	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
 
-	UPROPERTY() FHopData CurrentHopData;
+	UPROPERTY() FJumpData CurrentHopData;
 	int HopCurrentFrame = 0;
 
 	UPROPERTY() FFighterCapsule FollowCapsule;

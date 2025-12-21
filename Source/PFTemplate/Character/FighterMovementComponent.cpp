@@ -72,23 +72,22 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 
 #pragma region JumpHandling
 
-// Called when starting a hop
+
 bool UFighterMovementComponent::DoHop(EHopType HopType)
 {
 	if (JumpsRemaining <= 0) return false;
 
-	const FHopData* HopData = HopDataMap.Find(HopType);
-	if (!HopData) return false;
+	const FJumpData* JumpData = JumpDataMap.Find(HopType);
+	if (!JumpData || JumpData->FramesToApex <= 0) return false;
 
 	CollisionCapsule.LiftBottom();
-	CurrentHopData = *HopData;
+	CurrentHopData = *JumpData;
 	HopCurrentFrame = 0;
 
-	Velocity.Z = 0.f;
-	Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed.ToFixed(), MaxAirSpeed);
+	//only find a velocity
+
 	SetMovementMode(EFighterMovementMode::JumpingUp);
 	JumpsRemaining--;
-
 	return true;
 }
 

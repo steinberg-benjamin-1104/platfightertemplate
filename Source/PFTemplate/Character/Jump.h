@@ -13,13 +13,14 @@ enum class EHopType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FHopData
+struct FJumpData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP Height = 0.f;
+	FFixed_32BP JumpHeight = 0.f;
 
+	//peak height is reached at this frame
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Frames = 0;
+	int32 FramesToApex = 0;
 };
