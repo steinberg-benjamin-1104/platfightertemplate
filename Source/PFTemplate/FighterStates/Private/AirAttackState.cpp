@@ -5,7 +5,7 @@
 
 bool UAirAttackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 {
-	if (FighterPawnRef->FrameScriptRunner->IsFinished())
+	if (FighterPawnRef->AnimFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling", 5);
 		StateMachine->ChangeFighterState("Falling", Input);

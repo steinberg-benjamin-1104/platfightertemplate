@@ -7,16 +7,9 @@
 #include "SafeMath.h"
 #include "SafeMathBP.h"
 #include "FixedCollision.h"
+#include "AnimMvmt.h"
+#include "FighterMovementMode.h"
 #include "FighterMovementComponent.generated.h"
-
-UENUM(BlueprintType)
-enum class EFighterMovementMode : uint8
-{
-	Grounded UMETA(DisplayName = "Grounded"),
-	JumpingUp UMETA(DisplayName = "Jumping Up"),
-	Falling UMETA(DisplayName = "Falling"),
-	None UMETA(DisplayName = "None")
-};
 
 class AFighterPawn;
 
@@ -106,8 +99,8 @@ public:
 	void HaltVerticalVelocity();
 	void StopMovementCompletely(bool bStopCollision = false);
 	
-	void PreventLedgeFall(bool bPreventFall);
-	void PreventLedgeFall(bool bPreventFall, FFixedVector2D& InVelocity);
+	void PreventLedgeFall(FFixedVector2D& InVelocity, bool bPreventFall);
+	void PreventLedgeFall(bool bPreventFall) { PreventLedgeFall(Velocity, bPreventFall); }
 
 	bool IsStandingOnFacingLedge() const;
 	
@@ -118,9 +111,12 @@ public:
 
 	bool bDoCollisionChecks = true;
 
-	EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
+	UPROPERTY() EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
 
 	void ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall);
+
+	void ApplyAnimMovement(int32 CurrentFrame);
+	void SetCurrAnimMvmt(const FAnimMvmt& InAnimMvmt) { CurrAnimMvmt = InAnimMvmt; }
 
 protected:
 	
@@ -129,7 +125,9 @@ protected:
 	UPROPERTY() FHopData CurrentHopData;
 	int HopCurrentFrame = 0;
 
-	FFighterCapsule FollowCapsule;
+	UPROPERTY() FFighterCapsule FollowCapsule;
+
+	UPROPERTY() FAnimMvmt CurrAnimMvmt;
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);

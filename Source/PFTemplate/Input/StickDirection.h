@@ -10,7 +10,8 @@ enum class EStickDir : uint8
 	Forward,
 	Backward,
 	Up,
-	Down
+	Down,
+	Any
 };
 
 FORCEINLINE static EStickDir GetStickDirection(const FFixedVector2D& Stick, bool bFacingRight)

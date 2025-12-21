@@ -13,6 +13,7 @@
 #include "FighterMovementComponent.h"
 #include "BoneVectorAxis.h"
 #include "AttackDefinition.h"
+#include "FighterAnimInstance.h"
 #include "StickDirection.h"
 
 #include "FighterPawn.generated.h"
@@ -171,6 +172,8 @@ public:
 
 	FFixedVector2D GetFixedLoc() const { return VectorToFixed2D(GetActorLocation()); }
 	void SetFixedLoc(FFixedVector2D InLoc) { SetActorLocation(Fixed2DToVector(InLoc)); }
+
+	bool AnimFinished() {return FighterAnimInstance->CurrentAnimFinished(); }
 
 protected:
 

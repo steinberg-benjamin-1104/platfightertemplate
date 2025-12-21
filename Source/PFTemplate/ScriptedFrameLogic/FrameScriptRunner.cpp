@@ -6,40 +6,19 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 
-void UFrameScriptRunnerComponent::LoadScript(const TArray<FFrameCommand>& NewCommands, int inDuration, bool bNewLoop)
+void UFrameScriptRunnerComponent::TickScript(FFighterInput &Input, int32 AnimFrame)
 {
-	Commands = NewCommands;
-	CommandIndex = 0;
-	Duration = inDuration;
-	CurrentFrame = 0;
-	bIsFinished = false;
-	bLoop = bNewLoop;
-}
-
-void UFrameScriptRunnerComponent::TickScript(FFighterInput &Input)
-{
-	++CurrentFrame;
+	if (AnimFrame == 1) CommandIndex = 0;
 	while (CommandIndex < Commands.Num())
 	{
 		const FFrameCommand& Cmd = Commands[CommandIndex];
 
-		if (Cmd.FrameExecution > CurrentFrame)
+		if (Cmd.FrameExecution > AnimFrame)
 			break;
 
 		ExecuteCommand(Cmd, Input);
 		++CommandIndex;
 	}
-
-	if (Duration > 0 && CurrentFrame >= Duration)
-	{
-		if (bLoop) CommandIndex = 0;
-		else bIsFinished = true;
-	}
-}
-
-bool UFrameScriptRunnerComponent::IsFinished() const
-{
-	return bIsFinished;
 }
 
 void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFighterInput& Input)

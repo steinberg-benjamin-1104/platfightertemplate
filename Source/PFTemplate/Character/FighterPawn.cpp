@@ -87,21 +87,20 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 
 void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 {
-	FighterAnimInstance->AdvanceFrame();
+	int32 AnimFrame = FighterAnimInstance->AdvanceFrame();
 	FighterAnimInstance->UpdateAnimation(FixedToFloat(FixedDt), false);
 	CharacterMesh->RefreshBoneTransforms();
 	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
+
+	MovementComponent->ApplyAnimMovement(AnimFrame);
 	
 	for (auto& Pair : HurtboxMap)
 	{
-		if (AHurtbox2D* Hurtbox = Pair.Value)
-		{
-			Hurtbox->TickHurtbox();
-		}
+		if (AHurtbox2D* Hurtbox = Pair.Value) Hurtbox->TickHurtbox();
 	}
 	
-	FrameScriptRunner->TickScript(Input);
+	FrameScriptRunner->TickScript(Input, AnimFrame);
 }
 
 void AFighterPawn::DetectCollisions()
@@ -193,8 +192,9 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
 	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
+	FrameScriptRunner->LoadScript(NewAni.Commands);
 	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
+	MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
 
 	return true;
 }
@@ -207,8 +207,9 @@ bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int BlendTime)
 	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni.Commands, NumFrames, NewAni.bIsLoop);
+	FrameScriptRunner->LoadScript(NewAni.Commands);
 	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames,BlendTime);
+	MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
 
 	return true;
 }
@@ -236,10 +237,9 @@ const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputMask, b
 		if (Def->bFlickInput != bFlickInput)
 			continue;
 
-		if (Def->StickDir != EStickDir::Center &&
-			Def->StickDir != StickDir)
+		if (Def->StickDir != EStickDir::Any & Def->StickDir != StickDir)
 			continue;
-
+		
 		return Def;
 	}
 

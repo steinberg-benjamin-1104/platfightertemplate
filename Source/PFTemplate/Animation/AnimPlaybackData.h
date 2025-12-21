@@ -12,7 +12,7 @@ struct FAnimPlaybackData
 	UAnimSequenceBase* Sequence = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl")
-	int32 Frame = 0;
+	int32 CurrentFrame = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl")
 	int32 TotalFrames = 0;
@@ -23,7 +23,7 @@ struct FAnimPlaybackData
 	FAnimPlaybackData(UAnimSequenceBase* InSequence = nullptr, int32 InFrame = 0, int32 InTotalFrames = 0, bool bInLooping = false)
 	{
 		Sequence = InSequence;
-		Frame = InFrame;
+		CurrentFrame = InFrame;
 		TotalFrames = InTotalFrames;
 		bLooping = bInLooping;
 	}
@@ -31,18 +31,19 @@ struct FAnimPlaybackData
 	void Reset()
 	{
 		Sequence = nullptr;
-		Frame = 0;
+		CurrentFrame = 0;
 		TotalFrames = 0;
 		bLooping = false;
 	}
 
 	bool IsValid() const { return Sequence && TotalFrames > 0; }
 
-	void AdvanceFrame()
+	int32 AdvanceFrame()
 	{
-		if (!IsValid()) return;
-
-		if (bLooping) Frame = (Frame + 1) % TotalFrames;
-		else Frame = FMath::Min(Frame + 1, TotalFrames - 1);
+		if (bLooping) CurrentFrame = (CurrentFrame + 1) % TotalFrames;
+		else CurrentFrame += 1;
+		return CurrentFrame;
 	}
+
+	bool AnimIsFinished() const { return CurrentFrame > TotalFrames; }
 };

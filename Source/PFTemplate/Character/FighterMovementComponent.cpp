@@ -3,8 +3,6 @@
 #include "DrawDebugHelpers.h"
 #include "FighterPawn.h"
 #include "FixedCollision.h"
-#include "LandscapeRender.h"
-#include "VectorUtil.h"
 
 UFighterMovementComponent::UFighterMovementComponent()
 {
@@ -96,32 +94,14 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 
 void UFighterMovementComponent::UpdateJumpRise()
 {
-	if (!CurrentHopData.Curve || CurrentHopData.Frames <= 0)
-	{
-		SetMovementMode(EFighterMovementMode::Falling);
-		return;
-	}
-
-	const FFixed_32 Alpha =
-		FloatToFixed(static_cast<float>(HopCurrentFrame) / static_cast<float>(CurrentHopData.Frames));
-	const FFixed_32 HeightRatio =
-		FloatToFixed(CurrentHopData.Curve->GetFloatValue(FixedToFloat(Alpha)));
-
-	const FFixed_32 CurrentHeight = HeightRatio * CurrentHopData.Height;
-
-	const FFixed_32 PrevAlpha = FixedClamp(
-		FloatToFixed(static_cast<float>(HopCurrentFrame - 1) /
-					 static_cast<float>(CurrentHopData.Frames)),
-		FloatToFixed(0.f),
-		FloatToFixed(1.f)
+	if (!CurrentHopData.Curve || CurrentHopData.Frames <= 0) return;
+	
+	const FFixed_32 DeltaHeight = FixedCurveDeltaMagnitude(
+		CurrentHopData.Curve,
+		HopCurrentFrame,
+		CurrentHopData.Frames,
+		CurrentHopData.Height
 	);
-
-	const FFixed_32 PrevHeightRatio =
-		FloatToFixed(CurrentHopData.Curve->GetFloatValue(FixedToFloat(PrevAlpha)));
-
-	const FFixed_32 PrevHeight = PrevHeightRatio * CurrentHopData.Height;
-
-	const FFixed_32 DeltaHeight = CurrentHeight - PrevHeight;
 
 	Velocity.Z = DeltaHeight / FixedDt;
 	HopCurrentFrame++;
@@ -291,29 +271,9 @@ void UFighterMovementComponent::HaltVerticalVelocity()
 	Velocity.Z = FFixed_32(0.f);
 }
 
-void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall)
+void UFighterMovementComponent::PreventLedgeFall(FFixedVector2D& InVelocity, bool bPreventFall)
 {
-	const FFixed_32 CurrentSpeed = Velocity.X.Abs();
-	int32 Direction = Velocity.X.Sign();
-
-	if (!WillStayGroundedNextFrame(CurrentSpeed, Direction))
-	{
-		if (bPreventFall)
-		{
-			HaltHorizontalVelocity();
-			SnapToNearestGroundBehindStep(Direction);
-			SetMovementMode(EFighterMovementMode::Grounded);
-		}
-		else
-		{
-			SetMovementMode(EFighterMovementMode::Falling);
-			JumpsRemaining--;
-		}
-	}
-}
-
-void UFighterMovementComponent::PreventLedgeFall(bool bPreventFall, FFixedVector2D& InVelocity)
-{
+	if (!IsGrounded()) return;
 	const FFixed_32 CurrentSpeed = InVelocity.X.Abs();
 	int32 Direction = InVelocity.X.Sign();
 
@@ -465,13 +425,65 @@ FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVe
 	return OutHit;
 }
 
-void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall)
+void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not velocity*/, bool bPreventLedgeFall)
 {
 	FFixedVector2D TempVelocity = Movement / FixedDt;
 	PerformCollisionChecks(TempVelocity);
-	PreventLedgeFall(bPreventLedgeFall, TempVelocity);
+	PreventLedgeFall(TempVelocity, bPreventLedgeFall);
 	FVector DesiredMove = Fixed2DToVector(TempVelocity * FixedDt);
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	
 	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
+}
+
+void UFighterMovementComponent::ApplyAnimMovement(int32 CurrentFrame)
+{
+	if (CurrAnimMvmt.EndFrame == 0) return;
+	if (CurrentFrame >= CurrAnimMvmt.StartFrame && CurrentFrame <= CurrAnimMvmt.EndFrame)
+	{
+		if (CurrentFrame == CurrAnimMvmt.StartFrame) CurrentMovementMode = CurrAnimMvmt.Mode;
+	
+		const int32 AnimLengthFrames = CurrAnimMvmt.EndFrame - CurrAnimMvmt.StartFrame;
+		if (AnimLengthFrames <= 0) return;
+	
+		auto EvalAxisDelta = [&](const FAxisMovement& Axis) -> FFixed_32
+		{
+			if (!Axis.Curve) return FFixed_32(0.f);
+		
+			const int32 LocalFrame = CurrentFrame - CurrAnimMvmt.StartFrame;
+
+			return FixedCurveDeltaMagnitude(Axis.Curve, LocalFrame, AnimLengthFrames, Axis.TotalDisplacement);
+		};
+
+		FFixedVector2D Movement;
+		Movement.X = EvalAxisDelta(CurrAnimMvmt.X) * FighterPawnRef->GetFacingDirection();
+		Movement.Z = EvalAxisDelta(CurrAnimMvmt.Z);
+
+		Velocity = Movement / FixedDt;
+		PreventLedgeFall(CurrAnimMvmt.bPreventLedgeFall);
+	}
+	
+	else if (CurrentFrame == CurrAnimMvmt.EndFrame + 1)
+	{
+		auto ApplyPostVelocity = [&](const FAxisMovement& Axis, FFixed_32& VelocityComponent)
+		{
+			switch (Axis.PostMovement)
+			{
+			case EPostMovementVelocityMode::Zero:
+				VelocityComponent = FFixed_32(0);
+				break;
+
+			case EPostMovementVelocityMode::Override:
+				VelocityComponent = Axis.OverrideVelocity;
+				break;
+			
+			default:
+				break;
+			}
+		};
+
+		ApplyPostVelocity(CurrAnimMvmt.X, Velocity.X);
+		ApplyPostVelocity(CurrAnimMvmt.Z, Velocity.Z);
+		if (CurrentMovementMode == EFighterMovementMode::None) CurrentMovementMode = EFighterMovementMode::Falling;
+	}
 }
