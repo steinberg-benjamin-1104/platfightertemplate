@@ -11,6 +11,7 @@ void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCompon
 void UShieldState::OnEnter(FFighterInput& Input)
 {
 	FighterPawnRef->SetCurrentAnimation("Shield", 5);
+	//UE_LOG(LogTemp, Warning, TEXT("Enter Shield State"));
 }
 
 bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)
@@ -39,7 +40,7 @@ bool UShieldState::HandleButtonInput(FFighterInput& Input)
 		return true;
 	}
 
-	if (!ButtonState.IsPressed(EInputButton::Shield))
+	if (!ButtonState.IsHeld(EInputButton::Shield))
 	{
 		if (!ShieldComponent->IsActive() || InEndLag) return false;
 		FramesToEnd = StateMachine->FramesInState + EndLagFrames;

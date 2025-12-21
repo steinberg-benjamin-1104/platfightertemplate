@@ -78,7 +78,7 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 	if (JumpsRemaining <= 0) return false;
 
 	const FHopData* HopData = HopDataMap.Find(HopType);
-	if (!HopData || !HopData->Curve) return false;
+	if (!HopData) return false;
 
 	CollisionCapsule.LiftBottom();
 	CurrentHopData = *HopData;
@@ -94,22 +94,7 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 
 void UFighterMovementComponent::UpdateJumpRise()
 {
-	if (!CurrentHopData.Curve || CurrentHopData.Frames <= 0) return;
 	
-	const FFixed_32 DeltaHeight = FixedCurveDeltaMagnitude(
-		CurrentHopData.Curve,
-		HopCurrentFrame,
-		CurrentHopData.Frames,
-		CurrentHopData.Height
-	);
-
-	Velocity.Z = DeltaHeight / FixedDt;
-	HopCurrentFrame++;
-
-	if (HopCurrentFrame >= CurrentHopData.Frames)
-	{
-		SetMovementMode(EFighterMovementMode::Falling);
-	}
 }
 
 void UFighterMovementComponent::SetMaxJumpCount(int32 NewMaxJumpCount)
@@ -438,52 +423,5 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 
 void UFighterMovementComponent::ApplyAnimMovement(int32 CurrentFrame)
 {
-	if (CurrAnimMvmt.EndFrame == 0) return;
-	if (CurrentFrame >= CurrAnimMvmt.StartFrame && CurrentFrame <= CurrAnimMvmt.EndFrame)
-	{
-		if (CurrentFrame == CurrAnimMvmt.StartFrame) CurrentMovementMode = CurrAnimMvmt.Mode;
 	
-		const int32 AnimLengthFrames = CurrAnimMvmt.EndFrame - CurrAnimMvmt.StartFrame;
-		if (AnimLengthFrames <= 0) return;
-	
-		auto EvalAxisDelta = [&](const FAxisMovement& Axis) -> FFixed_32
-		{
-			if (!Axis.Curve) return FFixed_32(0.f);
-		
-			const int32 LocalFrame = CurrentFrame - CurrAnimMvmt.StartFrame;
-
-			return FixedCurveDeltaMagnitude(Axis.Curve, LocalFrame, AnimLengthFrames, Axis.TotalDisplacement);
-		};
-
-		FFixedVector2D Movement;
-		Movement.X = EvalAxisDelta(CurrAnimMvmt.X) * FighterPawnRef->GetFacingDirection();
-		Movement.Z = EvalAxisDelta(CurrAnimMvmt.Z);
-
-		Velocity = Movement / FixedDt;
-		PreventLedgeFall(CurrAnimMvmt.bPreventLedgeFall);
-	}
-	
-	else if (CurrentFrame == CurrAnimMvmt.EndFrame + 1)
-	{
-		auto ApplyPostVelocity = [&](const FAxisMovement& Axis, FFixed_32& VelocityComponent)
-		{
-			switch (Axis.PostMovement)
-			{
-			case EPostMovementVelocityMode::Zero:
-				VelocityComponent = FFixed_32(0);
-				break;
-
-			case EPostMovementVelocityMode::Override:
-				VelocityComponent = Axis.OverrideVelocity;
-				break;
-			
-			default:
-				break;
-			}
-		};
-
-		ApplyPostVelocity(CurrAnimMvmt.X, Velocity.X);
-		ApplyPostVelocity(CurrAnimMvmt.Z, Velocity.Z);
-		if (CurrentMovementMode == EFighterMovementMode::None) CurrentMovementMode = EFighterMovementMode::Falling;
-	}
 }

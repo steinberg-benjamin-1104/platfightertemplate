@@ -24,9 +24,9 @@ public:
 
 private:
 	UPROPERTY() UShieldComponent* ShieldComponent;
-	int StartupFrames = 4;
-	int EndLagFrames = 10;
-	int MinHoldFrames = 2;
-	int FramesToEnd;
+	int32 StartupFrames = 4;
+	int32 EndLagFrames = 10;
+	int32 MinHoldFrames = 2;
+	int32 FramesToEnd;
 	bool InEndLag = false;
 };

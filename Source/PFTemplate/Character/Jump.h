@@ -22,7 +22,4 @@ struct FHopData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Frames = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UCurveFloat> Curve = nullptr;
 };

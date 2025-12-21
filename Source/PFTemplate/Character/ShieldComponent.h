@@ -35,8 +35,8 @@ private:
 	
 	FFixed_32 MaxShieldHealth = 600.f;
 	FFixed_32 ShieldHealth;
-	FFixed_32 RegenRate = 0.05f;
-	FFixed_32 DegenerationRate = 0.3f;
+	FFixed_32 RegenRate = 0.8f;
+	FFixed_32 DegenerationRate = 2.f;
 
 	bool bIsActive = false;
 

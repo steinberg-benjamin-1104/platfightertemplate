@@ -22,7 +22,7 @@ bool UJumpSquatState::HandleButtonInput(FFighterInput& Input)
 {
 	FButtonState &ButtonState = Input.Button;
 	
-	if (ButtonState.IsPressed(EInputButton::Jump))
+	if (!ButtonState.IsHeld(EInputButton::Jump))
 	{
 		if (!bJumpButtonHeld) return false;
 		bJumpButtonHeld = false;
