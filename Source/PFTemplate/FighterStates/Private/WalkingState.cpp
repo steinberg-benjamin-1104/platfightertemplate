@@ -37,7 +37,7 @@ bool UWalkingState::HandleStickInput(FFighterInput& Input)
 	{
 		FighterPawnRef->FlipFacingDirection();
 		FFixedVector2D Velocity = MoveComp->GetVelocity();
-		Velocity.X = Velocity.X * FFixed_32(-1.f);
+		Velocity.X = MoveComp->WalkSpeed.ToFixed() * FighterPawnRef->GetFacingDirection();;
 		MoveComp->SetVelocity(Velocity);
 	}
 
