@@ -5,6 +5,7 @@
 
 class UAnimSequence;
 class UBakedAnimation;
+class UBakeProfile;
 
 UCLASS()
 class UBakeSocketsLibrary : public UBlueprintFunctionLibrary
@@ -16,7 +17,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sockets", meta = (CallInEditor = "true"))
 	static UBakedAnimation* BakeSocketsFromAnimation(
 		UAnimSequence* SourceAnimation,
-		const TArray<FName>& SocketNames,
+		const UBakeProfile* Profile,
 		const FString& AssetPath = TEXT("/Game/BakedSockets"),
 		const FString& AssetName = TEXT("BA_SocketBaked")
 	);

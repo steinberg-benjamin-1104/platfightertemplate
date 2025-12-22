@@ -6,6 +6,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "BonePose.h"
 #include "BakedSockets.h"
+#include "BakeProfile.h"
 
 // Helper to calculate Component Space transforms from the Animation
 void GetComponentSpacePoseAtTime(const UAnimSequence* AnimSequence, double Time, FBoneContainer& BoneContainer, FCSPose<FCompactPose>& OutCSPose)
@@ -36,7 +37,7 @@ void GetComponentSpacePoseAtTime(const UAnimSequence* AnimSequence, double Time,
 
 UBakedAnimation* UBakeSocketsLibrary::BakeSocketsFromAnimation(
     UAnimSequence* SourceAnimation,
-    const TArray<FName>& SocketNames,
+    const UBakeProfile* Profile,
     const FString& AssetPath,
     const FString& AssetName)
 {
@@ -54,149 +55,148 @@ UBakedAnimation* UBakeSocketsLibrary::BakeSocketsFromAnimation(
         return nullptr;
     }
 
-    if (SocketNames.Num() == 0)
+    const FReferenceSkeleton& RefSkeleton = Skeleton->GetReferenceSkeleton();
+
+    // --- 1. Identify Target Names (From Profile or Skeleton) ---
+    TArray<FName> NamesToBake;
+    if (Profile && Profile->TargetNames.Num() > 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("BakeSockets: No socket names provided."));
-        return nullptr;
+        NamesToBake = Profile->TargetNames;
+    }
+    else
+    {
+        for (USkeletalMeshSocket* Socket : Skeleton->Sockets) { NamesToBake.Add(Socket->SocketName); }
+        for (int32 i = 0; i < RefSkeleton.GetNum(); ++i) { NamesToBake.Add(RefSkeleton.GetBoneName(i)); }
     }
 
-    // --- 1. Create the New Asset ---
+    // --- 2. Create the New Asset ---
     IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    
     FString PackageName;
     FString FinalAssetName;
     AssetTools.CreateUniqueAssetName(AssetPath / AssetName, TEXT(""), PackageName, FinalAssetName);
 
     UPackage* Package = CreatePackage(*PackageName);
-    
-    UBakedAnimation* NewBakedData = NewObject<UBakedAnimation>(
-        Package, 
-        UBakedAnimation::StaticClass(), 
-        *FinalAssetName, 
-        RF_Public | RF_Standalone
-    );
+    UBakedAnimation* NewBakedData = NewObject<UBakedAnimation>(Package, UBakedAnimation::StaticClass(), *FinalAssetName, RF_Public | RF_Standalone);
+    if (!NewBakedData) return nullptr;
 
-    if (!NewBakedData)
-    {
-        UE_LOG(LogTemp, Error, TEXT("BakeSockets: Failed to create asset."));
-        return nullptr;
-    }
-
-    NewBakedData->AnimSequence = SourceAnimation;
+    // Fixed naming: assuming SourceAnimation is the property name in UBakedAnimation
+    NewBakedData->AnimSequence = SourceAnimation; 
     NewBakedData->SocketTracks.Empty();
 
-    // --- 2. Initialize Animation Evaluation Context ---
-    // We need a BoneContainer to process poses.
-    // We will include all bones in the reference skeleton to ensure hierarchy calculations are correct.
-    const FReferenceSkeleton& RefSkeleton = Skeleton->GetReferenceSkeleton();
+    // --- 3. Initialize Animation Context ---
     TArray<FBoneIndexType> RequiredBoneIndices;
     RequiredBoneIndices.SetNum(RefSkeleton.GetNum());
-    for (int32 i = 0; i < RequiredBoneIndices.Num(); ++i)
-    {
-        RequiredBoneIndices[i] = i;
-    }
+    for (int32 i = 0; i < RequiredBoneIndices.Num(); ++i) { RequiredBoneIndices[i] = i; }
 
     FBoneContainer BoneContainer;
-    UE::Anim::FCurveFilterSettings CurveFilterSettings;
     BoneContainer.SetUseRAWData(true);
+    UE::Anim::FCurveFilterSettings CurveFilterSettings;
     BoneContainer.InitializeTo(RequiredBoneIndices, CurveFilterSettings, *Skeleton);
 
-    // --- 3. Prepare Tracks ---
-    // Pre-cache Socket Pointers to avoid finding them every frame
-    struct FSocketCache
-    {
+    // --- 4. Prepare Tracks & Cache ---
+    struct FBakeTarget {
         FName Name;
+        int32 BoneIndex;
         USkeletalMeshSocket* SocketPtr;
         int32 TrackIndex;
     };
-    TArray<FSocketCache> TargetSockets;
+    TArray<FBakeTarget> BakeTargets;
 
-    for (const FName& Name : SocketNames)
+    for (const FName& RequestedName : NamesToBake)
     {
-        if (USkeletalMeshSocket* Socket = Skeleton->FindSocket(Name))
+        USkeletalMeshSocket* FoundSocket = Skeleton->FindSocket(RequestedName);
+        FName BoneToFind = FoundSocket ? FoundSocket->BoneName : RequestedName;
+        int32 FoundBoneIndex = RefSkeleton.FindBoneIndex(BoneToFind);
+
+        if (FoundBoneIndex != INDEX_NONE)
         {
-            FSocketCache Cache;
-            Cache.Name = Name;
-            Cache.SocketPtr = Socket;
+            FBakeTarget Target;
+            Target.Name = RequestedName;
+            Target.SocketPtr = FoundSocket;
+            Target.BoneIndex = FoundBoneIndex;
             
             FBakedSocketTrack NewTrack;
-            NewTrack.SocketName = Name;
-            Cache.TrackIndex = NewBakedData->SocketTracks.Add(NewTrack);
-            
-            TargetSockets.Add(Cache);
+            NewTrack.SocketName = RequestedName;
+            Target.TrackIndex = NewBakedData->SocketTracks.Add(NewTrack);
+            BakeTargets.Add(Target);
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("BakeSockets: Could not find socket '%s' on Skeleton."), *Name.ToString());
+            UE_LOG(LogTemp, Warning, TEXT("BakeSockets: [%s] skipped. No bone/socket found on Skeleton [%s]."), 
+                *RequestedName.ToString(), *Skeleton->GetName());
         }
     }
 
-    if (TargetSockets.Num() == 0)
-    {
-        UE_LOG(LogTemp, Error, TEXT("BakeSockets: None of the requested sockets exist on the skeleton."));
-        return nullptr;
-    }
+    if (BakeTargets.Num() == 0) return nullptr;
 
-    // --- 4. Iterate Frames and Bake ---
+    // --- 5. Iterate Frames and Bake ---
     const int32 NumFrames = SourceAnimation->GetNumberOfSampledKeys();
-    const double SampleRate = SourceAnimation->GetSamplingFrameRate().AsDecimal();
-    const double Interval = (SampleRate > 0.0) ? (1.0 / SampleRate) : 0.0333; // Default to 30fps if invalid
-
-    FCSPose<FCompactPose> ComponentSpacePose;
+    const double Duration = SourceAnimation->GetPlayLength();
+    const double Interval = (NumFrames > 1) ? (Duration / (NumFrames - 1)) : 0.0f;
 
     for (int32 FrameIndex = 0; FrameIndex < NumFrames; ++FrameIndex)
     {
+        FMemMark Mark(FMemStack::Get());
         const double Time = FrameIndex * Interval;
 
-        // Get the pose for this time
-        GetComponentSpacePoseAtTime(SourceAnimation, Time, BoneContainer, ComponentSpacePose);
+        FCompactPose Pose;
+        Pose.SetBoneContainer(&BoneContainer);
+        FBlendedCurve Curve;
+        Curve.InitFrom(BoneContainer);
+        UE::Anim::FStackAttributeContainer Attributes;
+        FCSPose<FCompactPose> ComponentSpacePose;
 
-        // Process each requested socket
-        for (const FSocketCache& SocketInfo : TargetSockets)
+        FAnimationPoseData AnimationPoseData(Pose, Curve, Attributes);
+        FAnimExtractContext Context(Time, SourceAnimation->bLoop);
+        SourceAnimation->GetBonePose(AnimationPoseData, Context);
+
+        ComponentSpacePose.InitPose(Pose);
+
+        // --- ROOT MOTION EXTRACTION LOGIC ---
+        // Get the actual Root Bone (index 0) transform for this frame
+        FCompactPoseBoneIndex RootBoneIndex(0);
+        FTransform RootTransform = ComponentSpacePose.GetComponentSpaceTransform(RootBoneIndex);
+
+        for (const FBakeTarget& Target : BakeTargets)
         {
-            FTransform FinalTransform = FTransform::Identity;
+            FCompactPoseBoneIndex CompactIndex = BoneContainer.MakeCompactPoseIndex(FMeshPoseBoneIndex(Target.BoneIndex));
+            FTransform BoneTransform = ComponentSpacePose.GetComponentSpaceTransform(CompactIndex);
 
-            if (SocketInfo.SocketPtr)
+            if (Target.SocketPtr)
             {
-                // Find the index of the bone the socket is attached to
-                int32 BoneIndex = Skeleton->GetReferenceSkeleton().FindBoneIndex(SocketInfo.SocketPtr->BoneName);
-                
-                if (BoneIndex != INDEX_NONE)
-                {
-                    FCompactPoseBoneIndex CompactIndex = BoneContainer.MakeCompactPoseIndex(FMeshPoseBoneIndex(BoneIndex));
-                    
-                    if (CompactIndex != INDEX_NONE)
-                    {
-                        // Get Bone Transform in Component Space
-                        const FTransform& BoneTransform = ComponentSpacePose.GetComponentSpaceTransform(CompactIndex);
-                        
-                        // Apply Socket Relative Transform
-                        // Socket World = SocketRelative * BoneLocal * ParentBoneLocal ...
-                        // Since we have BoneCS, it is: SocketRelative * BoneCS
-                        FinalTransform = SocketInfo.SocketPtr->GetSocketLocalTransform() * BoneTransform;
-                    }
-                }
+                BoneTransform = Target.SocketPtr->GetSocketLocalTransform() * BoneTransform;
             }
 
-            // Store Data
+            FTransform FinalTransform;
+
+            // If this is the root bone, keep it in Component Space (the 'World' movement)
+            // If it's anything else, make it relative to the Root Bone
+            if (Target.BoneIndex == 0 && !Target.SocketPtr)
+            {
+                FinalTransform = BoneTransform;
+            }
+            else
+            {
+                // Make relative to root to prevent double-transform when moving Actor
+                FinalTransform = BoneTransform.GetRelativeTransform(RootTransform);
+            }
+
             FBakedSocketTransform FrameData;
             FrameData.Location = FinalTransform.GetLocation();
-            FrameData.Rotation = FinalTransform.GetRotation().Rotator();;
+            FrameData.Rotation = FinalTransform.GetRotation().Rotator();
             FrameData.Scale = FinalTransform.GetScale3D();
 
-            NewBakedData->SocketTracks[SocketInfo.TrackIndex].Frames.Add(FrameData);
+            NewBakedData->SocketTracks[Target.TrackIndex].Frames.Add(FrameData);
         }
     }
 
-    // --- 5. Finalize Asset ---
     NewBakedData->MarkPackageDirty();
     FAssetRegistryModule::AssetCreated(NewBakedData);
     
-    UE_LOG(LogTemp, Log, TEXT("BakeSockets: Successfully baked %d sockets over %d frames to %s"), TargetSockets.Num(), NumFrames, *FinalAssetName);
+    UE_LOG(LogTemp, Log, TEXT("BakeSockets: Finished baking %d targets over %d frames."), BakeTargets.Num(), NumFrames);
 
     return NewBakedData;
 #else
-    UE_LOG(LogTemp, Error, TEXT("BakeSockets: This function is Editor Only."));
     return nullptr;
 #endif
 }
