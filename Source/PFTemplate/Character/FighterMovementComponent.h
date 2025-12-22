@@ -62,7 +62,7 @@ public:
 	//Divide by 36000 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP Gravity = 3600.f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP RisingGravity = 3600.f;
+	FFixed_32 RisingGravity;
 	//Divide by 600 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
@@ -123,9 +123,6 @@ public:
 protected:
 	
 	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
-
-	UPROPERTY() FJumpData CurrentHopData;
-	int HopCurrentFrame = 0;
 
 	UPROPERTY() FFighterCapsule FollowCapsule;
 

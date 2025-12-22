@@ -81,10 +81,10 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 	if (!JumpData || JumpData->FramesToApex <= 0) return false;
 
 	CollisionCapsule.LiftBottom();
-	CurrentHopData = *JumpData;
-	HopCurrentFrame = 0;
 
-	//only find a velocity
+	FFixed_32 time = JumpData->FramesToApex * FixedDt; //fixedDt is 1/60
+	Velocity.Z = FFixed_32(2.f) * JumpData->JumpHeight / time;
+	RisingGravity = FFixed_32(2.f) * JumpData->JumpHeight/ (time * time);
 
 	SetMovementMode(EFighterMovementMode::JumpingUp);
 	JumpsRemaining--;
@@ -93,7 +93,9 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 
 void UFighterMovementComponent::UpdateJumpRise()
 {
-	
+	Velocity.Z -= RisingGravity * FixedDt;
+
+	if (Velocity.Z <= FFixed_32(0.0f)) CurrentMovementMode = EFighterMovementMode::Falling;
 }
 
 void UFighterMovementComponent::SetMaxJumpCount(int32 NewMaxJumpCount)
