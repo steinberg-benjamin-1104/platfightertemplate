@@ -134,7 +134,7 @@ static T* FixedOverlapBoxFirstActorOfClass(const UWorld* World,
 		Overlaps,
 		Fixed2DToVector(Center),
 		FQuat::Identity,
-		Channel,
+		ECC_WorldDynamic, //temp collision channel
 		FCollisionShape::MakeBox(FVector(
 			FixedToFloat(HalfExtent.X),
 			FixedToFloat(HalfExtent.Z),
