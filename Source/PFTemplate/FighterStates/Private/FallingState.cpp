@@ -17,7 +17,7 @@ bool UFallingState::HandleButtonInput(FFighterInput& NewInput)
 			Velocity.X = NewInput.Stick.StickPos.X * MoveComp->MaxAirSpeed;
 			MoveComp->SetVelocity(Velocity);
 			
-			StateMachine->ChangeFighterState("Rising", NewInput);
+			StateMachine->ChangeFighterState("JumpUp", NewInput);
 			return true;
 		}
 	}

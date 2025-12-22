@@ -181,17 +181,3 @@ FORCEINLINE FFixed_32 FixedAlphaFromFrame(int32 Frame, int32 TotalFrames)
     if (TotalFrames <= 0) return FFixed_32(0);
     return FixedClamp(FFixed_32(Frame) / FFixed_32(TotalFrames),FFixed_32(0), FFixed_32(1));
 }
-
-FORCEINLINE FFixed_32 FixedCurveDeltaMagnitude(const UCurveFloat* Curve, int32 CurrentFrame, int32 TotalFrames, const FFixed_32& Magnitude)
-{
-    if (!Curve || TotalFrames <= 0 || CurrentFrame <= 0) return FFixed_32(0);
-    
-    const FFixed_32 Alpha = FixedAlphaFromFrame(CurrentFrame, TotalFrames);
-    const FFixed_32 PrevAlpha = FixedAlphaFromFrame(CurrentFrame - 1, TotalFrames);
-
-    const FFixed_32 Ratio = FloatToFixed(Curve->GetFloatValue(FixedToFloat(Alpha)));
-
-    const FFixed_32 PrevRatio = FloatToFixed(Curve->GetFloatValue(FixedToFloat(PrevAlpha)));
-
-    return (Ratio - PrevRatio) * Magnitude;
-}

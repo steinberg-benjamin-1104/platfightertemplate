@@ -186,9 +186,11 @@ FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
 bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 {
 	const FAnimation NewAni = GetAnimationByName(AniName);
-	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
 
-	if (!AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!NewAni.BakedAnimation) return false;
+
+	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
+	if (!AnimSequence) return false;
 
 	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
@@ -202,9 +204,11 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 
 bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int32 BlendTime)
 {
-	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
-	if (!AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!NewAni.BakedAnimation) return false;
 
+	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
+	if (!AnimSequence) return false;
+	
 	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
@@ -406,12 +410,13 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPos : StickState.StickPos;
 	const EStickDir StickDir = GetStickDirection(StickPos, IsFacingRight());
 	
-	const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir);
-	if (!Attack) return false;
-	
-	SetCurrentAnimation(Attack->Animation);
-	
-	StateMachine->ChangeFighterState(Attack->TargetState, Input);
-	
-	return true;
+	if (const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir))
+	{
+		if (SetCurrentAnimation(Attack->Animation))
+		{
+			StateMachine->ChangeFighterState(Attack->TargetState, Input);
+			return true;
+		}
+	}
+	return false;
 }
