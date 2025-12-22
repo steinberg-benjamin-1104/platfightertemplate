@@ -10,7 +10,7 @@ struct FAttackDefinition : public FTableRowBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FDataTableRowHandle AnimationRow;
+	FAnimation Animation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> ValidStates;

@@ -183,33 +183,34 @@ FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
 	return FAnimation();
 }
 
-bool AFighterPawn::SetCurrentAnimation(FName AniName, int BlendTime)
+bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 {
 	const FAnimation NewAni = GetAnimationByName(AniName);
+	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
 
-	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
+	if (!AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
 
-	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
+	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
 	FrameScriptRunner->LoadScript(NewAni.Commands);
-	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-	MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
+	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
+	//MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
 
 	return true;
 }
 
-bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int BlendTime)
+bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int32 BlendTime)
 {
-	if (!NewAni.AnimSequence || !FrameScriptRunner || !FighterAnimInstance) 
-		return false;
+	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
+	if (!AnimSequence || !FrameScriptRunner || !FighterAnimInstance) return false;
 
-	const int32 NumFrames = NewAni.AnimSequence->GetNumberOfSampledKeys();
+	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
 	FrameScriptRunner->LoadScript(NewAni.Commands);
-	FighterAnimInstance->SetAnimationSequence(NewAni.AnimSequence, NewAni.bIsLoop, NumFrames,BlendTime);
-	MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
+	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
+	//MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
 
 	return true;
 }
@@ -408,8 +409,7 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 	const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir);
 	if (!Attack) return false;
 	
-	const FAnimation* Anim = Attack->AnimationRow.GetRow<FAnimation>(TEXT("AttackAnimLookup"));
-	SetCurrentAnimation(*Anim);
+	SetCurrentAnimation(Attack->Animation);
 	
 	StateMachine->ChangeFighterState(Attack->TargetState, Input);
 	

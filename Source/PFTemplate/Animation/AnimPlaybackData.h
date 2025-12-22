@@ -9,7 +9,7 @@ struct FAnimPlaybackData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl")
-	UAnimSequenceBase* Sequence = nullptr;
+	UAnimSequence* Sequence = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl")
 	int32 CurrentFrame = 0;
@@ -20,7 +20,7 @@ struct FAnimPlaybackData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl")
 	bool bLooping = false;
 
-	FAnimPlaybackData(UAnimSequenceBase* InSequence = nullptr, int32 InFrame = 0, int32 InTotalFrames = 0, bool bInLooping = false)
+	FAnimPlaybackData(UAnimSequence* InSequence = nullptr, int32 InFrame = 0, int32 InTotalFrames = 0, bool bInLooping = false)
 	{
 		Sequence = InSequence;
 		CurrentFrame = InFrame;

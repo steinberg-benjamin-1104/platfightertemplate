@@ -28,7 +28,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AnimControl|Blend")
 	int32 BlendTotalFrames = 0;
 	
-	void SetAnimationSequence(UAnimSequenceBase* NewSequence, bool bLoop, int32 NumFrames, int32 InBlendFrames);
+	void SetAnimationSequence(UAnimSequence* NewSequence, bool bLoop, int32 NumFrames, int32 InBlendFrames);
 	int32 AdvanceFrame();
 
 	bool CurrentAnimFinished() {return Current.AnimIsFinished(); }

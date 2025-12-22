@@ -14,9 +14,11 @@
 		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
+			"TargetAllowList": [ "Editor" ]
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
 		}
 	]
 }

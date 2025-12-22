@@ -1,6 +1,6 @@
 #include "FighterAnimInstance.h"
 
-void UFighterAnimInstance::SetAnimationSequence(UAnimSequenceBase* NewSequence, bool bLoop, int32 NumFrames, int32 InBlendFrames)
+void UFighterAnimInstance::SetAnimationSequence(UAnimSequence* NewSequence, bool bLoop, int32 NumFrames, int32 InBlendFrames)
 {
 	FAnimPlaybackData NewAnim(NewSequence, -1, NumFrames, bLoop);
 	Previous = Current;
