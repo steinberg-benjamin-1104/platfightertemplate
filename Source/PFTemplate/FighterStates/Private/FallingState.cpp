@@ -48,6 +48,7 @@ bool UFallingState::HandlePhysics(FFighterInput& Input)
 		StateMachine->ChangeFighterState("Idle", Input);
 		return true;
 	}
+
 	return false;
 }
 
@@ -60,18 +61,23 @@ bool UFallingState::HandleStickInput(FFighterInput& Input)
 	
 	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
 	
-	ALedge* NearbyLedge = DetectNearbyLedge();
-	if (NearbyLedge)
-	{
-		float IsRight = NearbyLedge->IsRight ? 1.0f : -1.0f;
-		FighterPawnRef->SetFacingDirection(IsRight * -1.f);
-		FighterPawnRef->SetActorLocation(NearbyLedge->GetActorLocation() + FVector(25.f * IsRight, 0.f, -200.f));
-		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
-		return true;
-	}
-	
 	return false;
 }
+
+void UFallingState::Tick(FFighterInput& Input, int32 FramesInState)
+{
+	Super::Tick(Input, FramesInState);
+
+	if (ALedge* NearbyLedge = DetectNearbyLedge())
+	{
+		FFixedVector2D LedgePos = VectorToFixed2D(NearbyLedge->GetActorLocation());
+		int32 IsRight = NearbyLedge->IsRight ? 1 : -1;
+		FighterPawnRef->SetFacingDirection(IsRight * -1);
+		FighterPawnRef->SetFixedLoc(LedgePos + FFixedVector2D(FFixed_32(25.f) * IsRight, -200.f ));
+		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
+	}
+}
+
 
 void UFallingState::OnExit()
 {
@@ -80,13 +86,15 @@ void UFallingState::OnExit()
 
 ALedge* UFallingState::DetectNearbyLedge() const
 {
-	const FFixedVector2D BaseLoc = FighterPawnRef->GetFixedLoc() + MoveComp->GetVelocity()/FixedDt;
+	UE_LOG(LogTemp, Warning, TEXT("Detect nearby ledge"));
+	const FFixedVector2D BaseLoc = FighterPawnRef->GetFixedLoc() + MoveComp->GetVelocity() * FixedDt;
 	const int32 ForwardDir = FighterPawnRef->GetFacingDirection();
 	const FFixedVector2D HalfExtent(60.f, 40.f);
 	
 	const FFixedVector2D BoxCenter = BaseLoc + FFixedVector2D(ForwardDir * 30, 150.f);
 	
-	//DrawDebugBox(World, BoxCenter, HalfExtent, FQuat::Identity, FColor::Green, false, -1.f, 0, 2.f);
+	DrawDebugBox(GetWorld(), Fixed2DToVector(BoxCenter), Fixed2DToVector(HalfExtent), FQuat::Identity, FColor::Green, false, -1.f, 0, 2.f);
+	UE_LOG(LogTemp, Warning, TEXT("Drew New Box"));
 	
 	return FixedOverlapBoxFirstActorOfClass<ALedge>(GetWorld(), BoxCenter, HalfExtent);
 }

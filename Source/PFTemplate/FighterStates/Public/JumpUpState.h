@@ -13,6 +13,7 @@ public:
 	virtual void OnEnter(FFighterInput& Input) override;
 	virtual bool HandleStickInput(FFighterInput& Input) override;
 	virtual bool HandlePhysics(FFighterInput& Input) override;
+	virtual void Tick(FFighterInput& Input, int32 FramesInState) override {UFighterState::Tick(Input, FramesInState);}
 	
 	virtual FString GetStateName() override {return "JumpUp";}
 };
