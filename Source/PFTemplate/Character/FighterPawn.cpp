@@ -82,41 +82,39 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
 	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
 	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation(NewInput);
-	if (HitboxManager) DetectCollisions();
 }
 
 void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 {
-	int32 AnimFrame = FighterAnimInstance->AdvanceFrame();
+	FighterAnimInstance->AdvanceFrame();
 	FighterAnimInstance->UpdateAnimation(FixedToFloat(FixedDt), false);
 	CharacterMesh->RefreshBoneTransforms();
 	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
 
-	MovementComponent->ApplyAnimMovement(AnimFrame);
+	//MovementComponent->ApplyAnimMovement(AnimFrame);
 	
 	for (auto& Pair : HurtboxMap)
 	{
 		if (AHurtbox2D* Hurtbox = Pair.Value) Hurtbox->TickHurtbox();
 	}
 	
-	FrameScriptRunner->TickScript(Input, AnimFrame);
+	FrameScriptRunner->TickScript(Input, FighterAnimInstance->GetCurrentFrameIndex());
 }
 
 void AFighterPawn::DetectCollisions()
 {
-	HitboxManager->ScanActiveHitboxes();
+	if (HitboxManager) HitboxManager->ScanActiveHitboxes();
+}
+
+void AFighterPawn::ProcessCollisions()
+{
+	if (HitboxManager) HitboxManager->ProcessHits();
 }
 
 void AFighterPawn::PostCollisionPhase()
 {
 	ShieldPhase();
-}
-
-
-void AFighterPawn::ProcessCollisions()
-{
-	if (HitboxManager) HitboxManager->ProcessHits();
 }
 
 void AFighterPawn::ShieldPhase()
@@ -315,27 +313,27 @@ void AFighterPawn::HandleParry()
 
 #pragma region Mesh
 
-FFixedVector2D AFighterPawn::GetBoneLocation(FName BoneName) const
+float AFighterPawn::GetBakedBoneRotation(FName BoneName)
 {
-	return VectorToFixed2D(CharacterMesh->GetSocketLocation(BoneName)) - VectorToFixed2D(CharacterMesh->GetRelativeLocation());
-}
+	// 1. Get the baked transform
+	FTransform BoneTransform = GetBakedSocketTransform(BoneName);
 
-FVector AFighterPawn::GetBoneVector(FName BoneName) const
-{
-	if (!CharacterMesh) return FVector::ZeroVector;
-
-	const FRotator BoneRotation = CharacterMesh->GetSocketRotation(BoneName);
-	FVector BaseVec = FVector::ZeroVector;
-
+	// 2. Extract the desired local axis
+	FVector DirectionVec;
 	switch (BoneVectorDirection)
 	{
-		case EBoneVectorAxis::Forward: BaseVec = FVector::ForwardVector; break;
-		case EBoneVectorAxis::Right: BaseVec = FVector::RightVector;   break;
-		case EBoneVectorAxis::Up: BaseVec = FVector::UpVector;      break;
-		default: break;
+	case EBoneVectorAxis::Forward: DirectionVec = BoneTransform.GetUnitAxis(EAxis::X); break;
+	case EBoneVectorAxis::Right:   DirectionVec = BoneTransform.GetUnitAxis(EAxis::Y); break;
+	case EBoneVectorAxis::Up:      DirectionVec = BoneTransform.GetUnitAxis(EAxis::Z); break;
+	default: DirectionVec = BoneTransform.GetUnitAxis(EAxis::X);
 	}
-	
-	return BoneRotation.RotateVector(BaseVec);
+
+	// 3. Project onto the YZ plane
+	// Atan2(Vertical, Horizontal) -> Atan2(Z, Y)
+	float AngleRadians = FMath::Atan2(DirectionVec.Z, DirectionVec.Y);
+	float FinalDegrees = FMath::RadiansToDegrees(AngleRadians);
+
+	return FinalDegrees;
 }
 
 void AFighterPawn::ShakeMesh()
@@ -419,4 +417,17 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 		}
 	}
 	return false;
+}
+
+FTransform AFighterPawn::GetBakedSocketTransform(FName SocketName)
+{
+	return CurrentAnimation.BakedAnimation->GetSocketTransform(
+		SocketName,
+		FighterAnimInstance->GetCurrentFrameIndex(),
+		!IsFacingRight());
+}
+
+FVector AFighterPawn::GetBakedSocketLocation(FName SocketName)
+{
+	return GetBakedSocketTransform(SocketName).GetLocation();
 }

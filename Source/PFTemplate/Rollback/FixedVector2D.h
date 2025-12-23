@@ -36,18 +36,6 @@ struct FFixedVector2D
         FFixed_32 len = Length();
         return len.v == 0 ? FFixedVector2D{} : *this / len;
     }
-    
-    friend uint32 GetTypeHash(const FFixedVector2D& V)
-    {
-        return HashCombine(GetTypeHash(V.X), GetTypeHash(V.Z));
-    }
-
-    bool NetSerialize(FArchive& Ar, class UPackageMap*, bool& bOutSuccess)
-    {
-        Ar << X.v << Z.v;
-        bOutSuccess = true;
-        return true;
-    }
 };
 
 FORCEINLINE FVector Fixed2DToVector(const FFixedVector2D& V)
@@ -79,4 +67,14 @@ FORCEINLINE void LogFixedVector2D(const FString& Label, const FFixedVector2D& Ve
 {
     const FVector Converted = Fixed2DToVector(Vec);
     UE_LOG(LogTemp, Warning, TEXT("%s: X=%f, Z=%f"), *Label, Converted.X, Converted.Z);
+}
+
+FORCEINLINE FFixed_32 FixedDistance(const FFixedVector2D& A, const FFixedVector2D& B)
+{
+    return (A - B).Length();
+}
+
+FORCEINLINE FFixed_32 FixedDistanceSquared(const FFixedVector2D& A, const FFixedVector2D& B)
+{
+    return (A - B).LengthSquared();
 }

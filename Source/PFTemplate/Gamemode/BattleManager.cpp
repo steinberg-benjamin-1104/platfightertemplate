@@ -25,9 +25,13 @@ void ABattleManager::StepFrame()
 {
 	if (!bCanUpdate) return;
 	
-	
+	//Update States, Animation, Movement
 	for (AFighterPawn* F : Fighters) F->PreCollisionPhase(BattleFrame);
 
+	//Test for Collision After Char Updates
+	for (AFighterPawn* F : Fighters) F->DetectCollisions();
+
+	//Update States, Animation, Movement per collision
 	for (AFighterPawn* F : Fighters) F->ProcessCollisions();
 
 	for (AFighterPawn* F : Fighters) F->PostCollisionPhase();

@@ -43,5 +43,5 @@ public:
 
 	int32 GetNumFrames() const { return SocketTracks[0].Frames.Num(); }
 
-	bool GetSocketTransform(FName SocketName, int32 Frame, bool bMirrored, FTransform& OutTransform) const;
+	FTransform GetSocketTransform(FName SocketName, int32 Frame, bool bMirrored) const;
 };

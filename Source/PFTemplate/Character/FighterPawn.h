@@ -143,10 +143,7 @@ public:
 
 	virtual FVector CenterLocation() override {return Fixed2DToVector(MovementComponent->GetCenter());}
 	
-	FFixedVector2D GetBoneLocation(FName BoneName) const;
-
-	UFUNCTION(BlueprintPure, Category = "Mesh")
-	FVector GetBoneVector(FName BoneName) const;
+	float GetBakedBoneRotation(FName BoneName);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	EBoneVectorAxis BoneVectorDirection = EBoneVectorAxis::Forward;
@@ -174,6 +171,9 @@ public:
 	void SetFixedLoc(FFixedVector2D InLoc) { SetActorLocation(Fixed2DToVector(InLoc)); }
 
 	bool AnimFinished() {return FighterAnimInstance->CurrentAnimFinished(); }
+
+	FTransform GetBakedSocketTransform(FName SocketName);
+	FVector GetBakedSocketLocation(FName SocketName);
 
 protected:
 

@@ -27,30 +27,17 @@ void AHurtbox2D::UpdateLocation()
 {
 	if (!FighterPawnRef || BoneName.IsNone())
 		return;
+
+	FVector boneloc = FighterPawnRef->GetBakedSocketLocation(BoneName);
+	boneloc.X = boneloc.Y;
+	FVector loc = boneloc + FighterPawnRef->GetActorLocation();
 	
-	SetActorLocation(Fixed2DToVector(FighterPawnRef->GetBoneLocation(BoneName)));
+	SetActorLocation(FVector(loc.X, 0.f, loc.Z));
 }
 
-void AHurtbox2D::UpdateRotation() //need to figure this one out
+void AHurtbox2D::UpdateRotation()
 {
-	if (!FighterPawnRef || BoneName.IsNone()) return;
-	
-	const FVector BoneLoc = Fixed2DToVector(FighterPawnRef->GetBoneLocation(BoneName));
-	const FVector VecDir = FighterPawnRef->GetBoneVector(BoneName);
-	const FVector AddedVectors = BoneLoc - VecDir;
-	const float Dist = FVector::Dist({BoneLoc.X, 0.f, BoneLoc.Z}, {AddedVectors.X, 0.f, AddedVectors.Z});
-
-	float FinalRot = 0.f;
-	if (Dist > 0.1f)
-	{
-		const float AngleRadians = FMath::Atan2(
-			AddedVectors.Z - BoneLoc.Z,
-			AddedVectors.X - BoneLoc.X
-		);
-		FinalRot = FMath::RadiansToDegrees(AngleRadians);
-	}
-	
-	SetActorRotation({FinalRot, 0.f, 0.f}, ETeleportType::None);
+	SetActorRotation({FighterPawnRef->GetBakedBoneRotation(BoneName), 0.f, 0.f}, ETeleportType::None);
 }
 
 void AHurtbox2D::SetInvincibility(bool bInvulnerable)

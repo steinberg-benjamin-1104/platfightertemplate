@@ -11,7 +11,7 @@ void UFighterAnimInstance::SetAnimationSequence(UAnimSequence* NewSequence, bool
 	BlendFrameCounter = 0;
 }
 
-int32 UFighterAnimInstance::AdvanceFrame()
+void UFighterAnimInstance::AdvanceFrame()
 {
 	int32 Frame = Current.AdvanceFrame();
 	
@@ -24,5 +24,4 @@ int32 UFighterAnimInstance::AdvanceFrame()
 		if (BlendFrameCounter >= BlendTotalFrames) BlendAlpha = 1.f;
 	}
 	else BlendAlpha = 1.f;
-	return Frame;
 }

@@ -48,15 +48,15 @@ void AHitbox2D::UpdateTransform()
 
 void AHitbox2D::UpdateLocation()
 {
-    if (!FighterPawnRef) return;
-    
-    const FFixedVector2D BoneWorldLocation = FighterPawnRef->GetBoneLocation(HitboxDefinition.Transform.BoneName);
-    const FFixedVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone.ToFixed();
-    
-    const FFixedVector2D Offset3D(Offset2D.X * FighterPawnRef->GetFacingDirection(), Offset2D.Z);
-
-    const FVector FinalLocation = Fixed2DToVector(BoneWorldLocation + Offset3D);
-    SetActorLocation(FinalLocation);
+    // if (!FighterPawnRef) return;
+    //
+    // const FFixedVector2D BoneWorldLocation = FighterPawnRef->GetBoneLocation(HitboxDefinition.Transform.BoneName);
+    // const FFixedVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone.ToFixed();
+    //
+    // const FFixedVector2D Offset3D(Offset2D.X * FighterPawnRef->GetFacingDirection(), Offset2D.Z);
+    //
+    // const FVector FinalLocation = Fixed2DToVector(BoneWorldLocation + Offset3D);
+    // SetActorLocation(FinalLocation);
 }
 
 void AHitbox2D::UpdateRotation()

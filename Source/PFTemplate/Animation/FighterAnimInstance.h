@@ -29,7 +29,8 @@ public:
 	int32 BlendTotalFrames = 0;
 	
 	void SetAnimationSequence(UAnimSequence* NewSequence, bool bLoop, int32 NumFrames, int32 InBlendFrames);
-	int32 AdvanceFrame();
+	void AdvanceFrame();
 
-	bool CurrentAnimFinished() {return Current.AnimIsFinished(); }
+	int32 GetCurrentFrameIndex() const {return Current.CurrentFrame; }
+	bool CurrentAnimFinished() const {return Current.AnimIsFinished(); }
 };
