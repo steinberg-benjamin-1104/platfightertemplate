@@ -157,6 +157,8 @@ UBakedAnimation* UBakeSocketsLibrary::BakeSocketsFromAnimation(
         FCompactPoseBoneIndex RootBoneIndex(0);
         FTransform RootTransform = ComponentSpacePose.GetComponentSpaceTransform(RootBoneIndex);
 
+        // --- Inside the BakeTargets loop within the FrameIndex loop ---
+
         for (const FBakeTarget& Target : BakeTargets)
         {
             FCompactPoseBoneIndex CompactIndex = BoneContainer.MakeCompactPoseIndex(FMeshPoseBoneIndex(Target.BoneIndex));
@@ -167,26 +169,29 @@ UBakedAnimation* UBakeSocketsLibrary::BakeSocketsFromAnimation(
                 BoneTransform = Target.SocketPtr->GetSocketLocalTransform() * BoneTransform;
             }
 
-            FTransform FinalTransform;
-
-            // If this is the root bone, keep it in Component Space (the 'World' movement)
-            // If it's anything else, make it relative to the Root Bone
+            FTransform RelativeTransform;
             if (Target.BoneIndex == 0 && !Target.SocketPtr)
             {
-                FinalTransform = BoneTransform;
+                RelativeTransform = BoneTransform;
             }
             else
             {
-                // Make relative to root to prevent double-transform when moving Actor
-                FinalTransform = BoneTransform.GetRelativeTransform(RootTransform);
+                RelativeTransform = BoneTransform.GetRelativeTransform(RootTransform);
             }
 
-            FBakedSocketTransform FrameData;
-            FrameData.Location = FinalTransform.GetLocation();
-            FrameData.Rotation = FinalTransform.GetRotation().Rotator();
-            FrameData.Scale = FinalTransform.GetScale3D();
+            // --- NEW 2D PROJECTION LOGIC ---
+            FBakedSocketKey SocketKey;
+    
+            // 1. Store Y as X (Horizontal) and Z as Y (Vertical) for the FVector2D
+            FVector WorldPos = RelativeTransform.GetLocation();
+            SocketKey.Location2D = FVector2D(WorldPos.Y, WorldPos.Z);
 
-            NewBakedData->SocketTracks[Target.TrackIndex].Frames.Add(FrameData);
+            // 2. Calculate Angle on YZ plane
+            FVector DirectionVec = RelativeTransform.GetUnitAxis(EAxis::X); //make this a parameter
+            float AngleRadians = FMath::Atan2(DirectionVec.Z, DirectionVec.Y);
+            SocketKey.RotationAngle = FMath::RadiansToDegrees(AngleRadians);
+
+            NewBakedData->SocketTracks[Target.TrackIndex].Frames.Add(SocketKey);
         }
     }
 

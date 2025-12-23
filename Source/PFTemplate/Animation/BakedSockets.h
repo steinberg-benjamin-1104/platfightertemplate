@@ -3,18 +3,15 @@
 #include "BakedSockets.generated.h"
 
 USTRUCT(BlueprintType)
-struct FBakedSocketTransform
+struct FBakedSocketKey
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FVector Location;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D Location2D = FVector2D::ZeroVector;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FRotator Rotation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FVector Scale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotationAngle = 0.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -26,7 +23,7 @@ struct FBakedSocketTrack
 	FName SocketName;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<FBakedSocketTransform> Frames;
+	TArray<FBakedSocketKey> Frames;
 };
 
 UCLASS(BlueprintType)
@@ -43,5 +40,5 @@ public:
 
 	int32 GetNumFrames() const { return SocketTracks[0].Frames.Num(); }
 
-	FTransform GetSocketTransform(FName SocketName, int32 Frame, bool bMirrored) const;
+	FBakedSocketKey GetSocketKey(FName SocketName, int32 Frame, bool bMirrored) const;
 };

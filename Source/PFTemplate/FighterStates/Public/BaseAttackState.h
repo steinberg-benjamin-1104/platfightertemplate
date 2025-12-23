@@ -10,7 +10,7 @@ class PFTEMPLATE_API UBaseAttackState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void Tick(FFighterInput &NewInput, int32 FramesInState) override;
+	virtual bool HandleTimer(FFighterInput &NewInput, int32 FramesInState) override;
 	virtual bool HandlePhysics(FFighterInput &NewInput) override;
 	virtual void OnExit() override;
 	virtual FString GetStateName() override {return "Attack";}

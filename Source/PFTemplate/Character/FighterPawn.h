@@ -15,6 +15,7 @@
 #include "AttackDefinition.h"
 #include "FighterAnimInstance.h"
 #include "StickDirection.h"
+#include "BakedSockets.h"
 
 #include "FighterPawn.generated.h"
 
@@ -172,7 +173,7 @@ public:
 
 	bool AnimFinished() {return FighterAnimInstance->CurrentAnimFinished(); }
 
-	FTransform GetBakedSocketTransform(FName SocketName);
+	FBakedSocketKey GetBakedSocketKey(FName SocketName);
 	FVector GetBakedSocketLocation(FName SocketName);
 
 protected:
@@ -203,4 +204,5 @@ private:
 	UPROPERTY() UCharacterPanelWidget* CharacterPanel;
 	
 	int32 ShakeSign = 1;
+	FVector RootPreviousFrame = FVector::ZeroVector;
 };

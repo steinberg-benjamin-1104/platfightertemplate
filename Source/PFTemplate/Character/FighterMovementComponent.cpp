@@ -417,12 +417,13 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 	PerformCollisionChecks(TempVelocity);
 	PreventLedgeFall(TempVelocity, bPreventLedgeFall);
 	FVector DesiredMove = Fixed2DToVector(TempVelocity * FixedDt);
+	LogFixedVector2D("Actual movement", TempVelocity * FixedDt);
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	
 	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
 }
 
-void UFighterMovementComponent::ApplyAnimMovement(int32 CurrentFrame)
+void UFighterMovementComponent::ApplyAnimMovement(FVector InMvmt)
 {
-	
+	ManualDisplacement(VectorToFixed2D(InMvmt), false);
 }

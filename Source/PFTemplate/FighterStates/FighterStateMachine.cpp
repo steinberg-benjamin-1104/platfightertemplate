@@ -19,6 +19,7 @@
 #include "ParryState.h"
 #include "ShieldbreakState.h"
 #include "ShieldState.h"
+#include "SpecialState.h"
 #include "TumbleState.h"
 
 void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
@@ -44,6 +45,7 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("Tumble", NewObject<UTumbleState>(this));
 	StateMap.Add("Shieldbreak", NewObject<UShieldbreakState>(this));
 	StateMap.Add("Parry", NewObject<UParryState>(this));
+	StateMap.Add("Special", NewObject<USpecialState>(this));
 	
 	if (FighterPawnRef)
 	{

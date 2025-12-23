@@ -92,7 +92,10 @@ void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
 
-	//MovementComponent->ApplyAnimMovement(AnimFrame);
+	FVector RootLocation = GetBakedSocketLocation("root");
+	FVector NewLocation = RootLocation - RootPreviousFrame;
+	if (RootLocation != FVector::ZeroVector) MovementComponent->ApplyAnimMovement(NewLocation);
+	RootPreviousFrame = RootLocation;
 	
 	for (auto& Pair : HurtboxMap)
 	{
@@ -195,7 +198,6 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 
 	FrameScriptRunner->LoadScript(NewAni.Commands);
 	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-	//MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
 
 	return true;
 }
@@ -313,29 +315,6 @@ void AFighterPawn::HandleParry()
 
 #pragma region Mesh
 
-float AFighterPawn::GetBakedBoneRotation(FName BoneName)
-{
-	// 1. Get the baked transform
-	FTransform BoneTransform = GetBakedSocketTransform(BoneName);
-
-	// 2. Extract the desired local axis
-	FVector DirectionVec;
-	switch (BoneVectorDirection)
-	{
-	case EBoneVectorAxis::Forward: DirectionVec = BoneTransform.GetUnitAxis(EAxis::X); break;
-	case EBoneVectorAxis::Right:   DirectionVec = BoneTransform.GetUnitAxis(EAxis::Y); break;
-	case EBoneVectorAxis::Up:      DirectionVec = BoneTransform.GetUnitAxis(EAxis::Z); break;
-	default: DirectionVec = BoneTransform.GetUnitAxis(EAxis::X);
-	}
-
-	// 3. Project onto the YZ plane
-	// Atan2(Vertical, Horizontal) -> Atan2(Z, Y)
-	float AngleRadians = FMath::Atan2(DirectionVec.Z, DirectionVec.Y);
-	float FinalDegrees = FMath::RadiansToDegrees(AngleRadians);
-
-	return FinalDegrees;
-}
-
 void AFighterPawn::ShakeMesh()
 {
 	const FVector Loc = CharacterMesh->GetRelativeLocation();
@@ -419,9 +398,9 @@ bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
 	return false;
 }
 
-FTransform AFighterPawn::GetBakedSocketTransform(FName SocketName)
+FBakedSocketKey AFighterPawn::GetBakedSocketKey(FName SocketName)
 {
-	return CurrentAnimation.BakedAnimation->GetSocketTransform(
+	return CurrentAnimation.BakedAnimation->GetSocketKey(
 		SocketName,
 		FighterAnimInstance->GetCurrentFrameIndex(),
 		!IsFacingRight());
@@ -429,5 +408,11 @@ FTransform AFighterPawn::GetBakedSocketTransform(FName SocketName)
 
 FVector AFighterPawn::GetBakedSocketLocation(FName SocketName)
 {
-	return GetBakedSocketTransform(SocketName).GetLocation();
+	FVector2D Loc = GetBakedSocketKey(SocketName).Location2D;
+	return FVector(Loc.X, 0.f, Loc.Y);
+}
+
+float AFighterPawn::GetBakedBoneRotation(FName SocketName)
+{
+	return GetBakedSocketKey(SocketName).RotationAngle;
 }

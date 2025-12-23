@@ -3,15 +3,15 @@
 #include "FighterMovementComponent.h"
 #include "FrameScriptRunner.h"
 
-void UBaseAttackState::Tick(FFighterInput& NewInput, int32 FramesInState)
+bool UBaseAttackState::HandleTimer(FFighterInput &NewInput, int32 FramesInState)
 {
-	Super::Tick(NewInput, FramesInState);
-
 	if (FighterPawnRef->AnimFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 2);
 		StateMachine->ChangeFighterState("Idle", NewInput);
+		return true;
 	}
+	return false;
 }
 
 bool UBaseAttackState::HandlePhysics(FFighterInput& NewInput)
