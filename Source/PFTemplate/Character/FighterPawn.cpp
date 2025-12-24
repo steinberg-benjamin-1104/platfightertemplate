@@ -403,10 +403,10 @@ FBakedSocketKey AFighterPawn::GetBakedSocketKey(FName SocketName)
 		!IsFacingRight());
 }
 
-FVector AFighterPawn::GetBakedSocketLocation(FName SocketName)
+FFixedVector2D AFighterPawn::GetBakedSocketLocation(FName SocketName)
 {
 	FVector2D Loc = GetBakedSocketKey(SocketName).Location2D;
-	return FVector(Loc.X, 0.f, Loc.Y);
+	return Vector2DToFixed2D(Loc) + GetFixedLoc();
 }
 
 float AFighterPawn::GetBakedBoneRotation(FName SocketName)

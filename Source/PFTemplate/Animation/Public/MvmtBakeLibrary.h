@@ -13,41 +13,45 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Fighter|Baking")
     static void BakeMovementData(UBakedAnimMvmt* DataAsset)
     {
-        if (!DataAsset || !DataAsset->X.Curve || !DataAsset->Z.Curve)
+        // 1. Basic DataAsset check
+        if (!DataAsset)
         {
-            UE_LOG(LogTemp, Warning, TEXT("BakeMovementData: Missing DataAsset or Curves."));
+            UE_LOG(LogTemp, Error, TEXT("BakeMovementData: DataAsset is null."));
+            return;
+        }
+
+        // 2. Check if BOTH are missing
+        const bool bHasX = DataAsset->X.Curve != nullptr;
+        const bool bHasZ = DataAsset->Z.Curve != nullptr;
+
+        if (!bHasX && !bHasZ)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("BakeMovementData: Both X and Z curves are missing for %s. Aborting bake."), *DataAsset->GetName());
             return;
         }
 
         DataAsset->DeltaPos.Empty();
         
         const int32 TotalFrames = DataAsset->EndFrame - DataAsset->StartFrame;
-        
         if (TotalFrames <= 0) return;
 
         const float MagX = DataAsset->X.TotalDisplacement;
         const float MagZ = DataAsset->Z.TotalDisplacement;
 
-        // Keep track of the position at the previous frame to calculate the change
         FVector2D LastFramePos = FVector2D::ZeroVector;
-
-        // Start from i = 1 because the delta at frame 0 is always 0
-        // We initialize the array with a zero vector for the first frame
         DataAsset->DeltaPos.Add(FVector2D::ZeroVector);
 
         for (int32 i = 1; i <= TotalFrames; ++i)
         {
             const float Alpha = static_cast<float>(i) / static_cast<float>(TotalFrames);
 
-            // 1. Calculate the Absolute Position for the current frame
-            float CurrentX = DataAsset->X.Curve->GetFloatValue(Alpha) * MagX;
-            float CurrentZ = DataAsset->Z.Curve->GetFloatValue(Alpha) * MagZ;
+            // 3. Sample safely: Use the curve value if it exists, otherwise 0.0f
+            float CurrentX = bHasX ? (DataAsset->X.Curve->GetFloatValue(Alpha) * MagX) : 0.0f;
+            float CurrentZ = bHasZ ? (DataAsset->Z.Curve->GetFloatValue(Alpha) * MagZ) : 0.0f;
+            
             FVector2D CurrentFramePos = FVector2D(CurrentX, CurrentZ);
-
-            // 2. Calculate the Delta (Current - Previous)
             FVector2D Delta = CurrentFramePos - LastFramePos;
 
-            // 3. Store the Delta and update the tracker
             DataAsset->DeltaPos.Add(Delta);
             LastFramePos = CurrentFramePos;
         }
@@ -56,7 +60,9 @@ public:
         DataAsset->MarkPackageDirty();
 #endif
 
-        UE_LOG(LogTemp, Log, TEXT("BakeMovementData: Successfully baked %d deltas into %s"), 
-            DataAsset->DeltaPos.Num(), *DataAsset->GetName());
+        UE_LOG(LogTemp, Log, TEXT("BakeMovementData: Successfully baked %d deltas into %s (X: %s, Z: %s)"), 
+            DataAsset->DeltaPos.Num(), *DataAsset->GetName(), 
+            bHasX ? TEXT("Valid") : TEXT("Missing/Zeroed"), 
+            bHasZ ? TEXT("Valid") : TEXT("Missing/Zeroed"));
     }
 };

@@ -34,11 +34,12 @@ public class PFTemplate : ModuleRules
 			"PFTemplate/FighterStates",
 			"PFTemplate/Input",
 			"PFTemplate/ScriptedFrameLogic",
-			"PFTemplate/Animation",
+			"PFTemplate/Animation/Public",
 			"PFTemplate/Gamemode",
 			"PFTemplate/Stage",
 			"PFTemplate/UI",
-			"PFTemplate/Rollback"
+			"PFTemplate/Rollback",
+			"PFTemplate/Movement"
 		});
 	}
 }

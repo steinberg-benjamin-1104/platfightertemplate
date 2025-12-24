@@ -174,7 +174,7 @@ public:
 	bool AnimFinished() {return FighterAnimInstance->CurrentAnimFinished(); }
 
 	FBakedSocketKey GetBakedSocketKey(FName SocketName);
-	FVector GetBakedSocketLocation(FName SocketName);
+	FFixedVector2D GetBakedSocketLocation(FName SocketName);
 
 protected:
 

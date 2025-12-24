@@ -45,5 +45,5 @@ struct FAnimPlaybackData
 		return CurrentFrame;
 	}
 
-	bool AnimIsFinished() const { return CurrentFrame > TotalFrames; }
+	bool AnimIsFinished() const { return CurrentFrame + 1 >= TotalFrames; } //temp fix
 };

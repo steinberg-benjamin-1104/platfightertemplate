@@ -26,8 +26,9 @@ void AHurtbox2D::TickHurtbox()
 void AHurtbox2D::UpdateLocation()
 {
 	if (!FighterPawnRef || BoneName.IsNone()) return;
-	
-	SetActorLocation(FighterPawnRef->GetBakedSocketLocation(BoneName) + FighterPawnRef->GetActorLocation());
+
+	FFixedVector2D Loc = FighterPawnRef->GetBakedSocketLocation(BoneName);
+	SetActorLocation(Fixed2DToVector(Loc));
 }
 
 void AHurtbox2D::UpdateRotation()
