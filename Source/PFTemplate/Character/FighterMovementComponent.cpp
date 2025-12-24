@@ -345,7 +345,7 @@ FFixedHitResult UFighterMovementComponent::PerformWallCollisionCheck(FFixedVecto
 		{
 			if (OutHit.Normal.X.Abs() > 0.5f)
 			{
-				int32 Dir = InVelocity.X.Sign() * -1;
+				int32 Dir = OutHit.Normal.X.Sign();
 				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
 				ActorLoc.X = OutHit.ImpactPoint.X + (Dir * CollisionCapsule.GetRadiusWithBuffer());
 				FighterPawnRef->SetFixedLoc(ActorLoc);
