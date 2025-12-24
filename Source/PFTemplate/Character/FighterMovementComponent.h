@@ -117,13 +117,17 @@ public:
 
 	void ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall);
 
-	void ApplyAnimMovement(FVector NewMovement);
+	void ApplyAnimMovement(int32 Frame);
+
+	void SetBakedMovement(UBakedAnimMvmt* NewMovement) { BakedAnimMvmt = NewMovement;}
 
 protected:
 	
 	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
 
 	UPROPERTY() FFighterCapsule FollowCapsule;
+
+	UPROPERTY() UBakedAnimMvmt* BakedAnimMvmt;
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);

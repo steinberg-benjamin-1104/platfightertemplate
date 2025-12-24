@@ -18,4 +18,7 @@ struct FAnimation : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FFrameCommand> Commands;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBakedAnimMvmt* BakedAnimMvmt = nullptr;
 };

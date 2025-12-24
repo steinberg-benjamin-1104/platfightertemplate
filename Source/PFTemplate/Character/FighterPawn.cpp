@@ -92,10 +92,7 @@ void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
 
-	FVector RootLocation = GetBakedSocketLocation("root");
-	FVector NewLocation = RootLocation - RootPreviousFrame;
-	if (RootLocation != FVector::ZeroVector) MovementComponent->ApplyAnimMovement(NewLocation);
-	RootPreviousFrame = RootLocation;
+	MovementComponent->ApplyAnimMovement(FighterAnimInstance->GetCurrentFrameIndex());
 	
 	for (auto& Pair : HurtboxMap)
 	{
@@ -198,7 +195,7 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 
 	FrameScriptRunner->LoadScript(NewAni.Commands);
 	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-
+	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
 	return true;
 }
 
@@ -214,7 +211,7 @@ bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int32 BlendTime
 
 	FrameScriptRunner->LoadScript(NewAni.Commands);
 	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-	//MovementComponent->SetCurrAnimMvmt(NewAni.AnimMvmt);
+	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
 
 	return true;
 }

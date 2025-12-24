@@ -8,5 +8,7 @@ enum class EFighterMovementMode : uint8
 	Grounded UMETA(DisplayName = "Grounded"),
 	JumpingUp UMETA(DisplayName = "Jumping Up"),
 	Falling UMETA(DisplayName = "Falling"),
+	KeepCurrent UMETA(DisplayName = "Keep Current"),
+	AutoResolve UMETA(DisplayName = "Auto Resolve"),
 	None UMETA(DisplayName = "None")
 };

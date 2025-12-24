@@ -15,9 +15,8 @@ bool USpecialState::HandleTimer(FFighterInput &NewInput, int32 FramesInState)
 
 void USpecialState::OnEnter(FFighterInput& Input)
 {
-	MoveComp->CurrentMovementMode = EFighterMovementMode::None;
+	
 }
-
 
 void USpecialState::OnExit()
 {

@@ -67,7 +67,14 @@ void UFighterMovementComponent::DisplayDebug()
 
 void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 {
-	if (CurrentMovementMode != NewMode) CurrentMovementMode = NewMode;
+	switch (NewMode)
+	{
+		case EFighterMovementMode::KeepCurrent: return;
+		case EFighterMovementMode:: AutoResolve: return; //need implementation
+		default: break;
+	}
+	
+	CurrentMovementMode = NewMode;
 }
 
 #pragma region JumpHandling
@@ -423,7 +430,23 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
 }
 
-void UFighterMovementComponent::ApplyAnimMovement(FVector InMvmt)
+void UFighterMovementComponent::ApplyAnimMovement(int32 Frame)
 {
-	ManualDisplacement(VectorToFixed2D(InMvmt), false);
+	if (BakedAnimMvmt == nullptr) return;
+	if (Frame >= BakedAnimMvmt->StartFrame && Frame <= BakedAnimMvmt->EndFrame)
+	{
+		if (Frame == BakedAnimMvmt->StartFrame) SetMovementMode(BakedAnimMvmt->TargetMode);
+		
+		int32 CurrentFrame = Frame - BakedAnimMvmt->StartFrame;
+		Velocity = Vector2DToFixed2D(BakedAnimMvmt->DeltaPos[CurrentFrame]) / FixedDt;
+		Velocity.X *= FighterPawnRef->GetFacingDirection();
+		if (IsGrounded()) PreventLedgeFall(Velocity, BakedAnimMvmt->bPreventLedgeFall);
+	}
+	if (Frame == BakedAnimMvmt->EndFrame + 1)
+	{
+		SetMovementMode(BakedAnimMvmt->FinishedMode);
+		if (!BakedAnimMvmt->X.KeepVelocity) Velocity.X = 0.f;
+		if (!BakedAnimMvmt->Z.KeepVelocity) Velocity.Z = 0.f;
+		BakedAnimMvmt = nullptr;
+	}
 }
