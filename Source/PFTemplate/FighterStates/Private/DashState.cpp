@@ -93,6 +93,7 @@ bool UDashState::HandleTimer(FFighterInput& NewInput, int32 FramesInState)
 		
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle", NewInput);
+		MoveComp->HaltHorizontalVelocity();
 	}
 
 	return false;

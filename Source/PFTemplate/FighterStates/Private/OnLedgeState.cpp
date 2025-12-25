@@ -24,7 +24,7 @@ bool UOnLedgeState::HandleButtonInput(FFighterInput& Input)
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
 		FighterPawnRef->SetFixedLoc(FighterPawnRef->GetFixedLoc() + FFixedVector2D(0.f, 200.f));
-		MoveComp->DoHop(EHopType::Full);
+		MoveComp->StartJump(EHopType::Full);
 		StateMachine->ChangeFighterState("JumpUp", Input);
 		return true;
 	}

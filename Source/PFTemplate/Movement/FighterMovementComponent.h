@@ -43,7 +43,10 @@ public:
 	bool IsAirborne() {return CurrentMovementMode == EFighterMovementMode::Falling || CurrentMovementMode == EFighterMovementMode::JumpingUp;}
 	
 	// Jumping
-	bool DoHop(EHopType HopType);
+	bool StartJump(EHopType HopType);
+	EHopType CachedJumpType;
+	bool StartGroundJump() { return StartJump(CachedJumpType); }
+	
 	void ResetJumpCount();
 	void SetMaxJumpCount(int32 NewMaxJumpCount);
 

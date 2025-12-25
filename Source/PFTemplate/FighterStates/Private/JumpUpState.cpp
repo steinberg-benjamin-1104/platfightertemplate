@@ -7,6 +7,13 @@ void UJumpUpState::OnEnter(FFighterInput& Input)
 	FighterPawnRef->SetCurrentAnimation("JumpUp");
 }
 
+bool UJumpUpState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+{
+	if (FramesInState == Duration) MoveComp->StartGroundJump();
+	return false;
+}
+
+
 bool UJumpUpState::HandlePhysics(FFighterInput& Input)
 {
 	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);

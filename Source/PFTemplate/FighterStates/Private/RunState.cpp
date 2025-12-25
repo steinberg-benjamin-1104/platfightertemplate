@@ -25,6 +25,7 @@ bool URunState::HandleStickInput(FFighterInput& Input)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle", Input);
+		MoveComp->HaltHorizontalVelocity();
 		return true;
 	}
 	return false;
@@ -42,7 +43,6 @@ bool URunState::HandleButtonInput(FFighterInput& NewInput)
 
 	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
 	{
-		MoveComp->HaltHorizontalVelocity();
 		StateMachine->ChangeFighterState("Shield", NewInput);
 		return true;
 	}

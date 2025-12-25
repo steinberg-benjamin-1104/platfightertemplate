@@ -10,8 +10,7 @@ void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCompon
 
 void UShieldState::OnEnter(FFighterInput& Input)
 {
-	FighterPawnRef->SetCurrentAnimation("Shield", 5);
-	//UE_LOG(LogTemp, Warning, TEXT("Enter Shield State"));
+	FighterPawnRef->SetCurrentAnimation("Shield");
 }
 
 bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)

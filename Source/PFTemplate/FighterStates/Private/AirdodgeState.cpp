@@ -9,7 +9,7 @@ void UAirDodgeState::OnEnter(FFighterInput& Input)
 	FFixedVector2D Velocity = Speed * StickDir;
 	MoveComp->SetVelocity(Velocity);
 	MoveComp->SetMovementMode(EFighterMovementMode::None);
-	FighterPawnRef->SetCurrentAnimation("Airdodge");
+	FighterPawnRef->SetCurrentAnimation("Airdodge", 6);
 }
 
 bool UAirDodgeState::HandleTimer(FFighterInput& Input, int32 FramesInState)
@@ -40,6 +40,16 @@ bool UAirDodgeState::HandlePhysics(FFighterInput& Input)
 		bIsGrounded = true;
 		FighterPawnRef->SetCurrentAnimation("Landing");
 	}
-	if (bIsGrounded) MoveComp->ApplyGroundFriction();
+	if (bIsGrounded)
+	{
+		MoveComp->ApplyGroundFriction();
+		MoveComp->PreventLedgeFall(false);
+		if (MoveComp->CurrentMovementMode == EFighterMovementMode::Falling)
+		{
+			FighterPawnRef->SetCurrentAnimation("Falling");
+			StateMachine->ChangeFighterState("Falling", Input);
+			return true;
+		}
+	}
 	return false;
 }

@@ -13,6 +13,7 @@ bool UJumpSquatState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FramesInState == Duration)
 	{
 		StateMachine->ChangeFighterState("JumpUp", Input);
+		MoveComp->CachedJumpType = bJumpButtonHeld ? EHopType::Full : EHopType::Short;
 		return true;
 	}
 	return false;
@@ -36,9 +37,4 @@ bool UJumpSquatState::HandlePhysics(FFighterInput& Input)
 	MoveComp->ApplyGroundFriction();
 	MoveComp->PreventLedgeFall(true);
 	return false;
-}
-
-void UJumpSquatState::OnExit()
-{
-	MoveComp->DoHop(bJumpButtonHeld ? EHopType::Full : EHopType::Short);
 }

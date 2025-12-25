@@ -14,7 +14,6 @@ class PFTEMPLATE_API UJumpSquatState : public UFighterState
 public:
 
 	virtual void OnEnter(FFighterInput& Input) override;
-	virtual void OnExit() override;
 	virtual bool HandlePhysics(FFighterInput& Input) override;
 	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
 	virtual bool HandleButtonInput(FFighterInput& Input) override;

@@ -11,7 +11,7 @@ bool UFallingState::HandleButtonInput(FFighterInput& NewInput)
 	
 	if (ButtonState.IsPressed(EInputButton::Jump))
 	{
-		if (MoveComp->DoHop(EHopType::Air))
+		if (MoveComp->StartJump(EHopType::Air))
 		{
 			FFixedVector2D Velocity = MoveComp->GetVelocity();
 			Velocity.X = NewInput.Stick.StickPos.X * MoveComp->MaxAirSpeed;

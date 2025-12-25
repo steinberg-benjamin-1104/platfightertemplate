@@ -90,7 +90,7 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 #pragma region JumpHandling
 
 
-bool UFighterMovementComponent::DoHop(EHopType HopType)
+bool UFighterMovementComponent::StartJump(EHopType HopType)
 {
 	if (JumpsRemaining <= 0) return false;
 
@@ -300,6 +300,7 @@ void UFighterMovementComponent::PreventLedgeFall(FFixedVector2D& InVelocity, boo
 		else
 		{
 			SetMovementMode(EFighterMovementMode::Falling);
+			Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed.ToFixed(), MaxAirSpeed);
 			JumpsRemaining--;
 		}
 	}
