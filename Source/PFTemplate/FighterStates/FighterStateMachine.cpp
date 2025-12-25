@@ -12,11 +12,13 @@
 #include "JumpUpState.h"
 #include "FallingState.h"
 #include "AirAttackState.h"
+#include "AirdodgeState.h"
 #include "HitstopState.h"
 #include "KnockbackState.h"
 #include "KnockdownState.h"
 #include "OnLedgeState.h"
 #include "ParryState.h"
+#include "PlatformDrop.h"
 #include "ShieldbreakState.h"
 #include "ShieldState.h"
 #include "SpecialState.h"
@@ -46,6 +48,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("Shieldbreak", NewObject<UShieldbreakState>(this));
 	StateMap.Add("Parry", NewObject<UParryState>(this));
 	StateMap.Add("Special", NewObject<USpecialState>(this));
+	StateMap.Add("PlatformDrop", NewObject<UPlatformDropState>(this));
+	StateMap.Add("Airdodge", NewObject<UAirDodgeState>(this));
 	
 	if (FighterPawnRef)
 	{

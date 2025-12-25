@@ -84,7 +84,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP WalkSpeed = 500.f;
 
 	//Lower Friction: 0.95, Higher Friction: 0.5
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP GroundFriction = 0.8f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP GroundFriction = 0.06f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int MaxJumpCount = 2;
 	int JumpsRemaining = 0;
 	bool bIsFastFalling = false;
@@ -121,6 +121,9 @@ public:
 
 	void SetBakedMovement(UBakedAnimMvmt* NewMovement) { BakedAnimMvmt = NewMovement;}
 
+	bool bOnPlatform = false;
+	bool bIgnorePlatform = false;
+
 protected:
 	
 	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
@@ -128,6 +131,8 @@ protected:
 	UPROPERTY() FFighterCapsule FollowCapsule;
 
 	UPROPERTY() UBakedAnimMvmt* BakedAnimMvmt;
+
+	void TestIsGrounded();
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);

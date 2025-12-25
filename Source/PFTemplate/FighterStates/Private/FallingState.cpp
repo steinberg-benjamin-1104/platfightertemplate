@@ -36,6 +36,12 @@ bool UFallingState::HandleButtonInput(FFighterInput& NewInput)
 	{
 		return FighterPawnRef->TryStartAttack(EInputButton::Special, NewInput);
 	}
+
+	if (ButtonState.IsPressed(EInputButton::Shield))
+	{
+		StateMachine->ChangeFighterState("Airdodge", NewInput);
+		return true;
+	}
 	
 	return false;
 }
@@ -76,12 +82,6 @@ void UFallingState::Tick(FFighterInput& Input, int32 FramesInState)
 		FighterPawnRef->SetFixedLoc(LedgePos + FFixedVector2D(FFixed_32(25.f) * IsRight, -200.f ));
 		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
 	}
-}
-
-
-void UFallingState::OnExit()
-{
-	MoveComp->bIsFastFalling = false;
 }
 
 ALedge* UFallingState::DetectNearbyLedge() const

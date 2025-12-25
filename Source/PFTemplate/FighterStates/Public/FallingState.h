@@ -17,7 +17,6 @@ public:
 	virtual bool HandlePhysics(FFighterInput& Input) override;
 	virtual bool HandleStickInput(FFighterInput& Input) override;
 	virtual void Tick(FFighterInput& Input, int32 FramesInState) override;
-	virtual void OnExit() override;
 	virtual FString GetStateName() override {return "Falling";}
 	
 private:

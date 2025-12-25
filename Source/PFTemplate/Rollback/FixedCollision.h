@@ -11,6 +11,7 @@ struct FFixedHitResult
 	FFixedVector2D Normal;
 	FFixed_32        Distance;
 	bool            bBlockingHit = false;
+	AActor* HitActor = nullptr;
 };
 
 constexpr ECollisionChannel Channel = ECC_WorldStatic;
@@ -63,6 +64,7 @@ static FFixedHitResult FixedLineTrace(
 		Out.ImpactPoint = VectorToFixed2D(Hit.Location);
 		Out.Normal   = VectorToFixed2D(Hit.Normal);
 		Out.Distance = FloatToFixed(Hit.Distance);
+		Out.HitActor = Hit.GetActor();
 	}
 
 	return Out;
@@ -118,6 +120,7 @@ static FFixedHitResult FixedSweepCapsule(const UWorld* World,
 		Out.ImpactPoint  = VectorToFixed2D(Hit.ImpactPoint);
 		Out.Normal    = VectorToFixed2D(Hit.Normal);
 		Out.Distance  = FloatToFixed(Hit.Distance);
+		Out.HitActor = Hit.GetActor();
 	}
 	return Out;
 }

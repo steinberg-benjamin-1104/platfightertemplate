@@ -70,7 +70,17 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 	switch (NewMode)
 	{
 		case EFighterMovementMode::KeepCurrent: return;
-		case EFighterMovementMode:: AutoResolve: return; //need implementation
+		case EFighterMovementMode:: AutoResolve:
+			{
+				TestIsGrounded();
+				if (!IsGrounded()) SetMovementMode(EFighterMovementMode::Falling);
+				return;
+			}
+		case EFighterMovementMode::Falling:
+			{
+				bOnPlatform = false;
+			}
+	case EFighterMovementMode::None: bIsFastFalling = false;
 		default: break;
 	}
 	
@@ -89,12 +99,14 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 
 	CollisionCapsule.LiftBottom();
 
-	FFixed_32 time = JumpData->FramesToApex * FixedDt; //fixedDt is 1/60
+	FFixed_32 time = JumpData->FramesToApex * FixedDt;
 	Velocity.Z = FFixed_32(2.f) * JumpData->JumpHeight / time;
 	RisingGravity = FFixed_32(2.f) * JumpData->JumpHeight/ (time * time);
 
 	SetMovementMode(EFighterMovementMode::JumpingUp);
 	JumpsRemaining--;
+	bOnPlatform = false;
+	bIsFastFalling = false;
 	return true;
 }
 
@@ -120,7 +132,7 @@ void UFighterMovementComponent::ResetJumpCount()
 
 void UFighterMovementComponent::ApplyGroundFriction()
 {
-	if (!bCanApplyGroundFriction || Velocity.X == FFixed_32(0.f)) return;
+	if (Velocity.X == FFixed_32(0.f)) return;
 
 	Velocity.X *= GroundFriction;
 	
@@ -133,7 +145,7 @@ void UFighterMovementComponent::ApplyGroundFriction()
 
 void UFighterMovementComponent::ApplyCustomFriction(FFixed_32 Friction)
 {
-	if (!bCanApplyGroundFriction || Velocity.X == FFixed_32(0.f)) return;
+	if (Velocity.X == FFixed_32(0.f)) return;
 	
 	Velocity.X *= Friction;
 	
@@ -321,10 +333,7 @@ void UFighterMovementComponent::PerformCollisionChecks(FFixedVector2D &InVelocit
 {
 	if (InVelocity.Z < FFixed_32(0.f))
 	{
-		if (PerformGroundCollisionCheck(InVelocity).bBlockingHit)
-		{
-			ProcessLanded();
-		}
+		if (PerformGroundCollisionCheck(InVelocity).bBlockingHit) ProcessLanded();
 	}
 	else if (InVelocity.Z > FFixed_32(0.f)) PerformCeilingCollisionCheck(InVelocity);
 
@@ -345,6 +354,7 @@ FFixedHitResult UFighterMovementComponent::PerformWallCollisionCheck(FFixedVecto
 		{
 			if (OutHit.Normal.X.Abs() > 0.5f)
 			{
+				if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return OutHit;
 				int32 Dir = OutHit.Normal.X.Sign();
 				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
 				ActorLoc.X = OutHit.ImpactPoint.X + (Dir * CollisionCapsule.GetRadiusWithBuffer());
@@ -383,11 +393,18 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
 	FFixed_32 TraceDistanceZ = InVelocity.Z * FixedDt;
     
 	FFixedVector2D End = Start + FFixedVector2D(0.f, TraceDistanceZ);
+	Start.Z += FFixed_32(.5f);
 
 	OutHit = FixedLineTrace(GetWorld(), Start, End);
     
-	if (OutHit.bBlockingHit)
+	if (OutHit.bBlockingHit && !IsGrounded())
 	{
+		bOnPlatform = (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform")));
+		if (bIgnorePlatform && bOnPlatform || (bIsFastFalling && bOnPlatform))
+		{
+			bOnPlatform = false;
+			return OutHit;
+		}
 		FFixedVector2D NewLocation = OutHit.ImpactPoint;
 		NewLocation.Z += CollisionCapsule.bufferlayer;
 		FighterPawnRef->SetFixedLoc(NewLocation);
@@ -409,6 +426,7 @@ FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVe
     
 	if (OutHit.bBlockingHit)
 	{
+		if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return OutHit;
 		const FFixed_32 CapsuleTopOffset = (CollisionCapsule.defaultHalfHeight.ToFixed() * 2) + CollisionCapsule.bufferlayer.ToFixed();
 		const FFixedVector2D NewLocation = OutHit.ImpactPoint - FFixedVector2D(0.f, CapsuleTopOffset);
 		FighterPawnRef->SetFixedLoc(NewLocation);
@@ -449,4 +467,9 @@ void UFighterMovementComponent::ApplyAnimMovement(int32 Frame)
 		if (!BakedAnimMvmt->Z.KeepVelocity) Velocity.Z = 0.f;
 		BakedAnimMvmt = nullptr;
 	}
+}
+void UFighterMovementComponent::TestIsGrounded()
+{
+	FFixedVector2D TestVelocity(Velocity.X, 120.f);
+	PerformGroundCollisionCheck(TestVelocity).bBlockingHit;
 }

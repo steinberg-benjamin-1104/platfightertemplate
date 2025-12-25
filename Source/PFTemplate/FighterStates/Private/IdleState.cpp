@@ -56,6 +56,11 @@ bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
 		return FighterPawnRef->TryStartAttack(EInputButton::Special, NewInput);
 	}
 
+	if (NewInput.Stick.bDownThisFrame && MoveComp->bOnPlatform)
+	{
+		StateMachine->ChangeFighterState("PlatformDrop", NewInput);
+	}
+
 	return false;
 }
 
