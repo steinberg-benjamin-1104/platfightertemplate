@@ -97,7 +97,7 @@ bool UFighterMovementComponent::DoHop(EHopType HopType)
 	const FJumpData* JumpData = JumpDataMap.Find(HopType);
 	if (!JumpData || JumpData->FramesToApex <= 0) return false;
 
-	CollisionCapsule.LiftBottom();
+	//CollisionCapsule.LiftBottom();
 
 	FFixed_32 time = JumpData->FramesToApex * FixedDt;
 	Velocity.Z = FFixed_32(2.f) * JumpData->JumpHeight / time;
@@ -133,11 +133,18 @@ void UFighterMovementComponent::ResetJumpCount()
 void UFighterMovementComponent::ApplyGroundFriction()
 {
 	if (Velocity.X == FFixed_32(0.f)) return;
-
-	Velocity.X *= GroundFriction;
 	
-	const FFixed_32 MinVelocity = FFixed_32(0.01f);
-	if (Velocity.X.Abs() < MinVelocity)
+	FFixed_32 CurrentTraction = GroundTraction;
+	if (Velocity.X.Abs() > WalkSpeed) CurrentTraction *= FFixed_32(2.f);
+	
+	FFixed_32 DecelAmount = CurrentTraction;
+	
+	FFixed_32 Direction = Velocity.X.Sign();
+	FFixed_32 PrevVelocityX = Velocity.X;
+    
+	Velocity.X -= DecelAmount * Direction;
+	
+	if ((PrevVelocityX > 0 && Velocity.X <= 0) || (PrevVelocityX < 0 && Velocity.X >= 0))
 	{
 		Velocity.X = FFixed_32(0.f);
 	}

@@ -97,7 +97,7 @@ bool UKnockbackState::HandlePhysics(FFighterInput& Input)
 	// Slide Physics
 	if (bSliding)
 	{
-		Velocity.X *= MoveComp->GroundFriction;
+		//Velocity.X *= MoveComp->GroundFriction;
 		Velocity.X = FixedClamp(Velocity.X, FFixed_32(-498.f), FFixed_32(498.f)); // 8.3 * 60
 	}
 

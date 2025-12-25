@@ -9,6 +9,7 @@ void UAirDodgeState::OnEnter(FFighterInput& Input)
 	FFixedVector2D Velocity = Speed * StickDir;
 	MoveComp->SetVelocity(Velocity);
 	MoveComp->SetMovementMode(EFighterMovementMode::None);
+	FighterPawnRef->SetCurrentAnimation("Airdodge");
 }
 
 bool UAirDodgeState::HandleTimer(FFighterInput& Input, int32 FramesInState)
