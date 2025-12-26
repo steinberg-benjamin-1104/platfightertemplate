@@ -15,8 +15,8 @@ public:
 	bool HandlePhysics(FFighterInput& Input) override;
 
 private:
-	int32 MvmtDuration = 13;
-	int32 Duration = 30;
-	FFixed_32 Speed = 1200.f;
+	int32 MvmtDuration = 10;
+	int32 Duration = 28;
+	FFixed_32 Speed = 1600.f;
 	bool bIsGrounded = false;
 };

@@ -401,7 +401,7 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
 	FFixed_32 TraceDistanceZ = InVelocity.Z * FixedDt;
     
 	FFixedVector2D End = Start + FFixedVector2D(0.f, TraceDistanceZ);
-	Start.Z += FFixed_32(.5f);
+	Start.Z += FFixed_32(1.f);
 
 	OutHit = FixedLineTrace(GetWorld(), Start, End);
     
@@ -411,7 +411,7 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
 		if (bIgnorePlatform && bOnPlatform || (bIsFastFalling && bOnPlatform))
 		{
 			bOnPlatform = false;
-			return OutHit;
+			return FFixedHitResult();
 		}
 		FFixedVector2D NewLocation = OutHit.ImpactPoint;
 		NewLocation.Z += CollisionCapsule.bufferlayer;

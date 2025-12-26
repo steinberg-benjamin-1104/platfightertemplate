@@ -4,9 +4,9 @@
 
 void UAirDodgeState::OnEnter(FFighterInput& Input)
 {
-	FFixedVector2D StickDir = Input.Stick.StickPos;
+	FFixedVector2D StickPos = Input.Stick.StickPos;
 	bIsGrounded = false;
-	FFixedVector2D Velocity = Speed * StickDir;
+	FFixedVector2D Velocity = Speed * StickPos.GetSafeNormal();
 	MoveComp->SetVelocity(Velocity);
 	MoveComp->SetMovementMode(EFighterMovementMode::None);
 	FighterPawnRef->SetCurrentAnimation("Airdodge", 6);
