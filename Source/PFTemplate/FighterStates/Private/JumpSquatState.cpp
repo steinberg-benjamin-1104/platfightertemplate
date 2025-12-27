@@ -2,37 +2,32 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void UJumpSquatState::OnEnter(FFighterInput& Input)
+void UJumpSquatState::OnEnter()
 {
 	bJumpButtonHeld = true;
 	FighterPawnRef->SetCurrentAnimation("JumpSquat");
 }
 
-bool UJumpSquatState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UJumpSquatState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->ChangeFighterState("JumpUp", Input);
+		StateMachine->ChangeFighterState("JumpUp");
 		MoveComp->CachedJumpType = bJumpButtonHeld ? EHopType::Full : EHopType::Short;
 		return true;
 	}
 	return false;
 }
 
-bool UJumpSquatState::HandleButtonInput(FFighterInput& Input)
+void UJumpSquatState::HandleInput()
 {
-	FButtonState &ButtonState = Input.Button;
-	
-	if (!ButtonState.IsHeld(EInputButton::Jump))
+	if (!InputBuffer->IsHeld(EInputButton::Jump) && bJumpButtonHeld)
 	{
-		if (!bJumpButtonHeld) return false;
 		bJumpButtonHeld = false;
 	}
-	
-	return false;
 }
 
-bool UJumpSquatState::HandlePhysics(FFighterInput& Input)
+bool UJumpSquatState::HandlePhysics()
 {
 	MoveComp->ApplyGroundFriction();
 	MoveComp->PreventLedgeFall(true);

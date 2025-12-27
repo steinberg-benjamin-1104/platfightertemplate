@@ -2,30 +2,25 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void UJumpUpState::OnEnter(FFighterInput& Input)
+void UJumpUpState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("JumpUp");
 }
 
-bool UJumpUpState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UJumpUpState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == Duration) MoveComp->StartGroundJump();
 	return false;
 }
 
-
-bool UJumpUpState::HandlePhysics(FFighterInput& Input)
-{
-	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
-	return false;
-}
-
-bool UJumpUpState::HandleStickInput(FFighterInput& Input)
+bool UJumpUpState::HandlePhysics()
 {
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
 	{
-		StateMachine->ChangeFighterState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
+	
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
 	return false;
 }

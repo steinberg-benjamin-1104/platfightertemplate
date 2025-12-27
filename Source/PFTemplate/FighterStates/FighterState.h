@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "InputBuffer.h"
+#include "StickDirection.h"
 #include "FighterState.generated.h"
 
 class AFighterPawn;
@@ -23,8 +24,7 @@ public:
 
 	UPROPERTY()
 	UFighterStateMachine* StateMachine;
-
-	UPROPERTY()
+	
 	FInputBuffer* InputBuffer;
 
 	virtual FString GetStateName() {return "StateName";}
@@ -33,20 +33,13 @@ public:
 		AFighterPawn* InFighterPawn,
 		UFighterMovementComponent* InMoveComp,
 		UFighterStateMachine* InStateMachine,
-		FInputBuffer* InInputBuffer)
-	{
-		FighterPawnRef = InFighterPawn;
-		MoveComp = InMoveComp;
-		StateMachine = InStateMachine;
-		InputBuffer = InInputBuffer;
-	}
+		FInputBuffer* InInputBuffer);
 	
 	virtual void OnEnter() {}
 	virtual void OnExit() {}
 	virtual bool CanEnterState() const { return true; }
 	virtual bool CanExitState() const { return true; }
-	virtual bool HandleButtonInput() { return false; }
-	virtual bool HandleStickInput() { return false; }
+	virtual void HandleInput() { }
 	virtual bool HandlePhysics() { return false;}
 	virtual bool HandleTimer(int32 FramesInState) { return false;}
 
@@ -54,7 +47,11 @@ public:
 	{
 		if (HandleTimer(FramesInState)) return;
 		if (HandlePhysics()) return;
-		if (HandleButtonInput()) return;
-		if (HandleStickInput()) return;
+		HandleInput();
 	}
+
+protected:
+	EStickDir GetCurrentStickDir();
+	bool CheckActionButtons();
+	bool CheckBufferedButtonStateChanges(const TMap<EInputButton, FName>& TransitionMap);
 };

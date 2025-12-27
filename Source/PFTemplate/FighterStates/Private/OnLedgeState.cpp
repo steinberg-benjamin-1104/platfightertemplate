@@ -2,7 +2,7 @@
 #include "FighterMovementComponent.h"
 #include "FighterPawn.h"
 
-void UOnLedgeState::OnEnter(FFighterInput& Input)
+void UOnLedgeState::OnEnter()
 {
 	MoveComp->StopMovementCompletely(true);
 	FighterPawnRef->SetCurrentAnimation("Ledgegrab");
@@ -10,25 +10,23 @@ void UOnLedgeState::OnEnter(FFighterInput& Input)
 	Actionable = false;
 }
 
-bool UOnLedgeState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UOnLedgeState::HandleTimer(int32 FramesInState)
 {
 	if (StateMachine->FramesInState == DelayAction) Actionable = true;
 	return false;
 }
 
-bool UOnLedgeState::HandleButtonInput(FFighterInput& Input)
+void UOnLedgeState::HandleInput()
 {
-	if (!Actionable) return false;
-	FButtonState ButtonState = Input.Button;
+	if (!Actionable) return;
 	
-	if (ButtonState.IsPressed(EInputButton::Jump))
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
 		FighterPawnRef->SetFixedLoc(FighterPawnRef->GetFixedLoc() + FFixedVector2D(0.f, 200.f));
 		MoveComp->StartJump(EHopType::Full);
-		StateMachine->ChangeFighterState("JumpUp", Input);
-		return true;
+		Input->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("JumpUp");
 	}
-	return false;
 }
 
 void UOnLedgeState::OnExit()

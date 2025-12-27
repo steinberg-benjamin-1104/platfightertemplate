@@ -2,18 +2,18 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-bool USpecialState::HandleTimer(, int32 FramesInState)
+bool USpecialState::HandleTimer(int32 FramesInState)
 {
 	if (FighterPawnRef->AnimFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling", 2);
-		StateMachine->ChangeFighterState("Falling", NewInput);
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;
 }
 
-void USpecialState::OnEnter(FFighterInput& Input)
+void USpecialState::OnEnter()
 {
 	
 }

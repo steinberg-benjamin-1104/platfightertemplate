@@ -1,6 +1,5 @@
 #include "IdleState.h"
 #include "FighterPawn.h"
-#include "AttackDefinition.h"
 #include "FighterMovementComponent.h"
 
 void UIdleState::OnExit()
@@ -10,13 +9,11 @@ void UIdleState::OnExit()
 
 bool UIdleState::HandlePhysics()
 {
-
 	MoveComp->ApplyGroundFriction();
 	MoveComp->PreventLedgeFall(false);
 	
 	if (MoveComp->IsAirborne())
 	{
-		FighterPawnRef->SetCurrentAnimation("Falling");
 		FighterPawnRef->StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
@@ -30,59 +27,35 @@ bool UIdleState::HandlePhysics()
 	return false;
 }
 
-bool UIdleState::HandleButtonInput()
+void UIdleState::HandleInput()
 {
+	if (CheckActionButtons()) return;
 	
-	if (InputBuffer->WasPressed(EInputButton::Jump))
-	{
-		InputBuffer->Consume(EInputButton::Jump);
-		StateMachine->ChangeFighterState("JumpSquat");
-		return true;
-	}
+	static const TMap<EInputButton, FName> ButtonToState = {
+		{ EInputButton::Jump, "JumpSquat" },
+		{ EInputButton::StickDown, "PlatformDrop" },
+		{ EInputButton::Shield, "Shield"}
+	};
 
-	if (InputBuffer->WasPressed(EInputButton::Shield) || InputBuffer->IsHeld(EInputButton::Shield))
+	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
+
+	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		InputBuffer->Consume(EInputButton::Shield);
 		StateMachine->ChangeFighterState("Shield");
-		return true;
+		return;
 	}
 
-	if (InputBuffer->WasPressed(EInputButton::Attack))
+	EStickDir Stickdir = GetCurrentStickDir();
+	if (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Forward)
 	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Attack);
+		if (InputBuffer->GetRecent().IsPressed(EInputButton::Flick))
+		{
+			InputBuffer->GetRecent().Consume(EInputButton::Flick);
+			FighterPawnRef->StateMachine->ChangeFighterState("Dash");
+		}
+		else
+		{
+			StateMachine->ChangeFighterState("Walking");
+		}
 	}
-
-	if (ButtonState.IsPressed(EInputButton::Special))
-	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Special, NewInput);
-	}
-
-	if (NewInput.Stick.bDownThisFrame && MoveComp->bOnPlatform)
-	{
-		StateMachine->ChangeFighterState("PlatformDrop", NewInput);
-	}
-
-	return false;
-}
-
-bool UIdleState::HandleStickInput(FFighterInput& NewInput)
-{
-	FStickState Stick = NewInput.Stick;
-	EStickDir Stickdir = GetStickDirection(Stick.StickPos, FighterPawnRef->IsFacingRight());
-	
-	bool X = (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Forward);
-	if (Stick.bFlick && X)
-	{
-		NewInput.Stick.ConsumeFlick();
-		FighterPawnRef->StateMachine->ChangeFighterState("Dash", NewInput);
-		return true;
-	}
-	
-	if (X)
-	{
-		StateMachine->ChangeFighterState("Walking", NewInput);
-		return true;
-	}
-
-	return false;
 }

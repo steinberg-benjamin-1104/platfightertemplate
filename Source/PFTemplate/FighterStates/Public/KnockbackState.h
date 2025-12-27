@@ -14,11 +14,11 @@ class PFTEMPLATE_API UKnockbackState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine) override;
-	virtual void OnEnter(FFighterInput& Input) override;
+	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine, FInputBuffer* InputBuffer) override;
+	virtual void OnEnter() override;
 	virtual void OnExit() override;
-	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState);
-	virtual bool HandlePhysics(FFighterInput& Input) override;
+	virtual bool HandleTimer(int32 FramesInState);
+	virtual bool HandlePhysics() override;
 
 	virtual FString GetStateName() override {return "KnockbackState";}
 

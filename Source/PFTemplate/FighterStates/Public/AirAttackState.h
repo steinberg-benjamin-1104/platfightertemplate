@@ -10,9 +10,9 @@ class PFTEMPLATE_API UAirAttackState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
-	bool HandlePhysics(FFighterInput& Input) override;
-	bool HandleStickInput(FFighterInput& Input) override;
+	bool HandleTimer(int32 FramesInState) override;
+	bool HandlePhysics() override;
+	void HandleInput() override;
 
 	virtual FString GetStateName() override { return "AirAttack"; }
 };

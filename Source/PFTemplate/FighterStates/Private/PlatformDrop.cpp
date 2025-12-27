@@ -1,9 +1,9 @@
 #include "PlatformDrop.h"
 #include "FighterPawn.h"
 
-void UPlatformDropState::OnEnter(FFighterInput& Input)
+void UPlatformDropState::OnEnter()
 {
-	FighterPawnRef->SetCurrentAnimation("Falling"); //change to platform drop
+	 //change to platform drop
 	MoveComp->bIgnorePlatform = true;
 	MoveComp->bOnPlatform = false;
 	MoveComp->SetMovementMode(EFighterMovementMode::Falling);
@@ -14,11 +14,11 @@ void UPlatformDropState::OnExit()
 	MoveComp->bIgnorePlatform = false;
 }
 
-bool UPlatformDropState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UPlatformDropState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->ChangeFighterState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;

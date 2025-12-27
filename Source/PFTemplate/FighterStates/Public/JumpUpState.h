@@ -10,11 +10,10 @@ class PFTEMPLATE_API UJumpUpState : public UFallingState
 	GENERATED_BODY()
 
 public:
-	virtual void OnEnter(FFighterInput& Input) override;
-	virtual bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
-	virtual bool HandleStickInput(FFighterInput& Input) override;
-	virtual bool HandlePhysics(FFighterInput& Input) override;
-	virtual void Tick(FFighterInput& Input, int32 FramesInState) override {UFighterState::Tick(Input, FramesInState);}
+	virtual void OnEnter() override;
+	virtual bool HandleTimer(int32 FramesInState) override;
+	virtual bool HandlePhysics() override;
+	virtual void Tick(int32 FramesInState) override {UFighterState::Tick(FramesInState);}
 	
 	virtual FString GetStateName() override {return "JumpUp";}
 

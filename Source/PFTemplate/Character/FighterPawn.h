@@ -109,7 +109,7 @@ public:
 	FAnimation GetAnimationByName(FName MoveName) const;
 	const FAttackDefinition* DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const;
 
-	bool TryStartAttack(EInputButton Button);
+	bool TryStartAttack(EInputButton Button, FFighterInput* Input);
 
 	bool bStopAnimUpdates = false;
 	bool bStopMvmtUpdates = false;

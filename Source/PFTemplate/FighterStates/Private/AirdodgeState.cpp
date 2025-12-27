@@ -2,9 +2,9 @@
 #include "FighterMovementComponent.h"
 #include "FighterPawn.h"
 
-void UAirDodgeState::OnEnter(FFighterInput& Input)
+void UAirDodgeState::OnEnter()
 {
-	FFixedVector2D StickPos = Input.Stick.StickPos;
+	FFixedVector2D StickPos = InputBuffer->GetRecent().StickPos;
 	bIsGrounded = false;
 	FFixedVector2D Velocity = Speed * StickPos.GetSafeNormal();
 	MoveComp->SetVelocity(Velocity);
@@ -12,13 +12,13 @@ void UAirDodgeState::OnEnter(FFighterInput& Input)
 	FighterPawnRef->SetCurrentAnimation("Airdodge", 6);
 }
 
-bool UAirDodgeState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UAirDodgeState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == MvmtDuration)
 	{
 		if (bIsGrounded)
 		{
-			StateMachine->ChangeFighterState("Idle", Input);
+			StateMachine->ChangeFighterState("Idle");
 			return true;
 		}
 		MoveComp->SetVelocity(FFixedVector2D());
@@ -26,14 +26,13 @@ bool UAirDodgeState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FramesInState == Duration)
 	{
 		MoveComp->SetMovementMode(EFighterMovementMode::Falling);
-		FighterPawnRef->SetCurrentAnimation("Falling");
-		StateMachine->ChangeFighterState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;
 }
 
-bool UAirDodgeState::HandlePhysics(FFighterInput& Input)
+bool UAirDodgeState::HandlePhysics()
 {
 	if (MoveComp->IsGrounded() && !bIsGrounded)
 	{
@@ -46,8 +45,7 @@ bool UAirDodgeState::HandlePhysics(FFighterInput& Input)
 		MoveComp->PreventLedgeFall(false);
 		if (MoveComp->CurrentMovementMode == EFighterMovementMode::Falling)
 		{
-			FighterPawnRef->SetCurrentAnimation("Falling");
-			StateMachine->ChangeFighterState("Falling", Input);
+			StateMachine->ChangeFighterState("Falling");
 			return true;
 		}
 	}

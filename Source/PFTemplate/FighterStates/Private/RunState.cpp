@@ -3,7 +3,7 @@
 #include "FighterMovementComponent.h"
 #include "StickDirection.h"
 
-void URunState::OnEnter(FFighterInput& NewInput)
+void URunState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Run");
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
@@ -11,58 +11,49 @@ void URunState::OnEnter(FFighterInput& NewInput)
 	MoveComp->SetVelocity(Velocity);
 }
 
-bool URunState::HandleStickInput(FFighterInput& Input)
+void URunState::HandleInput()
 {
-	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
+	if (CheckActionButtons()) return;
+	
+	static const TMap<EInputButton, FName> ButtonToState = {
+		{ EInputButton::Jump, "JumpSquat" },
+		{ EInputButton::StickDown, "PlatformDrop" },
+		{ EInputButton::Shield, "Shield"}
+	};
+
+	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
+
+	if (InputBuffer->IsHeld(EInputButton::Shield))
+	{
+		StateMachine->ChangeFighterState("Shield");
+		return;
+	}
+
+	EStickDir StickDir = GetCurrentStickDir();
 
 	if (StickDir == EStickDir::Backward)
 	{
-		StateMachine->ChangeFighterState("Skid", Input);
-		return true;
+		StateMachine->ChangeFighterState("Skid");
+		return;
 	}
 	
 	if (StickDir == EStickDir::Center)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
-		StateMachine->ChangeFighterState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle");
 		MoveComp->HaltHorizontalVelocity();
-		return true;
 	}
-	return false;
-}
-
-bool URunState::HandleButtonInput(FFighterInput& NewInput)
-{
-	FButtonState &ButtonState = NewInput.Button;
 	
-	if (ButtonState.IsPressed(EInputButton::Jump))
-	{
-		StateMachine->ChangeFighterState("JumpSquat", NewInput);
-		return true;
-	}
-
-	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
-	{
-		StateMachine->ChangeFighterState("Shield", NewInput);
-		return true;
-	}
-
-	if (ButtonState.IsPressed(EInputButton::Attack))
-	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
-	}
-
-	return false;
 }
 
-bool URunState::HandlePhysics(FFighterInput& Input)
+bool URunState::HandlePhysics()
 {
 	MoveComp->PreventLedgeFall(false);
 	
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Falling)
 	{
-		FighterPawnRef->SetCurrentAnimation("Falling");
-		FighterPawnRef->StateMachine->ChangeFighterState("Falling", Input);
+		
+		FighterPawnRef->StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;

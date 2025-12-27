@@ -17,6 +17,8 @@ ENUM_CLASS_FLAGS(EMoveButton);
 USTRUCT()
 struct FStickConfig
 {
+	GENERATED_BODY()
+	
 	FFixed_32 DownThreshold  = FFixed_32(0.5f);
 	FFixed_32 FlickStart = FFixed_32(0.4f);
 	FFixed_32 FlickEnd = FFixed_32(0.7f);
@@ -45,9 +47,6 @@ enum class EInputButton : uint16
 	Heavy    = 1 << 8,
 	Shorthop = 1 << 9,
 	Fullhop  = 1 << 10,
-
-	// ButtonState
-	Consumed = 1 << 15
 };
 ENUM_CLASS_FLAGS(EInputButton);
 
@@ -55,20 +54,33 @@ USTRUCT()
 struct FFighterInput
 {
 	GENERATED_BODY()
-
-	uint16 Down = 0;
+	
 	uint16 Pressed = 0;
+	uint16 Held = 0;
+	uint16 Consumed = 0;
 	FFixedVector2D StickPos;
 	FStickConfig StickConfig;
 
 	bool IsHeld(EInputButton Bit) const
 	{
-		return (Down & static_cast<uint16>(Bit)) != 0;
+		return (Held & static_cast<uint16>(Bit)) != 0;
 	}
 
 	bool IsPressed(EInputButton Bit) const
 	{
 		return (Pressed & static_cast<uint16>(Bit)) != 0;
+	}
+
+	bool IsAvailable(EInputButton Bit) const
+	{
+		uint16 Mask = static_cast<uint16>(Bit);
+		return (Pressed & Mask) != 0 && (Consumed & Mask) == 0;
+	}
+
+	void Consume(EInputButton Button)
+	{
+		Consumed |= static_cast<uint16>(Button);
+		Held |= static_cast<uint16>(Button);
 	}
 };
 
@@ -100,4 +112,20 @@ FORCEINLINE void UpdateStickState(FFighterInput& S, FFixedVector2D New, FFixedVe
 	bool FlickY = FlickAxis(S.StickPos.Z, Old.Z);
 	
 	if (FlickX || FlickY) S.Pressed |=static_cast<uint32>(EInputButton::Flick);
+}
+
+FORCEINLINE uint16 CompileMoveButtonMask(EMoveButton MoveButton)
+{
+	uint16 Mask = 0;
+	
+	if (!!(MoveButton & EMoveButton::Attack))
+		Mask |= static_cast<uint16>(EInputButton::Attack);
+
+	if (!!(MoveButton & EMoveButton::Special))
+		Mask |= static_cast<uint16>(EInputButton::Special);
+
+	if (!!(MoveButton & EMoveButton::Grab))
+		Mask |= static_cast<uint16>(EInputButton::Grab);
+
+	return Mask;
 }

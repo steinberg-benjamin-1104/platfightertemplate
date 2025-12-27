@@ -23,7 +23,7 @@ FFighterInput AFighterPlayerController::BuildInput()
     if (IsPressed(ParryAction)) Current |= static_cast<uint32>(EInputButton::Parry);
     if (IsPressed(GrabAction)) Current |= static_cast<uint32>(EInputButton::Grab);
 
-    Out.Down     = Current;
+    Out.Held     = Current;
     Out.Pressed  = Current & ~PrevButtonsDown;
 
     const FFixedVector2D Stick = ReadStick(IsPressed(WalkHotkey));

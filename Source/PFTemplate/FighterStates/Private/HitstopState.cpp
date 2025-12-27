@@ -4,28 +4,28 @@
 #include "FighterPawn.h"
 #include "HitboxData.h"
 
-void UHitstopState::OnEnter(FFighterInput& Input)
+void UHitstopState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Hitstop");
 	FighterPawnRef->FaceInstigator();
-	FighterPawnRef->UpdateAnimation(Input);
+	FighterPawnRef->UpdateAnimation();
 	FighterPawnRef->FreezePlayer(true);
 	FighterPawnRef->LastInstigator->FreezePlayer(true);
 	Duration = CalcHitstop();
 	MoveComp->StopMovementCompletely();
 }
 
-bool UHitstopState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UHitstopState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
-		StateMachine->ChangeFighterState("Knockback", Input);
+		StateMachine->ChangeFighterState("Knockback");
 		return true;
 	}
 	return false;
 }
 
-bool UHitstopState::HandlePhysics(FFighterInput& Input)
+bool UHitstopState::HandlePhysics()
 {
 	FighterPawnRef->ShakeMesh();
 	return false;

@@ -2,34 +2,27 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void UChargeHeavyState::OnEnter(FFighterInput& Input)
+void UChargeHeavyState::OnEnter()
 {
 	FighterPawnRef->bStopAnimUpdates = true;
 }
 
-bool UChargeHeavyState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UChargeHeavyState::HandleTimer(int32 FramesInState)
 {
 	if (StateMachine->FramesInState == MaxHoldDuration)
 	{
-		StateMachine->ChangeFighterState("BaseAttack", Input); //possibly needs a change here
+		StateMachine->ChangeFighterState("BaseAttack"); //possibly needs a change here
 		return true;
 	}
 	return false;
 }
 
-bool UChargeHeavyState::HandleButtonInput(FFighterInput& Input)
+void UChargeHeavyState::HandleInput()
 {
-	FButtonState ButtonState = Input.Button;
-
-	if (!ButtonState.IsPressed(EInputButton::Attack))
-	{
-		StateMachine->ChangeFighterState("BaseAttack", Input); //possibly needs a change here
-		return true;
-	}
-	return false;
+	//handle attack release here
 }
 
-bool UChargeHeavyState::HandlePhysics(FFighterInput& Input)
+bool UChargeHeavyState::HandlePhysics()
 {
 	MoveComp->ApplyGroundFriction();
 	MoveComp->PreventLedgeFall(true);

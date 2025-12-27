@@ -3,37 +3,37 @@
 #include "FighterMovementComponent.h"
 #include "FrameScriptRunner.h"
 
-bool UAirAttackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UAirAttackState::HandleTimer(int32 FramesInState)
 {
 	if (FighterPawnRef->AnimFinished())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling", 5);
-		StateMachine->ChangeFighterState("Falling", Input);
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;
 }
 
 
-bool UAirAttackState::HandlePhysics(FFighterInput& Input)
+bool UAirAttackState::HandlePhysics()
 {
 	if (MoveComp->GetCurrentMode() == EFighterMovementMode::Grounded)
 	{
 		FighterPawnRef->SetCurrentAnimation("Landing");
-		StateMachine->ChangeFighterState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle");
 		FighterPawnRef->GetHitboxManager()->DeactivateHitboxes(true);
 		return true;
 	}
 	return false;
 }
 
-bool UAirAttackState::HandleStickInput(FFighterInput& Input)
+void UAirAttackState::HandleInput()
 {
-	if (!MoveComp->bIsFastFalling && Input.Stick.bDownThisFrame)
+	if (!MoveComp->bIsFastFalling && InputBuffer->GetRecent().IsPressed(EInputButton::StickDown))
 	{
 		MoveComp->bIsFastFalling = true;
+		InputBuffer->GetRecent().Consume(EInputButton::StickDown);
 	}
 	
-	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
-	return false;
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
 }

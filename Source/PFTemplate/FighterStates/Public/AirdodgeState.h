@@ -10,9 +10,9 @@ class PFTEMPLATE_API UAirDodgeState : public UFighterState
 	GENERATED_BODY()
 
 public:
-	void OnEnter(FFighterInput& Input) override;
-	bool HandleTimer(FFighterInput& Input, int32 FramesInState) override;
-	bool HandlePhysics(FFighterInput& Input) override;
+	void OnEnter() override;
+	bool HandleTimer(int32 FramesInState) override;
+	bool HandlePhysics() override;
 
 private:
 	int32 MvmtDuration = 10;

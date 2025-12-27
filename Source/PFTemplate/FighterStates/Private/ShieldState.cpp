@@ -2,18 +2,18 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine)
+void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine, FInputBuffer* InBuffer)
 {
-	Super::InitState(InFighterPawn, InMoveComp, InStateMachine);
+	Super::InitState(InFighterPawn, InMoveComp, InStateMachine, InBuffer);
 	ShieldComponent = InFighterPawn->ShieldComponent;
 }
 
-void UShieldState::OnEnter(FFighterInput& Input)
+void UShieldState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Shield");
 }
 
-bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UShieldState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == StartupFrames)
 	{
@@ -23,47 +23,39 @@ bool UShieldState::HandleTimer(FFighterInput& Input, int32 FramesInState)
 	if (FramesInState >= FramesToEnd && InEndLag)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle");
-		StateMachine->ChangeFighterState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle");
 		return true;
 	}
 	return false;
 }
 
-bool UShieldState::HandleButtonInput(FFighterInput& Input)
+void UShieldState::HandleInput()
 {
-	FButtonState &ButtonState = Input.Button;
-	
-	if (ButtonState.IsPressed(EInputButton::Jump))
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
-		StateMachine->ChangeFighterState("JumpSquat", Input);
-		return true;
+		Input->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("JumpSquat");
+		return;
 	}
 
-	if (!ButtonState.IsHeld(EInputButton::Shield))
+	if (!InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		if (!ShieldComponent->IsActive() || InEndLag) return false;
+		if (!ShieldComponent->IsActive() || InEndLag) return;
 		FramesToEnd = StateMachine->FramesInState + EndLagFrames;
 		ShieldComponent->SetShieldActive(false);
 		InEndLag = true;
 		FighterPawnRef->SetCurrentAnimation("ShieldRelease", 3);
-		return true;
 	}
-	return false;
 }
 
-bool UShieldState::HandleStickInput(FFighterInput& Input)
-{
-	return false;
-}
-
-bool UShieldState::HandlePhysics(FFighterInput& Input)
+bool UShieldState::HandlePhysics()
 {
 	MoveComp->ApplyGroundFriction();
 	MoveComp->PreventLedgeFall(false);
 	if (MoveComp->IsAirborne())
 	{
-		FighterPawnRef->SetCurrentAnimation("Falling");
-		StateMachine->ChangeFighterState("Falling", Input);
+		
+		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 	return false;

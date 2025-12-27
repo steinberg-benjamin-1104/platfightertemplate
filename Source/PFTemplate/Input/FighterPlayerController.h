@@ -15,7 +15,7 @@ class PFTEMPLATE_API AFighterPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	void UpdateInput(int32 Frame, );
+	void UpdateInput(int32 Frame, FFighterInput& NewInput);
 
 	void DummyAction(const FInputActionValue&){}
 

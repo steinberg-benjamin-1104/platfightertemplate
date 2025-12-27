@@ -6,7 +6,6 @@
 #include "FrameScriptRunner.h"
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
-#include "ButtonState.h"
 #include "AttackDefinition.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Hitstop Called"));
@@ -80,7 +79,7 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
 	InputBuffer.Update(NewInput);
-	if (StateMachine) StateMachine->TickCurrentState(NewInput);
+	if (StateMachine) StateMachine->TickCurrentState();
 	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
 	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation();
 }
@@ -124,7 +123,7 @@ void AFighterPawn::ShieldPhase()
 	FFighterInput None;
 	if (ShieldComponent->IsBroken())
 	{
-		StateMachine->ChangeFighterState("Shieldbreak", None);
+		StateMachine->ChangeFighterState("Shieldbreak");
 	}
 }
 
@@ -282,7 +281,7 @@ void AFighterPawn::InitiateKnockback()
 	}
 	FFighterInput None;
 	ApplyDamage(StoredDamageInfo.Damage);
-	StateMachine->ChangeFighterState("Hitstop", None);
+	StateMachine->ChangeFighterState("Hitstop");
 }
 
 void AFighterPawn::ApplyDamage(int32 Damage)
@@ -378,16 +377,15 @@ void AFighterPawn::FreezePlayer(bool bFreeze)
 	bStopMvmtUpdates = bFreeze;
 }
 
-bool AFighterPawn::TryStartAttack(EInputButton Button)
+bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput* Input)
 {
-	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPos : StickState.StickPos;
-	const EStickDir StickDir = GetStickDirection(StickPos, IsFacingRight());
+	const EStickDir StickDir = GetStickDirection(Input->StickPos, IsFacingRight());
 	
-	if (const FAttackDefinition* Attack = DetermineAttack(Button, StickState.bFlick, StickDir))
+	if (const FAttackDefinition* Attack = DetermineAttack(Button, Input->IsPressed(EInputButton::Flick), StickDir))
 	{
 		if (SetCurrentAnimation(Attack->Animation))
 		{
-			StateMachine->ChangeFighterState(Attack->TargetState, Input);
+			StateMachine->ChangeFighterState(Attack->TargetState);
 			return true;
 		}
 	}

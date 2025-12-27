@@ -4,10 +4,10 @@
 #include "FighterMovementComponent.h"
 #include "StickDirection.h"
 
-void UWalkingState::OnEnter(FFighterInput& Input)
+void UWalkingState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Walk");
-	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetCurrentStickDir();
 
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 
@@ -16,31 +16,54 @@ void UWalkingState::OnEnter(FFighterInput& Input)
 	MoveComp->SetVelocity(Velocity);
 }
 
-bool UWalkingState::HandlePhysics(FFighterInput& Input)
+bool UWalkingState::HandlePhysics()
 {
 	MoveComp->PreventLedgeFall(true);
 	return false;
 }
 
-bool UWalkingState::HandleStickInput(FFighterInput& Input)
+void UWalkingState::HandleInput()
 {
-	EStickDir StickDir = GetStickDirection(Input.Stick.StickPos, FighterPawnRef->IsFacingRight());
+	if (CheckActionButtons()) return;
 	
-	if (StickDir == EStickDir::Center)
+	static const TMap<EInputButton, FName> ButtonToState = {
+		{ EInputButton::Jump, "JumpSquat" },
+		{ EInputButton::StickDown, "PlatformDrop" },
+		{ EInputButton::Shield, "Shield"}
+	};
+
+	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
+
+	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		FighterPawnRef->SetCurrentAnimation("Idle", 3);
-		StateMachine->ChangeFighterState("Idle", Input);
-		MoveComp->HaltHorizontalVelocity();
-		return true;
+		StateMachine->ChangeFighterState("Shield");
+		return;
 	}
 
-	if (StickDir == EStickDir::Backward)
+	EStickDir Stickdir = GetCurrentStickDir();
+	if (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Forward)
+	{
+		if (InputBuffer->GetRecent().IsPressed(EInputButton::Flick))
+		{
+			InputBuffer->GetRecent().Consume(EInputButton::Flick);
+			FighterPawnRef->StateMachine->ChangeFighterState("Dash");
+			return;
+		}
+	}
+	
+	if (Stickdir == EStickDir::Center)
+	{
+		FighterPawnRef->SetCurrentAnimation("Idle", 3);
+		StateMachine->ChangeFighterState("Idle");
+		MoveComp->HaltHorizontalVelocity();
+		return;
+	}
+
+	if (Stickdir == EStickDir::Backward)
 	{
 		FighterPawnRef->FlipFacingDirection();
 		FFixedVector2D Velocity = MoveComp->GetVelocity();
 		Velocity.X = MoveComp->WalkSpeed.ToFixed() * FighterPawnRef->GetFacingDirection();;
 		MoveComp->SetVelocity(Velocity);
 	}
-
-	return false;
 }

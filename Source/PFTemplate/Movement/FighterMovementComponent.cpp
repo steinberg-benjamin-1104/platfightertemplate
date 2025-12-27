@@ -87,7 +87,7 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 	CurrentMovementMode = NewMode;
 }
 
-#pragma region JumpHandling
+#pragma region Jump Handling
 
 
 bool UFighterMovementComponent::StartJump(EHopType HopType)

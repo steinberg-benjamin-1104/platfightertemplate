@@ -2,25 +2,25 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void USkidState::OnEnter(FFighterInput& Input)
+void USkidState::OnEnter()
 {
 	FighterPawnRef->FlipFacingDirection();
 	FighterPawnRef->SetCurrentAnimation("Skid");
 	Reduction = MoveComp->GetVelocity().X.Abs() / SkidDuration;
 }
 
-bool USkidState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool USkidState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == SkidDuration)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
-		StateMachine->ChangeFighterState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle");
 		return true;
 	}
 	return false;
 }
 
-bool USkidState::HandlePhysics(FFighterInput& Input)
+bool USkidState::HandlePhysics()
 {
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
 	Velocity.X -= Reduction * MoveComp->GetVelocity().X.Sign();
@@ -29,21 +29,18 @@ bool USkidState::HandlePhysics(FFighterInput& Input)
 	return false;
 }
 
-bool USkidState::HandleButtonInput(FFighterInput& NewInput)
+void USkidState::HandleInput()
 {
-	FButtonState &ButtonState = NewInput.Button;
-	
-	if (ButtonState.IsPressed(EInputButton::Jump))
-	{
-		StateMachine->ChangeFighterState("JumpSquat", NewInput);
-		return true;
-	}
+	static const TMap<EInputButton, FName> ButtonToState = {
+		{ EInputButton::Jump, "JumpSquat" },
+		{ EInputButton::StickDown, "PlatformDrop" },
+		{ EInputButton::Shield, "Shield"}
+	};
 
-	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
-	{
-		StateMachine->ChangeFighterState("Shield", NewInput);
-		return true;
-	}
+	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
 
-	return false;
+	if (InputBuffer->IsHeld(EInputButton::Shield))
+	{
+		StateMachine->ChangeFighterState("Shield");
+	}
 }

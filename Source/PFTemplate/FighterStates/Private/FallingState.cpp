@@ -5,74 +5,52 @@
 #include "Ledge.h"
 #include "SafeMath.h"
 
-bool UFallingState::HandleButtonInput(FFighterInput& NewInput)
+void UFallingState::OnEnter()
 {
-	FButtonState &ButtonState = NewInput.Button;
+	FighterPawnRef->SetCurrentAnimation("Falling");
+}
+
+void UFallingState::HandleInput()
+{
+	if (CheckActionButtons()) return;
 	
-	if (ButtonState.IsPressed(EInputButton::Jump))
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
 		if (MoveComp->StartJump(EHopType::Air))
 		{
 			FFixedVector2D Velocity = MoveComp->GetVelocity();
-			Velocity.X = NewInput.Stick.StickPos.X * MoveComp->MaxAirSpeed;
+			Velocity.X = InputBuffer->GetRecent().StickPos.X * MoveComp->MaxAirSpeed;
 			MoveComp->SetVelocity(Velocity);
-			
-			StateMachine->ChangeFighterState("JumpUp", NewInput);
-			return true;
+
+			Input->Consume(EInputButton::Jump);
+			StateMachine->ChangeFighterState("JumpUp");
+			return;
 		}
 	}
-	
-	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
-	{
-		// air dodge
-	}
-	
-	if (ButtonState.IsPressed(EInputButton::Attack))
-	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
-	}
-	
-	if (ButtonState.IsPressed(EInputButton::Special))
-	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Special, NewInput);
-	}
 
-	if (ButtonState.IsPressed(EInputButton::Shield))
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Shield))
 	{
-		StateMachine->ChangeFighterState("Airdodge", NewInput);
-		return true;
+		Input->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("Airdodge");
 	}
 	
-	return false;
 }
 
-bool UFallingState::HandlePhysics(FFighterInput& Input)
+bool UFallingState::HandlePhysics()
 {
 	if (MoveComp->IsGrounded())
 	{
 		FighterPawnRef->SetCurrentAnimation("Landing");
-		StateMachine->ChangeFighterState("Idle", Input);
+		StateMachine->ChangeFighterState("Idle");
 		return true;
 	}
 
 	return false;
 }
 
-bool UFallingState::HandleStickInput(FFighterInput& Input)
+void UFallingState::Tick(int32 FramesInState)
 {
-	if (!MoveComp->bIsFastFalling && Input.Stick.bDownThisFrame)
-	{
-		MoveComp->bIsFastFalling = true;
-	}
-	
-	MoveComp->ApplyAirDrift(Input.Stick.StickPos.X);
-	
-	return false;
-}
-
-void UFallingState::Tick(FFighterInput& Input, int32 FramesInState)
-{
-	Super::Tick(Input, FramesInState);
+	Super::Tick(FramesInState);
 
 	if (ALedge* NearbyLedge = DetectNearbyLedge())
 	{
@@ -80,7 +58,7 @@ void UFallingState::Tick(FFighterInput& Input, int32 FramesInState)
 		int32 IsRight = NearbyLedge->IsRight ? 1 : -1;
 		FighterPawnRef->SetFacingDirection(IsRight * -1);
 		FighterPawnRef->SetFixedLoc(LedgePos + FFixedVector2D(FFixed_32(25.f) * IsRight, -200.f ));
-		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge", Input);
+		FighterPawnRef->StateMachine->ChangeFighterState("OnLedge");
 	}
 }
 

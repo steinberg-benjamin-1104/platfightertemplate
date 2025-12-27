@@ -13,12 +13,11 @@ class PFTEMPLATE_API UDashState : public UFighterState
 
 public:
 
-	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine) override;
-	virtual void OnEnter(FFighterInput& NewInput) override;
-	virtual bool HandleStickInput(FFighterInput& NewInput) override;
-	virtual bool HandlePhysics(FFighterInput& NewInput) override;
-	virtual bool HandleButtonInput(FFighterInput& NewInput) override;
-	virtual bool HandleTimer(FFighterInput& NewInput, int32 FramesInState) override;
+	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine, FInputBuffer* InBuffer) override;
+	virtual void OnEnter() override;
+	virtual bool HandlePhysics() override;
+	virtual void HandleInput() override;
+	virtual bool HandleTimer(int32 FramesInState) override;
 
 	virtual FString GetStateName() override {return "Dash";}
 

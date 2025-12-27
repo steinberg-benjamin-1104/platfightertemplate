@@ -4,9 +4,9 @@
 #include "FixedCollision.h"
 #include "SafeMath.h"
 
-void UKnockbackState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine)
+void UKnockbackState::InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine, FInputBuffer* InBuffer)
 {
-	Super::InitState(InFighterPawn, InMoveComp, InStateMachine);
+	Super::InitState(InFighterPawn, InMoveComp, InStateMachine, InBuffer);
 	weight = InFighterPawn->Weight;
 	gravity = InMoveComp->Gravity;
 }
@@ -24,7 +24,7 @@ void UKnockbackState::InitKnockback(int32 h, int32 d, FFixed_32 KBG, int32 BKB, 
 	CheckTumble();
 }
 
-void UKnockbackState::OnEnter(FFighterInput& Input)
+void UKnockbackState::OnEnter()
 {
 	MoveComp->bDoCollisionChecks = false;
 	bSliding = false;
@@ -42,17 +42,17 @@ void UKnockbackState::OnEnter(FFighterInput& Input)
 	FighterPawnRef->SetCurrentAnimation("Knockback", Duration);
 }
 
-bool UKnockbackState::HandleTimer(FFighterInput& Input, int32 FramesInState)
+bool UKnockbackState::HandleTimer(int32 FramesInState)
 {
 	if (StateMachine->FramesInState == Duration)
 	{
-		StateMachine->ChangeFighterState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling", Input);
+		StateMachine->ChangeFighterState(MoveComp->IsGrounded() ? "Idle" : bTumble ? "Tumble" : "Falling");
 		return true;
 	}
 	return false;
 }
 
-bool UKnockbackState::HandlePhysics(FFighterInput& Input)
+bool UKnockbackState::HandlePhysics()
 {
 	FFixedVector2D Velocity;
 	CalcKBPosUpdate(Velocity);
