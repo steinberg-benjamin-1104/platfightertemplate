@@ -23,29 +23,26 @@ FFighterInput AFighterPlayerController::BuildInput()
     if (IsPressed(ParryAction)) Current |= static_cast<uint32>(EInputButton::Parry);
     if (IsPressed(GrabAction)) Current |= static_cast<uint32>(EInputButton::Grab);
 
-    Out.Button.Down     = Current;
-    Out.Button.Pressed  = Current & ~PrevButtonsDown;
+    Out.Down     = Current;
+    Out.Pressed  = Current & ~PrevButtonsDown;
 
     const FFixedVector2D Stick = ReadStick(IsPressed(WalkHotkey));
-    UpdateStickState(Out.Stick, Stick, PrevStick);
 
     PrevButtonsDown = Current;
     PrevStick = Stick;
+    
+    UpdateStickState(Out, Stick, PrevStick);
 
     return Out;
 }
 
-FFixedVector2D AFighterPlayerController::ReadStick(bool bSmallClamp) const
+FFixedVector2D AFighterPlayerController::ReadStick(bool bReduceRadius) const
 {
     FVector2D Raw = GetVec2(MoveAction);
 
-    float radius = bSmallClamp ? 0.5f : 1.f;
+    float radius = bReduceRadius ? 0.5f : 1.f;
     FFixed_32 X = FixedClamp(Raw.X, FFixed_32(-radius), FFixed_32(radius));
     FFixed_32 Z = FixedClamp(Raw.Y, FFixed_32(-radius), FFixed_32(radius));
-
-    const FFixed_32 Dead(DEAD_ZONE);
-    if (X.Abs() < Dead) X = FFixed_32(0);
-    if (Z.Abs() < Dead) Z = FFixed_32(0);
 
     return FFixedVector2D(X, Z);
 }

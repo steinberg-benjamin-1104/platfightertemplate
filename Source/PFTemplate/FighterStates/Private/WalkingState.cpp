@@ -30,6 +30,7 @@ bool UWalkingState::HandleStickInput(FFighterInput& Input)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle", Input);
+		MoveComp->HaltHorizontalVelocity();
 		return true;
 	}
 

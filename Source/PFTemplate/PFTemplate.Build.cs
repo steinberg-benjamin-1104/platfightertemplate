@@ -20,11 +20,16 @@ public class PFTemplate : ModuleRules
 	        "UMG"
         });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { 
-			"UnrealEd",      // For FAssetToolsModule
-			"AssetTools",    // For CreateUniqueAssetName
-			"AnimationCore"  // For BoneContainers
+		PrivateDependencyModuleNames.AddRange(new string[] 
+		{ 
+    		"AnimationCore"  // Usually safe for runtime
 		});
+
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.Add("UnrealEd");
+			PrivateDependencyModuleNames.Add("AssetTools"); 
+		}
 		
 		PublicIncludePaths.AddRange(new string[]
 		{

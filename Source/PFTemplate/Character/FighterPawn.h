@@ -16,6 +16,7 @@
 #include "FighterAnimInstance.h"
 #include "StickDirection.h"
 #include "BakedSockets.h"
+#include "InputBuffer.h"
 
 #include "FighterPawn.generated.h"
 
@@ -37,13 +38,13 @@ public:
 
 	//simulated tick phases
 	void PreCollisionPhase(int32 CurrentFrame);
-	void UpdateAnimation(FFighterInput& Input);
+	void UpdateAnimation();
 	void DetectCollisions();
 	void ProcessCollisions();
 	void ShieldPhase();
 	void PostCollisionPhase();
 	void FighterDebug();
-
+	
 	UFUNCTION(BlueprintPure, Category = "Component Getters")
 	UFighterMovementComponent* GetFighterMovementComponent() const {return MovementComponent;}
 
@@ -175,6 +176,8 @@ public:
 
 	FBakedSocketKey GetBakedSocketKey(FName SocketName);
 	FFixedVector2D GetBakedSocketLocation(FName SocketName);
+
+	UPROPERTY() FInputBuffer InputBuffer;
 
 protected:
 

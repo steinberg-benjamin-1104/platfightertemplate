@@ -83,7 +83,6 @@ void UFighterStateMachine::ChangeFighterState(FName NewState, FFighterInput &Tra
 		CurrentStateKey = NewState;
 		CurrentState->OnEnter(TransitionInput);
 		FramesInState = -1;
-		TransitionInput.Button.ProcessPressed();
 		TickCurrentState(TransitionInput);
 	}
 }

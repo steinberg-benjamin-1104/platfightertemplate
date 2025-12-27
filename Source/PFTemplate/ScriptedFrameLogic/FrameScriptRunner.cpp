@@ -6,7 +6,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 
-void UFrameScriptRunnerComponent::TickScript(FFighterInput &Input, int32 AnimFrame)
+void UFrameScriptRunnerComponent::TickScript(int32 AnimFrame)
 {
 	if (AnimFrame == 1) CommandIndex = 0;
 	while (CommandIndex < Commands.Num())
@@ -16,12 +16,12 @@ void UFrameScriptRunnerComponent::TickScript(FFighterInput &Input, int32 AnimFra
 		if (Cmd.FrameExecution > AnimFrame)
 			break;
 
-		ExecuteCommand(Cmd, Input);
+		ExecuteCommand(Cmd);
 		++CommandIndex;
 	}
 }
 
-void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFighterInput& Input)
+void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd)
 {
 	if (!FighterPawnRef) return;
 
@@ -30,12 +30,6 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd, FFigh
 		case EFrameCommandType::SetCurrentAnimation:
 		{
 			FighterPawnRef->SetCurrentAnimation(Cmd.NameParam, Cmd.IntParam);
-			break;
-		}
-
-		case EFrameCommandType::ChangeFighterState:
-		{
-			FighterPawnRef->StateMachine->ChangeFighterState(Cmd.NameParam, Input);
 			break;
 		}
 		

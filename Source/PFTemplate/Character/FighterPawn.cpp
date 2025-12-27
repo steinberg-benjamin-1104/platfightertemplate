@@ -79,12 +79,13 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 {
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
+	InputBuffer.Update(NewInput);
 	if (StateMachine) StateMachine->TickCurrentState(NewInput);
 	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
-	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation(NewInput);
+	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation();
 }
 
-void AFighterPawn::UpdateAnimation(FFighterInput &Input)
+void AFighterPawn::UpdateAnimation()
 {
 	FighterAnimInstance->AdvanceFrame();
 	FighterAnimInstance->UpdateAnimation(FixedToFloat(FixedDt), false);
@@ -99,7 +100,7 @@ void AFighterPawn::UpdateAnimation(FFighterInput &Input)
 		if (AHurtbox2D* Hurtbox = Pair.Value) Hurtbox->TickHurtbox();
 	}
 	
-	FrameScriptRunner->TickScript(Input, FighterAnimInstance->GetCurrentFrameIndex());
+	FrameScriptRunner->TickScript(FighterAnimInstance->GetCurrentFrameIndex());
 }
 
 void AFighterPawn::DetectCollisions()

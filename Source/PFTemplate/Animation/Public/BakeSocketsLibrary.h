@@ -1,11 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "BakeSocketsLibrary.generated.h"
 
 class UAnimSequence;
 class UBakedAnimation;
 class UBakeProfile;
+class IAssetTools;
 
 UCLASS()
 class UBakeSocketsLibrary : public UBlueprintFunctionLibrary

@@ -17,12 +17,12 @@ class PFTEMPLATE_API UFrameScriptRunnerComponent : public UActorComponent
 public:
 	void Initialize(AFighterPawn* pawn) {FighterPawnRef = pawn;}
 	void LoadScript(const TArray<FFrameCommand>& NewCommands) {Commands = NewCommands;}
-	void TickScript(FFighterInput& Input, int32 AnimFrame);
+	void TickScript(int32 AnimFrame);
 
 private:
 	UPROPERTY() TArray<FFrameCommand> Commands;
 	UPROPERTY() AFighterPawn* FighterPawnRef;
 	int32 CommandIndex = 0;
 
-	void ExecuteCommand(const FFrameCommand& Cmd, FFighterInput& Input);
+	void ExecuteCommand(const FFrameCommand& Cmd);
 };
