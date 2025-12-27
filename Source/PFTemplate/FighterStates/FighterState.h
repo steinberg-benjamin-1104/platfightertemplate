@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "FighterInput.h"
+#include "InputBuffer.h"
 #include "FighterState.generated.h"
 
 class AFighterPawn;
@@ -24,29 +24,37 @@ public:
 	UPROPERTY()
 	UFighterStateMachine* StateMachine;
 
+	UPROPERTY()
+	FInputBuffer* InputBuffer;
+
 	virtual FString GetStateName() {return "StateName";}
 
-	virtual void InitState(AFighterPawn* InFighterPawn, UFighterMovementComponent* InMoveComp, UFighterStateMachine* InStateMachine)
+	virtual void InitState(
+		AFighterPawn* InFighterPawn,
+		UFighterMovementComponent* InMoveComp,
+		UFighterStateMachine* InStateMachine,
+		FInputBuffer* InInputBuffer)
 	{
 		FighterPawnRef = InFighterPawn;
 		MoveComp = InMoveComp;
 		StateMachine = InStateMachine;
+		InputBuffer = InInputBuffer;
 	}
 	
-	virtual void OnEnter(FFighterInput &Input) {}
+	virtual void OnEnter() {}
 	virtual void OnExit() {}
 	virtual bool CanEnterState() const { return true; }
 	virtual bool CanExitState() const { return true; }
-	virtual bool HandleButtonInput(FFighterInput &Input) { return false; }
-	virtual bool HandleStickInput(FFighterInput &Input) { return false; }
-	virtual bool HandlePhysics(FFighterInput &Input) { return false;}
-	virtual bool HandleTimer(FFighterInput &Input, int32 FramesInState) { return false;}
+	virtual bool HandleButtonInput() { return false; }
+	virtual bool HandleStickInput() { return false; }
+	virtual bool HandlePhysics() { return false;}
+	virtual bool HandleTimer(int32 FramesInState) { return false;}
 
-	virtual void Tick(FFighterInput &Input, int32 FramesInState)
+	virtual void Tick(int32 FramesInState)
 	{
-		if (HandleTimer(Input, FramesInState)) return;
-		if (HandlePhysics(Input)) return;
-		if (HandleButtonInput(Input)) return;
-		if (HandleStickInput(Input)) return;
+		if (HandleTimer(FramesInState)) return;
+		if (HandlePhysics()) return;
+		if (HandleButtonInput()) return;
+		if (HandleStickInput()) return;
 	}
 };

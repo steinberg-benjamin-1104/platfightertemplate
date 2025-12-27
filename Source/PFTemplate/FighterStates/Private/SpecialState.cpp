@@ -2,7 +2,7 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-bool USpecialState::HandleTimer(FFighterInput &NewInput, int32 FramesInState)
+bool USpecialState::HandleTimer(, int32 FramesInState)
 {
 	if (FighterPawnRef->AnimFinished())
 	{

@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "FighterInput.h"
 
 #include "FighterStateMachine.generated.h"
 
@@ -15,15 +14,14 @@ class PFTEMPLATE_API UFighterStateMachine : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY() AFighterPawn* FighterPawnRef;
 	UPROPERTY() UFighterState* CurrentState;
 	UPROPERTY(BlueprintReadOnly) FName CurrentStateKey = NAME_None;
 	UPROPERTY() TMap<FName, UFighterState*> StateMap;
 	int FramesInState = 0;
 	
 	void Initialize(AFighterPawn* InOwner);
-	void ChangeFighterState(FName NewState, FFighterInput &TransitionInput);
+	void ChangeFighterState(FName NewState);
 	void AddState(FName StateName, UFighterState* State);
-	void TickCurrentState(FFighterInput &Input);
+	void TickCurrentState();
 	void ShowStateDebug();
 };

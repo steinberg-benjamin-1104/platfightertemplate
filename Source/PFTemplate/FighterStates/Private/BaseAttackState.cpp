@@ -3,7 +3,7 @@
 #include "FighterMovementComponent.h"
 #include "FrameScriptRunner.h"
 
-bool UBaseAttackState::HandleTimer(FFighterInput &NewInput, int32 FramesInState)
+bool UBaseAttackState::HandleTimer(, int32 FramesInState)
 {
 	if (FighterPawnRef->AnimFinished())
 	{

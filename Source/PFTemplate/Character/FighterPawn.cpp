@@ -378,10 +378,8 @@ void AFighterPawn::FreezePlayer(bool bFreeze)
 	bStopMvmtUpdates = bFreeze;
 }
 
-bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput& Input)
+bool AFighterPawn::TryStartAttack(EInputButton Button)
 {
-	const FStickState& StickState = Input.Stick;
-	
 	const FFixedVector2D StickPos = StickState.bFlick ? StickState.FlickPos : StickState.StickPos;
 	const EStickDir StickDir = GetStickDirection(StickPos, IsFacingRight());
 	

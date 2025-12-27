@@ -12,9 +12,9 @@ class PFTEMPLATE_API UIdleState : public UFighterState
 public:
 	
 	virtual void OnExit() override;
-	virtual bool HandleButtonInput(FFighterInput &NewInput) override;
-	virtual bool HandleStickInput(FFighterInput &NewInput) override;
-	virtual bool HandlePhysics(FFighterInput &NewInput) override;
+	virtual bool HandleButtonInput() override;
+	virtual bool HandleStickInput() override;
+	virtual bool HandlePhysics() override;
 
 	virtual FString GetStateName() override {return "Idle";}
 

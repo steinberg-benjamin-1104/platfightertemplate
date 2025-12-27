@@ -45,6 +45,9 @@ enum class EInputButton : uint16
 	Heavy    = 1 << 8,
 	Shorthop = 1 << 9,
 	Fullhop  = 1 << 10,
+
+	// ButtonState
+	Consumed = 1 << 15
 };
 ENUM_CLASS_FLAGS(EInputButton);
 

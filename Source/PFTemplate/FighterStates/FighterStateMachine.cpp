@@ -26,8 +26,6 @@
 
 void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 {
-	FighterPawnRef = InOwner;
-
 	StateMap.Add("Idle", NewObject<UIdleState>(this));
 	StateMap.Add("BaseAttack", NewObject<UBaseAttackState>(this));
 	StateMap.Add("JumpSquat", NewObject<UJumpSquatState>(this));
@@ -51,26 +49,23 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("PlatformDrop", NewObject<UPlatformDropState>(this));
 	StateMap.Add("Airdodge", NewObject<UAirDodgeState>(this));
 	
-	if (FighterPawnRef)
-	{
-		FighterPawnRef->RegisterCustomStates(this);
-	}
+	InOwner->RegisterCustomStates(this);
 
 	for (auto& Elem : StateMap)
 	{
 		if (Elem.Value)
-			Elem.Value->InitState(FighterPawnRef, FighterPawnRef->MovementComponent, this);
+			Elem.Value->InitState(InOwner, InOwner->MovementComponent, this, &InOwner->InputBuffer);
 	}
 
 	CurrentStateKey = "Idle";
 	CurrentState = StateMap[CurrentStateKey];
 	FFighterInput NewInput;
-	CurrentState->OnEnter(NewInput);
+	CurrentState->OnEnter();
 }
 
-void UFighterStateMachine::ChangeFighterState(FName NewState, FFighterInput &TransitionInput)
+void UFighterStateMachine::ChangeFighterState(FName NewState)
 {
-	if (!StateMap.Contains(NewState) || !FighterPawnRef)
+	if (!StateMap.Contains(NewState))
 	{
 		UE_LOG(LogTemp, Error, TEXT("State '%s' does not exist in StateMap!"), *NewState.ToString());
 		return;
@@ -81,18 +76,18 @@ void UFighterStateMachine::ChangeFighterState(FName NewState, FFighterInput &Tra
 		CurrentState->OnExit();
 		CurrentState = StateMap[NewState];
 		CurrentStateKey = NewState;
-		CurrentState->OnEnter(TransitionInput);
+		CurrentState->OnEnter();
 		FramesInState = -1;
-		TickCurrentState(TransitionInput);
+		TickCurrentState();
 	}
 }
 
-void UFighterStateMachine::TickCurrentState(FFighterInput &Input)
+void UFighterStateMachine::TickCurrentState()
 {
-	if (CurrentState && FighterPawnRef)
+	if (CurrentState)
 	{
 		FramesInState++;
-		CurrentState->Tick(Input, FramesInState);
+		CurrentState->Tick(FramesInState);
 	}
 }
 
@@ -109,7 +104,6 @@ void UFighterStateMachine::ShowStateDebug()
 void UFighterStateMachine::AddState(FName StateName, UFighterState* State)
 {
 	if (!State || StateMap.Contains(StateName)) return;
-
-	State->FighterPawnRef = FighterPawnRef;
+	
 	StateMap.Add(StateName, State);
 }

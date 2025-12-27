@@ -8,7 +8,7 @@ void UIdleState::OnExit()
 	bOnLedge = false;
 }
 
-bool UIdleState::HandlePhysics(FFighterInput &NewInput)
+bool UIdleState::HandlePhysics()
 {
 
 	MoveComp->ApplyGroundFriction();
@@ -17,7 +17,7 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 	if (MoveComp->IsAirborne())
 	{
 		FighterPawnRef->SetCurrentAnimation("Falling");
-		FighterPawnRef->StateMachine->ChangeFighterState("Falling", NewInput);
+		FighterPawnRef->StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
 
@@ -30,25 +30,26 @@ bool UIdleState::HandlePhysics(FFighterInput &NewInput)
 	return false;
 }
 
-bool UIdleState::HandleButtonInput(FFighterInput &NewInput)
+bool UIdleState::HandleButtonInput()
 {
-	FButtonState &ButtonState = NewInput.Button;
 	
-	if (ButtonState.IsPressed(EInputButton::Jump))
+	if (InputBuffer->WasPressed(EInputButton::Jump))
 	{
-		StateMachine->ChangeFighterState("JumpSquat", NewInput);
+		InputBuffer->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("JumpSquat");
 		return true;
 	}
 
-	if (ButtonState.IsPressed(EInputButton::Shield) || ButtonState.IsHeld(EInputButton::Shield))
+	if (InputBuffer->WasPressed(EInputButton::Shield) || InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		StateMachine->ChangeFighterState("Shield", NewInput);
+		InputBuffer->Consume(EInputButton::Shield);
+		StateMachine->ChangeFighterState("Shield");
 		return true;
 	}
 
-	if (ButtonState.IsPressed(EInputButton::Attack))
+	if (InputBuffer->WasPressed(EInputButton::Attack))
 	{
-		return FighterPawnRef->TryStartAttack(EInputButton::Attack, NewInput);
+		return FighterPawnRef->TryStartAttack(EInputButton::Attack);
 	}
 
 	if (ButtonState.IsPressed(EInputButton::Special))

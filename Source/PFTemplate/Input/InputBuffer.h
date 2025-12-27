@@ -21,7 +21,7 @@ struct FInputBuffer
 		ConsumedMask = 0; 
 	}
 
-	bool WasPressed(EInputButton Button, int32 Window = 6) const
+	FFighterInput* WasPressed(EInputButton Button, int32 Window = 6)
 	{
 		if ((ConsumedMask & static_cast<uint16>(Button)) != 0) return false;
 		
@@ -30,14 +30,16 @@ struct FInputBuffer
 			int32 CheckIndex = (CurrentFrameIndex - i + BUFFER_SIZE) % BUFFER_SIZE;
 			if (History[CheckIndex].IsPressed(Button))
 			{
-				return true;
+				return &History[CheckIndex];
 			}
 		}
-		return false;
+		return nullptr;
 	}
 	
 	void Consume(EInputButton Button)
 	{
 		ConsumedMask |= static_cast<uint16>(Button);
 	}
+
+	bool IsHeld(EInputButton Button) {return History[CurrentFrameIndex].IsHeld(Button); }
 };
