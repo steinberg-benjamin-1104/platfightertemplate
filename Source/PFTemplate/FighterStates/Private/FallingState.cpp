@@ -33,7 +33,8 @@ void UFallingState::HandleInput()
 		Input->Consume(EInputButton::Jump);
 		StateMachine->ChangeFighterState("Airdodge");
 	}
-	
+
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
 }
 
 bool UFallingState::HandlePhysics()

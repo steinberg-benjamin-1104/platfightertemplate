@@ -3,7 +3,6 @@
 #include "EnhancedInputComponent.h"
 #include "SafeMath.h"
 #include "InputMappingContext.h"
-#include "Containers/Array.h"
 
 void AFighterPlayerController::UpdateInput(int32 Frame, FFighterInput& NewInput)
 {
@@ -25,13 +24,10 @@ FFighterInput AFighterPlayerController::BuildInput()
 
     Out.Held     = Current;
     Out.Pressed  = Current & ~PrevButtonsDown;
-
-    const FFixedVector2D Stick = ReadStick(IsPressed(WalkHotkey));
-
-    PrevButtonsDown = Current;
-    PrevStick = Stick;
     
-    UpdateStickState(Out, Stick, PrevStick);
+    UpdateStickState(Out, ReadStick(IsPressed(WalkHotkey)));
+    
+    PrevButtonsDown = Current;
 
     return Out;
 }
@@ -89,4 +85,35 @@ void AFighterPlayerController::OnPossess(APawn* InPawn)
             if (IMC) SubSys->AddMappingContext(IMC, 0);
         }
     }
+}
+
+void AFighterPlayerController::UpdateStickState(FFighterInput& InputState, FFixedVector2D New)
+{
+    if (New.X.Abs() < DeadZone) New.X = FFixed_32(0.f);
+    if (New.Z.Abs() < DeadZone) New.Z = FFixed_32(0.f);
+	
+    InputState.StickPos = New;
+	
+    if ((InputState.StickPos.Z < -DownThreshold) && !(PrevStick.Z < -DownThreshold))
+    {
+        InputState.Pressed |= static_cast<uint32>(EInputButton::StickDown);
+    }
+
+    auto FlickAxis = [&](FFixed_32 Curr, FFixed_32 Prev)
+    {
+        const bool bCurrStrong = Curr.Abs() >= FlickEnd;
+        const bool bPrevNeutral = Prev.Abs() <= FlickStart;
+
+        const bool bSignFlip =
+            Prev.Abs() >= FlickEnd &&
+            ((Curr > FFixed_32(0)) != (Prev > FFixed_32(0)));
+
+        return bCurrStrong && (bPrevNeutral || bSignFlip);
+    };
+
+    bool FlickX = FlickAxis(InputState.StickPos.X, PrevStick.X);
+    bool FlickY = FlickAxis(InputState.StickPos.Z, PrevStick.Z);
+	
+    if (FlickX || FlickY) InputState.Pressed |=static_cast<uint32>(EInputButton::Flick);
+    PrevStick = New;
 }

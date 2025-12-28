@@ -33,7 +33,6 @@ void UIdleState::HandleInput()
 	
 	static const TMap<EInputButton, FName> ButtonToState = {
 		{ EInputButton::Jump, "JumpSquat" },
-		{ EInputButton::StickDown, "PlatformDrop" },
 		{ EInputButton::Shield, "Shield"}
 	};
 
@@ -43,6 +42,15 @@ void UIdleState::HandleInput()
 	{
 		StateMachine->ChangeFighterState("Shield");
 		return;
+	}
+
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::StickDown))
+	{
+		if (MoveComp->bOnPlatform)
+		{
+			Input->Consume(EInputButton::StickDown);
+			StateMachine->ChangeFighterState("PlatformDrop");
+		}
 	}
 
 	EStickDir Stickdir = GetCurrentStickDir();

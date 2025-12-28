@@ -20,7 +20,5 @@ bool UJumpUpState::HandlePhysics()
 		StateMachine->ChangeFighterState("Falling");
 		return true;
 	}
-	
-	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
 	return false;
 }

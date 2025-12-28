@@ -14,6 +14,8 @@ public:
 	bool HandleTimer(int32 FramesInState) override;
 	bool HandlePhysics() override;
 
+	virtual FString GetStateName() override { return "Airdodge"; }
+
 private:
 	int32 MvmtDuration = 10;
 	int32 Duration = 28;

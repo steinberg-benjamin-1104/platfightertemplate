@@ -41,16 +41,33 @@ void UDashState::HandleInput()
 	
 	static const TMap<EInputButton, FName> ButtonToState = {
 		{ EInputButton::Jump, "JumpSquat" },
-		{ EInputButton::StickDown, "PlatformDrop" },
-		{ EInputButton::Shield, "Shield"}
 	};
 
 	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
 
-	if (InputBuffer->IsHeld(EInputButton::Shield))
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Shield))
 	{
+		MoveComp->HaltHorizontalVelocity();
+		Input->Consume(EInputButton::Shield);
 		StateMachine->ChangeFighterState("Shield");
 		return;
+	}
+	
+	if (InputBuffer->IsHeld(EInputButton::Shield))
+	{
+		MoveComp->HaltHorizontalVelocity();
+		StateMachine->ChangeFighterState("Shield");
+		return;
+	}
+
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::StickDown))
+	{
+		if (MoveComp->bOnPlatform)
+		{
+			Input->Consume(EInputButton::StickDown);
+			StateMachine->ChangeFighterState("PlatformDrop");
+			return;
+		}
 	}
 
 	EStickDir StickDir = GetCurrentStickDir();

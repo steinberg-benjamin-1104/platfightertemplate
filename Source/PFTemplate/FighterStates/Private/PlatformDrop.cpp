@@ -3,7 +3,7 @@
 
 void UPlatformDropState::OnEnter()
 {
-	 //change to platform drop
+	FighterPawnRef->SetCurrentAnimation("Falling"); //change to platform drop
 	MoveComp->bIgnorePlatform = true;
 	MoveComp->bOnPlatform = false;
 	MoveComp->SetMovementMode(EFighterMovementMode::Falling);

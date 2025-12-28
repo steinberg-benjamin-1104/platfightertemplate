@@ -14,17 +14,6 @@ enum class EMoveButton : uint8
 };
 ENUM_CLASS_FLAGS(EMoveButton);
 
-USTRUCT()
-struct FStickConfig
-{
-	GENERATED_BODY()
-	
-	FFixed_32 DownThreshold  = FFixed_32(0.5f);
-	FFixed_32 FlickStart = FFixed_32(0.4f);
-	FFixed_32 FlickEnd = FFixed_32(0.7f);
-	FFixed_32 DeadZone = FFixed_32(0.1f);
-};
-
 enum class EInputButton : uint16
 {
 	None = 0,
@@ -59,7 +48,6 @@ struct FFighterInput
 	uint16 Held = 0;
 	uint16 Consumed = 0;
 	FFixedVector2D StickPos;
-	FStickConfig StickConfig;
 
 	bool IsHeld(EInputButton Bit) const
 	{
@@ -83,36 +71,6 @@ struct FFighterInput
 		Held |= static_cast<uint16>(Button);
 	}
 };
-
-FORCEINLINE void UpdateStickState(FFighterInput& S, FFixedVector2D New, FFixedVector2D Old)
-{
-	if (New.X.Abs() < S.StickConfig.DeadZone) New.X = FFixed_32(0.f);
-	if (New.Z.Abs() < S.StickConfig.DeadZone) New.Z = FFixed_32(0.f);
-	
-	S.StickPos = New;
-	
-	if ((S.StickPos.Z < -S.StickConfig.DownThreshold) && !(Old.Z < -S.StickConfig.DownThreshold))
-	{
-		S.Pressed |= static_cast<uint32>(EInputButton::StickDown);
-	}
-
-	auto FlickAxis = [&](FFixed_32 Curr, FFixed_32 Prev)
-	{
-		const bool bCurrStrong = Curr.Abs() >= S.StickConfig.FlickEnd;
-		const bool bPrevNeutral = Prev.Abs() <= S.StickConfig.FlickStart;
-
-		const bool bSignFlip =
-			Prev.Abs() >= S.StickConfig.FlickEnd &&
-			((Curr > FFixed_32(0)) != (Prev > FFixed_32(0)));
-
-		return bCurrStrong && (bPrevNeutral || bSignFlip);
-	};
-
-	bool FlickX = FlickAxis(S.StickPos.X, Old.X);
-	bool FlickY = FlickAxis(S.StickPos.Z, Old.Z);
-	
-	if (FlickX || FlickY) S.Pressed |=static_cast<uint32>(EInputButton::Flick);
-}
 
 FORCEINLINE uint16 CompileMoveButtonMask(EMoveButton MoveButton)
 {

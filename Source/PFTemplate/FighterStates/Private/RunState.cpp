@@ -37,7 +37,7 @@ void URunState::HandleInput()
 		return;
 	}
 	
-	if (StickDir == EStickDir::Center)
+	if (StickDir != EStickDir::Forward)
 	{
 		FighterPawnRef->SetCurrentAnimation("Idle", 3);
 		StateMachine->ChangeFighterState("Idle");

@@ -56,9 +56,17 @@ protected:
 	bool IsPressed(const UInputAction* Action) const;
 	FVector2D GetVec2(const UInputAction* Action) const;
 
+	//Stick Configuration
+	FFixed_32 DownThreshold  = FFixed_32(0.5f);
+	FFixed_32 FlickStart = FFixed_32(0.4f);
+	FFixed_32 FlickEnd = FFixed_32(0.7f);
+	FFixed_32 DeadZone = FFixed_32(0.1f);
+
 private:
 
 	float DEAD_ZONE = 0.1f;
+
+	void UpdateStickState(FFighterInput& S, FFixedVector2D New);
 	
 	uint16 PrevButtonsDown;
 	FFixedVector2D PrevStick;
