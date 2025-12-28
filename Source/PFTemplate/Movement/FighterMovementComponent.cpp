@@ -135,7 +135,7 @@ void UFighterMovementComponent::ApplyGroundFriction()
 	if (Velocity.X == FFixed_32(0.f)) return;
 	
 	FFixed_32 CurrentTraction = GroundTraction;
-	if (Velocity.X.Abs() > WalkSpeed) CurrentTraction *= FFixed_32(2.f);
+	if (Velocity.X.Abs() > WalkSpeed.ToFixed() * FFixed_32(1.3f)) CurrentTraction *= FFixed_32(2.f);
 	
 	FFixed_32 DecelAmount = CurrentTraction;
 	

@@ -65,7 +65,6 @@ void UFallingState::Tick(int32 FramesInState)
 
 ALedge* UFallingState::DetectNearbyLedge() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Detect nearby ledge"));
 	const FFixedVector2D BaseLoc = FighterPawnRef->GetFixedLoc() + MoveComp->GetVelocity() * FixedDt;
 	const int32 ForwardDir = FighterPawnRef->GetFacingDirection();
 	const FFixedVector2D HalfExtent(60.f, 40.f);
@@ -73,7 +72,6 @@ ALedge* UFallingState::DetectNearbyLedge() const
 	const FFixedVector2D BoxCenter = BaseLoc + FFixedVector2D(ForwardDir * 30, 150.f);
 	
 	DrawDebugBox(GetWorld(), Fixed2DToVector(BoxCenter), Fixed2DToVector(HalfExtent), FQuat::Identity, FColor::Green, false, -1.f, 0, 2.f);
-	UE_LOG(LogTemp, Warning, TEXT("Drew New Box"));
 	
 	return FixedOverlapBoxFirstActorOfClass<ALedge>(GetWorld(), BoxCenter, HalfExtent);
 }

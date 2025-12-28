@@ -59,7 +59,7 @@ void AGMTest::InitBattle()
 		AFighterPawn* NewPawn = SpawnAndPossessPawn(PC, i);
 		if (NewPawn)
 		{
-			//AddCharacterPanelForPawn(NewPawn, PC, i);
+			AddCharacterPanelForPawn(NewPawn, PC, i);
 		}
 	}
 
@@ -121,8 +121,8 @@ void AGMTest::SetupHUD()
 		UE_LOG(LogTemp, Warning, TEXT("No HUD class declared"));
 		return;
 	}
-	//HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-	//HUDWidget->AddToViewport();
+	HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+	HUDWidget->AddToViewport();
 }
 
 void AGMTest::AddCharacterPanelForPawn(AFighterPawn* NewPawn, APlayerController* PC, int32 PlayerIndex)

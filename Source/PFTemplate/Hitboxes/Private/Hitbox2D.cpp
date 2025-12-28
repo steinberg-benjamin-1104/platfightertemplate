@@ -51,11 +51,9 @@ void AHitbox2D::UpdateLocation()
     if (!FighterPawnRef) return;
     
     FFixedVector2D BoneLoc = FighterPawnRef->GetBakedSocketLocation(HitboxDefinition.Transform.BoneName);
-    LogFixedVector2D("BoneLoc", BoneLoc);
     FFixedVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone.ToFixed();
     Offset2D.X *= FighterPawnRef->GetFacingDirection();
     FFixedVector2D FinalLoc = BoneLoc + Offset2D;
-    LogFixedVector2D("FinalLoc", BoneLoc);
     SetActorLocation(Fixed2DToVector(FinalLoc));
     
 }

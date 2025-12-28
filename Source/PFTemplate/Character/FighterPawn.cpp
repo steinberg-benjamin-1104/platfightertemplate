@@ -162,7 +162,7 @@ void AFighterPawn::FlipFacingDirection()
 
 void AFighterPawn::FaceInstigator()
 {
-	SetFacingDirection(LastInstigator->GetActorLocation().X < GetActorLocation().X ? -1.f : 1.f);
+	SetFacingDirection(LastInstigator->GetFixedLoc().X < GetFixedLoc().X ? -1 : 1 );
 }
 
 #pragma endregion

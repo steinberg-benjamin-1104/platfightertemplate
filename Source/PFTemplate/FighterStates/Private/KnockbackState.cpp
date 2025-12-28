@@ -15,10 +15,10 @@ void UKnockbackState::InitKnockback(int32 h, int32 d, FFixed_32 KBG, int32 BKB, 
 {
 	const FFixed_32 KnockbackValue = (((h/10 + (h * d/20)) * (FFixed_32(200.f)
 									/ (weight + FFixed_32(100.f)) * FFixed_32(1.4f))
-									+ FFixed_32(18.f)) * KBG) + BKB;
-
+									+ FFixed_32(18.f)) * KBG) + FFixed_32(BKB);
+	
 	LaunchSpeed = KnockbackValue * FFixed_32(0.3f);
-	if (x < 0) LaunchAngle = FFixed_32(180.f) - a;
+	if (x == -1) LaunchAngle = FFixed_32(180.f) - a;
 	else LaunchAngle = a;
 	Duration = FixedFloor(KnockbackValue * FFixed_32(0.4f));
 	CheckTumble();
@@ -33,9 +33,9 @@ void UKnockbackState::OnEnter()
 	InitKnockback(
 		FighterPawnRef->Health/10,
 		Dam.Damage/10,
-		Dam.KnockbackGrowth.ToFixed(),
+		FFixed_32(Dam.KnockbackGrowth)/FFixed_32(100.f),
 		Dam.BaseKnockback,
-		Dam.Angle.ToFixed(),
+		FFixed_32(Dam.Angle),
 		FighterPawnRef->GetFacingDirection() * -1
 		);
 
@@ -97,7 +97,7 @@ bool UKnockbackState::HandlePhysics()
 	// Slide Physics
 	if (bSliding)
 	{
-		//Velocity.X *= MoveComp->GroundFriction;
+		Velocity.X -= MoveComp->GroundTraction;
 		Velocity.X = FixedClamp(Velocity.X, FFixed_32(-498.f), FFixed_32(498.f)); // 8.3 * 60
 	}
 
@@ -107,20 +107,26 @@ bool UKnockbackState::HandlePhysics()
 
 void UKnockbackState::CalcKBPosUpdate(FFixedVector2D& InVelocity)
 {
-	if (LaunchSpeed <= FFixed_32(0)) 
-		LaunchSpeed = FFixed_32(0);
-	
-	FFixed_32 Radians = FixedDegreesToRadians(LaunchAngle);
+	if (LaunchSpeed <= FFixed_32(0.f))  LaunchSpeed = FFixed_32(0.f);
+
+	LogFixedInt("Initial Velocity", LaunchSpeed * FFixed_32(60.f));
+	LogFixedInt("Initial Angle", LaunchAngle);
 	
 	FFixedVector2D PosUpdate(
-		Radians.Cos() * LaunchSpeed,
-		Radians.Sin() * LaunchSpeed
+		LaunchAngle.Cos() * LaunchSpeed,
+		LaunchAngle.Sin() * LaunchSpeed
 	);
+
+	LogFixedInt("Cos", LaunchAngle.Cos());
+	LogFixedInt("Sin", LaunchAngle.Sin());
 	
 	InVelocity = PosUpdate * FFixed_32(60.f);
 	
 	if (InVelocity.Z > MoveComp->TerminalFallVelocity) InVelocity.Z -= gravity * FixedDt;
 	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(InVelocity.Z, InVelocity.X));
+
+	LogFixedVector2D("Velocity", InVelocity);
+	LogFixedInt("Angle", LaunchAngle);
 }
 
 FFixedVector2D UKnockbackState::CalcReflect(const FFixedVector2D& InVel, const FFixedVector2D& Normal)
@@ -149,7 +155,6 @@ void UKnockbackState::CompleteKBPosUpdate(FFixedVector2D& InVelocity)
 	LaunchSpeed -= 0.51f;
 	ShowDebugKB(true, InVelocity);
 }
-
 
 void UKnockbackState::ShowDebugKB(bool bDebug, const FFixedVector2D &InVelocity)
 {

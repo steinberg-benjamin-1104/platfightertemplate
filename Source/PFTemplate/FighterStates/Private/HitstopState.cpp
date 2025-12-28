@@ -36,11 +36,11 @@ void UHitstopState::OnExit()
 	FighterPawnRef->ResetMeshOffset();
 	FighterPawnRef->FreezePlayer(false);
 	FighterPawnRef->LastInstigator->FreezePlayer(false);
-	Duration = CalcHitstop();
 }
 
 int UHitstopState::CalcHitstop()
 {
 	FDamageInfo DamageInfo = FighterPawnRef->StoredDamageInfo;
-	return FixedFloor((DamageInfo.Damage/20 + 6) * DamageInfo.HitstopMod.ToFixed());
+	FFixed_32 HitstopMod = FFixed_32(DamageInfo.HitstopMod)/FFixed_32(100.f);
+	return FixedFloor((DamageInfo.Damage/20 + 6) * HitstopMod);
 }

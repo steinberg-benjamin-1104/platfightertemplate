@@ -33,29 +33,22 @@ struct FDamageInfo
 	EHitEffect HitEffect = EHitEffect::Knockback;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP Angle;
+	int32 Angle = 45;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 BaseKnockback = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP KnockbackGrowth;
+	int32 KnockbackGrowth = 80;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP HitstopMod;
+	int32 HitstopMod = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Priority = 2;
 
 	bool HasSamePriority(const FDamageInfo& Other) const { return Priority == Other.Priority; }
 	bool HasHigherPriority(const FDamageInfo& Other) const { return Priority > Other.Priority; }
-
-	FDamageInfo()
-	{
-		Angle.Value = 45.f;
-		KnockbackGrowth.Value = 1.f;
-		HitstopMod.Value = 1.f;
-	}
 };
 
 USTRUCT(BlueprintType)
@@ -83,8 +76,8 @@ struct FHitboxTransform
 
 	FHitboxTransform()
 	{
-		Size.X = 10.f;
-		Size.Z = 10.f;
+		Size.X = 20.f;
+		Size.Z = 20.f;
 		Rotation.Value = 0.f;
 	}
 };

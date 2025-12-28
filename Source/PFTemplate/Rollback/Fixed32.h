@@ -70,8 +70,7 @@ struct FFixed_32
     }
 
 private:
-    FFixed_32 MulHigh(FFixed_32 b) const;
-    static FFixed_32 poly5(FFixed_32 x2);
+    static const int64_t SIN_TABLE[91];
 };
 
 constexpr int64_t ONE  = 1LL << 32;
@@ -180,4 +179,9 @@ FORCEINLINE FFixed_32 FixedAlphaFromFrame(int32 Frame, int32 TotalFrames)
 {
     if (TotalFrames <= 0) return FFixed_32(0);
     return FixedClamp(FFixed_32(Frame) / FFixed_32(TotalFrames),FFixed_32(0), FFixed_32(1));
+}
+
+FORCEINLINE void LogFixedInt(const FString& Label, const FFixed_32& Input)
+{
+    UE_LOG(LogTemp, Warning, TEXT("%s: %f"), *Label, FixedToFloat(Input));
 }
