@@ -60,15 +60,26 @@ AHitbox2D* UHitboxManagerComponent::RequestHitbox()
     return nullptr;
 }
 
-void UHitboxManagerComponent::ActivateHitboxes(const FHitboxGroup& HitboxGroup)
+void UHitboxManagerComponent::ActivateHitboxes(const FName GroupName)
 {
-    for (const FHitboxDefinition& HitboxDef : HitboxGroup.Hitboxes)
-    {
-        AHitbox2D* Hitbox = RequestHitbox();
-        if (!Hitbox) continue;
+    static const FString ContextString(TEXT("Hitbox Selection Context"));
+    FHitboxGroup* FoundGroup = HitboxTable->FindRow<FHitboxGroup>(GroupName, ContextString);
 
-        Hitbox->SetBoxActive(true, HitboxDef);
-        ActiveHitboxGroup.Add(Hitbox);
+    if (FoundGroup)
+    {
+        // Loop through the hitboxes inside the group we just found
+        for (const FHitboxDefinition& HitboxDef : FoundGroup->Hitboxes)
+        {
+            AHitbox2D* Hitbox = RequestHitbox();
+            if (!Hitbox) continue;
+
+            Hitbox->SetBoxActive(true, HitboxDef);
+            ActiveHitboxGroup.Add(Hitbox);
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HitboxManager: Could not find Hitbox Group Row: %s"), *GroupName.ToString());
     }
 }
 

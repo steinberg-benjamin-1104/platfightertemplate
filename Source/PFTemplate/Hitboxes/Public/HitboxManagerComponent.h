@@ -20,7 +20,7 @@ public:
 
 	void Initialize(AFighterPawn* InOwner, int32 PoolSize = 16);
 
-	void ActivateHitboxes(const FHitboxGroup& HitboxGroup);
+	void ActivateHitboxes(FName GroupName);
 	void ScanActiveHitboxes();
 	void ProcessHits();
 	void DeactivateHitboxes(bool ClearHits);
@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hitbox")
 	TSubclassOf<AHitbox2D> HitboxClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animations")
+	UDataTable* HitboxTable;
 
 private:
 	UPROPERTY()

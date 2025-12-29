@@ -35,7 +35,7 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd)
 		
 		case EFrameCommandType::SpawnHitboxes:
 		{
-			FighterPawnRef->GetHitboxManager()->ActivateHitboxes(Cmd.HitboxGroup);
+			FighterPawnRef->GetHitboxManager()->ActivateHitboxes(Cmd.NameParam);
 			break;
 		}
 

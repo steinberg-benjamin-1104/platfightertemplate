@@ -13,9 +13,6 @@ struct FFrameCommand
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EFrameCommandType Command = EFrameCommandType::None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FHitboxGroup HitboxGroup;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 FrameExecution = -1;

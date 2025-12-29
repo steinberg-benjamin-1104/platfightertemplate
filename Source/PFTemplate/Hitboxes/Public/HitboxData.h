@@ -95,7 +95,7 @@ struct FHitboxDefinition
 };
 
 USTRUCT(BlueprintType)
-struct FHitboxGroup
+struct FHitboxGroup : public FTableRowBase
 {
 	GENERATED_BODY()
 
