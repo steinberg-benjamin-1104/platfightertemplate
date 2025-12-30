@@ -1,28 +1,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SafeMath.h"
+#include "Hitbox2D.h"
 #include "ProjectileBase.generated.h"
 
 
 UCLASS()
-class PFTEMPLATE_API AProjectileBase : public AActor
+class PFTEMPLATE_API AProjectileBase : public AHitbox2D
 {
 	GENERATED_BODY()
 
 public:
-	void Initialize(AFighterPawn* InOwner);
-	void SetActive(bool inActive, FName inName);
 	void StepFrame(int32 BattleFrame);
+	virtual void SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition) override;
 
 protected:
-	UPROPERTY()
-	UHitboxManagerComponent* HitboxManager;
 
-	UPROPERTY()
-	AFighterPawn* FighterPawnRef = nullptr;
-
-	// movement
+	virtual void UpdateLocation() override;
+	virtual void UpdateRotation() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D InitialVelocity;
@@ -40,9 +35,7 @@ protected:
 	bool bDestroyOnHit = true;
 	bool bCanPierce = false;
 
-	void OnHit(const FPendingHit& Hit);
-
 private:
-	bool bActive = false;
+	
 	FFixedVector2D Velocity;
 };

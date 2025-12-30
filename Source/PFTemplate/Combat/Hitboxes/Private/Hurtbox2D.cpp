@@ -11,10 +11,11 @@ AHurtbox2D::AHurtbox2D()
 	SetActorTickEnabled(false);
 }
 
-void AHurtbox2D::Initialize(AFighterPawn* InOwner)
+void AHurtbox2D::Initialize(APawn* InOwner)
 {
 	Super::Initialize(InOwner);
 	SetInvincibility(false);
+	FighterPawnRef = Cast<AFighterPawn>(InOwner);
 }
 
 void AHurtbox2D::TickHurtbox()

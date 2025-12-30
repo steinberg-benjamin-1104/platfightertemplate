@@ -17,7 +17,7 @@ public:
     AHurtbox2D();
     void TickHurtbox();
 
-    virtual void Initialize(AFighterPawn* InOwner) override;
+    virtual void Initialize(APawn* InOwner) override;
     
     UFUNCTION(BlueprintCallable, Category = "Hurtbox")
     void UpdateLocation();
@@ -39,4 +39,6 @@ public:
     
 private:
     bool bIsInvincible = false;
+
+    UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
 };

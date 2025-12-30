@@ -15,6 +15,7 @@ class PFTEMPLATE_API AHitbox2D : public ACapsule2D
 
 public:
 	AHitbox2D();
+	virtual void Initialize(APawn* InPawn) override;
 
 	virtual void SetBoxActive(bool bActivate, const FHitboxDefinition&) override;
 	void TickHitbox();
@@ -24,6 +25,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void UpdateLocation();
+	virtual void UpdateRotation();
 
 private:
 
@@ -34,6 +38,6 @@ private:
 	
 	void ApplyMaterialForType();
 	void UpdateTransform();
-	void UpdateLocation();
-	void UpdateRotation();
+
+	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
 };

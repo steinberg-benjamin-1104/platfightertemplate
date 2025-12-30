@@ -46,6 +46,12 @@ void AHitbox2D::UpdateTransform()
     UpdateRotation();
 }
 
+void AHitbox2D::Initialize(APawn* InPawn)
+{
+    Super::Initialize(InPawn);
+    FighterPawnRef = Cast<AFighterPawn>(InPawn);
+}
+
 void AHitbox2D::UpdateLocation()
 {
     if (!FighterPawnRef) return;

@@ -18,7 +18,7 @@ class PFTEMPLATE_API ACapsule2D : public AActor
 public:
     ACapsule2D();
 
-    virtual void Initialize(AFighterPawn* InPawn) { FighterPawnRef = InPawn; }
+    virtual void Initialize(APawn* InPawn) { SetOwner(InPawn); }
 
 protected:
     virtual void OnConstruction(const FTransform& Transform) override;
@@ -53,8 +53,6 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
     UCapsuleComponent* CollisionCapsule;
-
-    UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
     
     bool bIsActive = false;
 };

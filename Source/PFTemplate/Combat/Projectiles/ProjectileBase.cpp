@@ -1,20 +1,10 @@
 #include "ProjectileBase.h"
 #include "FighterPawn.h"
 
-void AProjectileBase::Initialize(AFighterPawn* InOwner)
+void AProjectileBase::SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition)
 {
-	FighterPawnRef = InOwner;
-	HitboxManager->Initialize(FighterPawnRef, 2);
-}
-
-void AProjectileBase::SetActive(bool inActive, FName InName)
-{
-	bActive = inActive;
-	if (bActive)
-	{
-		Velocity = Vector2DToFixed2D(InitialVelocity);
-		HitboxManager->ActivateHitboxes(InName);
-	}
+	Super::SetBoxActive(bActivate, InDefinition);
+	Velocity = Vector2DToFixed2D(InitialVelocity);
 }
 
 void AProjectileBase::StepFrame(int32 BattleFrame)

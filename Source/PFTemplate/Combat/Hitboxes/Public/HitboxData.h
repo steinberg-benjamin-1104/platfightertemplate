@@ -92,6 +92,9 @@ struct FHitboxDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDamageInfo DamageInfo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bProjectile = false;
 };
 
 USTRUCT(BlueprintType)
