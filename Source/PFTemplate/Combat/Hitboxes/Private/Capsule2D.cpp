@@ -18,15 +18,6 @@ ACapsule2D::ACapsule2D()
     CollisionCapsule->SetGenerateOverlapEvents(true);
 }
 
-void ACapsule2D::Initialize(AFighterPawn* InOwner)
-{
-    FighterPawnRef = InOwner;
-    if (FighterPawnRef)
-    {
-        SetOwner(FighterPawnRef);
-    }
-}
-
 void ACapsule2D::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);

@@ -26,10 +26,10 @@ public:
 	void DeactivateHitboxes(bool ClearHits);
 	void ResetAlraedyHitObjects() {HitObjects.Reset();}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hitbox")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AHitbox2D> HitboxClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UDataTable* HitboxTable;
 
 private:
@@ -44,7 +44,8 @@ private:
 	UPROPERTY()
 	TArray<FPendingHit> PendingHits;
 
-	AFighterPawn* FighterPawnRef = nullptr;
-
 	AHitbox2D* RequestHitbox();
+
+	UPROPERTY()
+	AFighterPawn* FighterPawnRef = nullptr;
 };

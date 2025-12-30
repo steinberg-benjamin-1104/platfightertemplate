@@ -55,7 +55,6 @@ void AHitbox2D::UpdateLocation()
     Offset2D.X *= FighterPawnRef->GetFacingDirection();
     FFixedVector2D FinalLoc = BoneLoc + Offset2D;
     SetActorLocation(Fixed2DToVector(FinalLoc));
-    
 }
 
 void AHitbox2D::UpdateRotation()

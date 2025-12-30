@@ -13,7 +13,7 @@ bool UJumpSquatState::HandleTimer(int32 FramesInState)
 	if (FramesInState == Duration)
 	{
 		StateMachine->ChangeFighterState("JumpUp");
-		MoveComp->CachedJumpType = bJumpButtonHeld ? EHopType::Full : EHopType::Short;
+		MoveComp->CachedJumpType = bJumpButtonHeld ? EJumpType::Full : EJumpType::Short;
 		return true;
 	}
 	return false;

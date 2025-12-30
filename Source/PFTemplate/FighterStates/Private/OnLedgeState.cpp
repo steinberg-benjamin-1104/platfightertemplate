@@ -23,7 +23,7 @@ void UOnLedgeState::HandleInput()
 	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
 		FighterPawnRef->SetFixedLoc(FighterPawnRef->GetFixedLoc() + FFixedVector2D(0.f, 200.f));
-		MoveComp->StartJump(EHopType::Full);
+		MoveComp->StartJump(EJumpType::Full);
 		Input->Consume(EInputButton::Jump);
 		StateMachine->ChangeFighterState("JumpUp");
 	}

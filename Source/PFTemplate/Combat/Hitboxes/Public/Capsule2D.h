@@ -9,7 +9,6 @@
 
 class UProcedural2DCapsuleComponent;
 class UCapsuleComponent;
-class AFighterPawn;
 
 UCLASS(Blueprintable)
 class PFTEMPLATE_API ACapsule2D : public AActor
@@ -18,7 +17,8 @@ class PFTEMPLATE_API ACapsule2D : public AActor
 
 public:
     ACapsule2D();
-    virtual void Initialize(AFighterPawn* InOwner);
+
+    virtual void Initialize(AFighterPawn* InPawn) { FighterPawnRef = InPawn; }
 
 protected:
     virtual void OnConstruction(const FTransform& Transform) override;
@@ -45,6 +45,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "2D Capsule")
     virtual void SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition) {bIsActive = bActivate;}
 
+
 protected:
     
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
@@ -53,7 +54,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
     UCapsuleComponent* CollisionCapsule;
 
-    bool bIsActive = false;
-
     UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
+    
+    bool bIsActive = false;
 };

@@ -12,7 +12,6 @@ UHitboxManagerComponent::UHitboxManagerComponent()
 void UHitboxManagerComponent::Initialize(AFighterPawn* InOwner, int32 PoolSize)
 {
     FighterPawnRef = InOwner;
-
     if (HitboxClass && GetWorld())
     {
         for (int32 i = 0; i < PoolSize; ++i)

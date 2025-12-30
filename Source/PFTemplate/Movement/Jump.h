@@ -5,7 +5,7 @@
 #include "Jump.generated.h"
 
 UENUM(BlueprintType)
-enum class EHopType : uint8
+enum class EJumpType : uint8
 {
 	Full,
 	Short,

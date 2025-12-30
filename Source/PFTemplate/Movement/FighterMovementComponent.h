@@ -43,8 +43,8 @@ public:
 	bool IsAirborne() {return CurrentMovementMode == EFighterMovementMode::Falling || CurrentMovementMode == EFighterMovementMode::JumpingUp;}
 	
 	// Jumping
-	bool StartJump(EHopType HopType);
-	EHopType CachedJumpType;
+	bool StartJump(EJumpType HopType);
+	EJumpType CachedJumpType;
 	bool StartGroundJump() { return StartJump(CachedJumpType); }
 	
 	void ResetJumpCount();
@@ -76,7 +76,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP MaxAirSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EHopType, FJumpData> JumpDataMap;
+	TMap<EJumpType, FJumpData> JumpDataMap;
 	
 	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
 	FFixedVector2D GetVelocity() const { return Velocity; }

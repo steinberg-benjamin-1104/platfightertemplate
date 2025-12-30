@@ -34,7 +34,7 @@ public class PFTemplate : ModuleRules
 		PublicIncludePaths.AddRange(new string[]
 		{
 			"PFTemplate/FighterStates/Public",
-			"PFTemplate/Hitboxes/Public",
+			"PFTemplate/Combat/Public",
 			"PFTemplate/Character",
 			"PFTemplate/FighterStates",
 			"PFTemplate/Input",
@@ -44,7 +44,8 @@ public class PFTemplate : ModuleRules
 			"PFTemplate/Stage",
 			"PFTemplate/UI",
 			"PFTemplate/Rollback",
-			"PFTemplate/Movement"
+			"PFTemplate/Movement",
+			"PFTemplate/Combat/Hitboxes/Public"
 		});
 	}
 }

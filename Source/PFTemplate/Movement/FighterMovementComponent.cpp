@@ -90,11 +90,11 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 #pragma region Jump Handling
 
 
-bool UFighterMovementComponent::StartJump(EHopType HopType)
+bool UFighterMovementComponent::StartJump(EJumpType JumpType)
 {
 	if (JumpsRemaining <= 0) return false;
 
-	const FJumpData* JumpData = JumpDataMap.Find(HopType);
+	const FJumpData* JumpData = JumpDataMap.Find(JumpType);
 	if (!JumpData || JumpData->FramesToApex <= 0) return false;
 
 	//CollisionCapsule.LiftBottom();
