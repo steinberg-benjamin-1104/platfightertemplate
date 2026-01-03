@@ -39,13 +39,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "2D Capsule")
     void SetDebugVisible(bool bVisible);
 
-    UFUNCTION(BlueprintCallable, Category = "2D Capsule")
-    bool IsActive() const { return bIsActive; }
-
-    UFUNCTION(BlueprintCallable, Category = "2D Capsule")
-    virtual void SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition) {bIsActive = bActivate;}
-
-
 protected:
     
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
@@ -53,6 +46,4 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
     UCapsuleComponent* CollisionCapsule;
-    
-    bool bIsActive = false;
 };

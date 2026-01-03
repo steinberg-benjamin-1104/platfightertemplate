@@ -1,19 +1,18 @@
 #pragma once
 #include "CoreMinimal.h"
-
+#include "ObjectPool.h"
 #include "ProjectilePool.generated.h"
 
 class AProjectileBase;
 
-UCLASS()
-class PFTEMPLATE_API AProjectilePool : public AActor
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class PFTEMPLATE_API UProjectilePool : public UObjectPool
 {
 	GENERATED_BODY()
 
 public:
-	AProjectileBase* Request();
-	void Return(AProjectileBase* Projectile);
-
-private:
-	TArray<AProjectileBase*> Pool;
+	
+	bool ActivateProjectile();
+	virtual void FrameStep();
+	void ProcessHits();
 };

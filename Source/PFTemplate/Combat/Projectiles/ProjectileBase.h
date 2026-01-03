@@ -5,37 +5,55 @@
 #include "ProjectileBase.generated.h"
 
 
+class AFighterPawn;
+class AHitbox2D;
+
 UCLASS()
-class PFTEMPLATE_API AProjectileBase : public AHitbox2D
+class PFTEMPLATE_API AProjectileBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	void StepFrame(int32 BattleFrame);
-	virtual void SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition) override;
-
+	void StepFrame();
+	void ActivateProjectile(const FHitboxDefinition& InDefinition);
+	void Initialize(AFighterPawn* InPawn);
+	bool ProcessHits();
+	bool IsActive() { return bIsActive; }
+	
 protected:
 
-	virtual void UpdateLocation() override;
-	virtual void UpdateRotation() override;
+	void DeactivateProjectile();
+	AProjectileBase();
+	virtual void UpdateLocation();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D InitialVelocity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D Accel;
+	FVector2D Acceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 LifeFrame = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxLifeFrame = 60;
-
-	// behavior flags
+	
 	bool bDestroyOnHit = true;
-	bool bCanPierce = false;
+
+	UPROPERTY()
+	UChildActorComponent* Hitbox = nullptr;
+
+	UPROPERTY() AHitbox2D* HitboxActor = nullptr;
 
 private:
 	
 	FFixedVector2D Velocity;
+
+	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
+
+	TArray<TScriptInterface<IHittable>> HitObjects;
+
+	UPROPERTY() TArray<FPendingHit> PendingHits;
+
+	bool bIsActive = false;
 };

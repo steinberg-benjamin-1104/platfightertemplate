@@ -20,15 +20,13 @@ void AHitbox2D::BeginPlay()
 
 void AHitbox2D::SetBoxActive(bool bActivate, const FHitboxDefinition& InDefinition)
 {
-    Super::SetBoxActive(bActivate, InDefinition);
-
+    bIsActive = bActivate;
+    SetDebugVisible(bIsActive);
     if (bIsActive)
     {
         HitboxDefinition = InDefinition;
         UpdateTransform();
     }
-
-    SetDebugVisible(bIsActive);
 }
 
 void AHitbox2D::TickHitbox()
@@ -50,6 +48,7 @@ void AHitbox2D::Initialize(APawn* InPawn)
 {
     Super::Initialize(InPawn);
     FighterPawnRef = Cast<AFighterPawn>(InPawn);
+    SetOwner(InPawn);
 }
 
 void AHitbox2D::UpdateLocation()

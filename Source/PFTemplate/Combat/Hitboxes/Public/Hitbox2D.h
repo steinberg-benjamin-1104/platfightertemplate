@@ -17,17 +17,20 @@ public:
 	AHitbox2D();
 	virtual void Initialize(APawn* InPawn) override;
 
-	virtual void SetBoxActive(bool bActivate, const FHitboxDefinition&) override;
+	void SetBoxActive(bool bActivate, const FHitboxDefinition&);
 	void TickHitbox();
 	const FHitboxDefinition& GetDefinition() const { return HitboxDefinition; }
 	void GetHitPlayers(TArray<FPendingHit>& OutHits, TArray<TScriptInterface<IHittable>>& AlreadyHit) const;
 	FDamageInfo GetDamageInfo() const { return HitboxDefinition.DamageInfo; }
+	bool IsActive() const { return bIsActive; }
 
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void UpdateLocation();
 	virtual void UpdateRotation();
+
+	bool bIsActive;
 
 private:
 
