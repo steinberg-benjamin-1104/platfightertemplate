@@ -387,13 +387,13 @@ FFixedHitResult UFighterMovementComponent::PerformWallCollisionCheck(FFixedVecto
 		if (HitLeft.bBlockingHit) return HitLeft;
 	}
 
-	return OutHit;
+	return FFixedHitResult();
 }
 
 FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVector2D &InVelocity)
 {
 	FFixedHitResult OutHit;
-	if (InVelocity.Z >= FFixed_32(0.f)) return OutHit;
+	if (InVelocity.Z >= FFixed_32(0.f)) return FFixedHitResult();
 	
 	FFixedVector2D Start = CollisionCapsule.GetBottom();
 	Start.X += InVelocity.X * FixedDt;
@@ -426,7 +426,7 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
 FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVector2D &InVelocity)
 {
 	FFixedHitResult OutHit;
-	if (InVelocity.Z <= 0.f) return OutHit;
+	if (InVelocity.Z <= 0.f) return FFixedHitResult();
 	FFixedVector2D Start = CollisionCapsule.GetCenter() + FFixedVector2D(InVelocity.X * FixedDt, CollisionCapsule.HalfHeight);
 	FFixedVector2D End = Start + FFixedVector2D(0.f, InVelocity.Z * FixedDt);
 
