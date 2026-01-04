@@ -362,7 +362,7 @@ FFixedHitResult UFighterMovementComponent::PerformWallCollisionCheck(FFixedVecto
 		{
 			if (OutHit.Normal.X.Abs() > 0.5f)
 			{
-				if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return OutHit;
+				if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return FFixedHitResult();
 				int32 Dir = OutHit.Normal.X.Sign();
 				FFixedVector2D ActorLoc = FighterPawnRef->GetFixedLoc();
 				ActorLoc.X = OutHit.ImpactPoint.X + (Dir * CollisionCapsule.GetRadiusWithBuffer());
@@ -434,7 +434,7 @@ FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVe
     
 	if (OutHit.bBlockingHit)
 	{
-		if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return OutHit;
+		if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return FFixedHitResult();
 		const FFixed_32 CapsuleTopOffset = (CollisionCapsule.defaultHalfHeight.ToFixed() * 2) + CollisionCapsule.bufferlayer.ToFixed();
 		const FFixedVector2D NewLocation = OutHit.ImpactPoint - FFixedVector2D(0.f, CapsuleTopOffset);
 		FighterPawnRef->SetFixedLoc(NewLocation);
