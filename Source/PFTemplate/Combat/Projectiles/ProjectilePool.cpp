@@ -41,21 +41,29 @@ bool UProjectilePool::ActivateProjectile()
 	return false;
 }
 
-void UProjectilePool::PreCollision()
-{
-	for (AProjectileBase* Proj : ActivePool)
-	{
-		if (Proj->PreCollision()) ActivePool.Remove(Proj);
-	}
-}
-
 void UProjectilePool::DetectCollision()
 {
 	for (AProjectileBase* Proj : ActivePool) Proj->DetectCollisions();
 }
 
+void UProjectilePool::PreCollision()
+{
+	for (int32 i = ActivePool.Num() - 1; i >= 0; --i)
+	{
+		if (ActivePool[i]->PreCollision())
+		{
+			ActivePool.RemoveAtSwap(i);
+		}
+	}
+}
+
 void UProjectilePool::ProcessHits()
 {
-	for (AProjectileBase* Proj : ActivePool)
-		if (Proj->ProcessHits()) ActivePool.Remove(Proj);
+	for (int32 i = ActivePool.Num() - 1; i >= 0; --i)
+	{
+		if (ActivePool[i]->ProcessHits())
+		{
+			ActivePool.RemoveAtSwap(i);
+		}
+	}
 }

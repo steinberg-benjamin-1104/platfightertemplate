@@ -98,10 +98,7 @@ void AProjectileBase::SetSpawnLoc()
 {
 	FFixedVector2D Offset = Vector2DToFixed2D(SpawnLocOffset);
 
-	LogFixedVector2D("InitialOffset", Offset);
-
 	Offset.X = Offset.X * FighterPawnRef->GetFacingDirection();
 	FFixedVector2D FinalLoc = FighterPawnRef->GetFixedLoc() + Offset;
-	LogFixedVector2D("Spawn Loc", FinalLoc);
 	SetActorLocation(Fixed2DToVector(FinalLoc));
 }
