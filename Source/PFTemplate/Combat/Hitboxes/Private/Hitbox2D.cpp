@@ -40,7 +40,6 @@ void AHitbox2D::UpdateTransform()
 
     ApplyMaterialForType();
     SetCapsuleSize(Fixed2DToVector2D(HitboxDefinition.Transform.Size.ToFixed()));
-    UpdateLocation();
     UpdateRotation();
 }
 

@@ -1,16 +1,13 @@
 #include "ProjectileBase.h"
 #include "FighterPawn.h"
+#include "SafeMath.h"
 
 AProjectileBase::AProjectileBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	Hitbox = CreateDefaultSubobject<UChildActorComponent>(TEXT("Hitbox"));
-	Hitbox->SetupAttachment(RootComponent);
-	Hitbox->SetChildActorClass(AHitbox2D::StaticClass());
-	HitboxActor = Cast<AHitbox2D>(Hitbox->GetChildActor());
 	
-	//Mesh
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -20,13 +17,18 @@ AProjectileBase::AProjectileBase()
 void AProjectileBase::Initialize(AFighterPawn* InPawn)
 {
 	FighterPawnRef = InPawn;
+	
+	HitboxActor = GetWorld()->SpawnActor<AHitbox2D>(FighterPawnRef->GetHitboxManager()->HitboxClass);
+	HitboxActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	HitboxActor->Initialize(InPawn);
 	HitboxActor->SetBoxActive(false, FHitboxDefinition());
+	
 	Mesh->SetVisibility(false);
 }
 
 void AProjectileBase::ActivateProjectile(const FHitboxDefinition& InDefinition)
 {
+	SetSpawnLoc();
 	Velocity = Vector2DToFixed2D(InitialVelocity) * FighterPawnRef->GetFacingDirection();
 	LifeFrame = 0;
 	HitboxActor->SetBoxActive(true, InDefinition);
@@ -44,20 +46,6 @@ void AProjectileBase::UpdateLocation()
 	
 	FVector DesiredMove = Fixed2DToVector(Velocity * FixedDt);
 	AddActorWorldOffset(DesiredMove, false);
-}
-
-void AProjectileBase::StepFrame()
-{
-	if (LifeFrame == MaxLifeFrame)
-	{
-		DeactivateProjectile();
-		return;
-	}
-
-	UpdateLocation();
-	
-	HitboxActor->GetHitPlayers(PendingHits, HitObjects);
-	LifeFrame++;
 }
 
 void AProjectileBase::DeactivateProjectile()
@@ -104,4 +92,16 @@ bool AProjectileBase::PreCollision()
 void AProjectileBase::DetectCollisions()
 {
 	HitboxActor->GetHitPlayers(PendingHits, HitObjects);
+}
+
+void AProjectileBase::SetSpawnLoc()
+{
+	FFixedVector2D Offset = Vector2DToFixed2D(SpawnLocOffset);
+
+	LogFixedVector2D("InitialOffset", Offset);
+
+	Offset.X = Offset.X * FighterPawnRef->GetFacingDirection();
+	FFixedVector2D FinalLoc = FighterPawnRef->GetFixedLoc() + Offset;
+	LogFixedVector2D("Spawn Loc", FinalLoc);
+	SetActorLocation(Fixed2DToVector(FinalLoc));
 }

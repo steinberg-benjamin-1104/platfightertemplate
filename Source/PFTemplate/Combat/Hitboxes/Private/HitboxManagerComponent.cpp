@@ -76,6 +76,7 @@ void UHitboxManagerComponent::ActivateHitboxes(const FName GroupName)
             if (!Hitbox) continue;
 
             Hitbox->SetBoxActive(true, HitboxDef);
+            Hitbox->UpdateLocation();
             ActiveHitboxGroup.Add(Hitbox);
         }
     }

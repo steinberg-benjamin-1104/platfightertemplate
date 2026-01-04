@@ -23,11 +23,11 @@ public:
 	void GetHitPlayers(TArray<FPendingHit>& OutHits, TArray<TScriptInterface<IHittable>>& AlreadyHit) const;
 	FDamageInfo GetDamageInfo() const { return HitboxDefinition.DamageInfo; }
 	bool IsActive() const { return bIsActive; }
+	virtual void UpdateLocation();
 
 protected:
 	virtual void BeginPlay() override;
 	
-	virtual void UpdateLocation();
 	virtual void UpdateRotation();
 
 	bool bIsActive;

@@ -14,5 +14,6 @@ enum class EFrameCommandType : uint8
 	PlayVFX UMETA(DisplayName = "Trigger VFX"),
 	SetDisplacement UMETA(DisplayName = "Set Displacement"),
 	ToggleHurtboxI UMETA(DisplayName = "Toggle Hurtbox Invulnerability"),
-	Custom UMETA(DisplayName = "Custom")
+	SpawnProjectile UMETA(DisplayName = "Spawn Projectile"),
+	Custom UMETA(DisplayName = "Custom") //doing nothing with this right now
 };

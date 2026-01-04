@@ -108,25 +108,16 @@ bool UKnockbackState::HandlePhysics()
 void UKnockbackState::CalcKBPosUpdate(FFixedVector2D& InVelocity)
 {
 	if (LaunchSpeed <= FFixed_32(0.f))  LaunchSpeed = FFixed_32(0.f);
-
-	LogFixedInt("Initial Velocity", LaunchSpeed * FFixed_32(60.f));
-	LogFixedInt("Initial Angle", LaunchAngle);
 	
 	FFixedVector2D PosUpdate(
 		LaunchAngle.Cos() * LaunchSpeed,
 		LaunchAngle.Sin() * LaunchSpeed
 	);
-
-	LogFixedInt("Cos", LaunchAngle.Cos());
-	LogFixedInt("Sin", LaunchAngle.Sin());
 	
 	InVelocity = PosUpdate * FFixed_32(60.f);
 	
 	if (InVelocity.Z > MoveComp->TerminalFallVelocity) InVelocity.Z -= gravity * FixedDt;
 	LaunchAngle = FixedRadiansToDegrees(FixedAtan2(InVelocity.Z, InVelocity.X));
-
-	LogFixedVector2D("Velocity", InVelocity);
-	LogFixedInt("Angle", LaunchAngle);
 }
 
 FFixedVector2D UKnockbackState::CalcReflect(const FFixedVector2D& InVel, const FFixedVector2D& Normal)

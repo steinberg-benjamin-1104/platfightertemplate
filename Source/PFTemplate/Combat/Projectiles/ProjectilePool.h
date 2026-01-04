@@ -4,9 +4,10 @@
 
 class AProjectileBase;
 class AFighterPawn;
+class AHitbox2D;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class PFTEMPLATE_API UProjectilePool : public UActorComponent
+UCLASS(EditInlineNew, DefaultToInstanced, BlueprintType)
+class PFTEMPLATE_API UProjectilePool : public UObject
 {
 	GENERATED_BODY()
 
@@ -22,9 +23,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AProjectileBase> PoolClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D SpawnLocOffset;
-
 	void PreCollision();
 	void DetectCollision();
 	void ProcessHits();
@@ -37,6 +35,4 @@ protected:
 	AProjectileBase* RequestObjectFromPool();
 
 	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
-
-	FVector DetermineSpawnLoc();
 };

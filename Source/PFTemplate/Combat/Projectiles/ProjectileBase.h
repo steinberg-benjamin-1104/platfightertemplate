@@ -8,13 +8,12 @@
 class AFighterPawn;
 class AHitbox2D;
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class PFTEMPLATE_API AProjectileBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	void StepFrame();
 	void ActivateProjectile(const FHitboxDefinition& InDefinition);
 	void Initialize(AFighterPawn* InPawn);
 	bool IsActive() { return bIsActive; }
@@ -22,6 +21,9 @@ public:
 	bool PreCollision();
 	void DetectCollisions();
 	bool ProcessHits();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D SpawnLocOffset;
 	
 protected:
 
@@ -29,10 +31,10 @@ protected:
 	AProjectileBase();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D InitialVelocity;
+	FVector2D InitialVelocity = FVector2D(200.f, 0.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D Acceleration;
+	FVector2D Acceleration = FVector2D(0.f, 0.f);;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 LifeFrame = 0;
@@ -41,9 +43,6 @@ protected:
 	int32 MaxLifeFrame = 60;
 	
 	bool bDestroyOnHit = true;
-
-	UPROPERTY()
-	UChildActorComponent* Hitbox = nullptr;
 
 	UPROPERTY() AHitbox2D* HitboxActor = nullptr;
 
@@ -62,4 +61,6 @@ private:
 	UPROPERTY() TArray<FPendingHit> PendingHits;
 
 	bool bIsActive = false;
+
+	void SetSpawnLoc();
 };

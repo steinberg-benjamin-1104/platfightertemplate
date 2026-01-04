@@ -45,7 +45,8 @@ public class PFTemplate : ModuleRules
 			"PFTemplate/UI",
 			"PFTemplate/Rollback",
 			"PFTemplate/Movement",
-			"PFTemplate/Combat/Hitboxes/Public"
+			"PFTemplate/Combat/Hitboxes/Public",
+			"PFTemplate/Combat/Projectiles"
 		});
 	}
 }

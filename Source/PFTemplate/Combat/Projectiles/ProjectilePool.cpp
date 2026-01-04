@@ -2,7 +2,6 @@
 #include "ProjectileBase.h"
 #include "FighterPawn.h"
 
-
 void UProjectilePool::Initialize(AFighterPawn* InOwner)
 {
 	FighterPawnRef = InOwner;
@@ -34,7 +33,6 @@ bool UProjectilePool::ActivateProjectile()
 {
 	if (AProjectileBase* Proj = RequestObjectFromPool())
 	{
-		Proj->SetActorLocation(DetermineSpawnLoc());
 		Proj->ActivateProjectile(FHitboxDefinition());
 		ActivePool.Add(Proj);
 		return true;
@@ -60,14 +58,4 @@ void UProjectilePool::ProcessHits()
 {
 	for (AProjectileBase* Proj : ActivePool)
 		if (Proj->ProcessHits()) ActivePool.Remove(Proj);
-}
-
-FVector UProjectilePool::DetermineSpawnLoc()
-{
-	FFixedVector2D FPLoc = FighterPawnRef->GetFixedLoc();
-	FFixedVector2D Offset = Vector2DToFixed2D(SpawnLocOffset);
-
-	Offset.X = Offset.X * FighterPawnRef->GetFacingDirection();
-
-	return Fixed2DToVector(FPLoc + Offset);
 }

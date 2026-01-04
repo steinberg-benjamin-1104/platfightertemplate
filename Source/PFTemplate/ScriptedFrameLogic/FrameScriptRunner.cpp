@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "ProjectilePool.h"
 
 void UFrameScriptRunnerComponent::TickScript(int32 AnimFrame)
 {
@@ -86,6 +87,14 @@ void UFrameScriptRunnerComponent::ExecuteCommand(const FFrameCommand& Cmd)
 		{
 			FighterPawnRef->ToggleHurtboxInvulnerable(Cmd.NameParam, Cmd.BoolParam);
 		}
+
+		case EFrameCommandType::SpawnProjectile:
+		
+			if (FighterPawnRef && FighterPawnRef->ProjectilePools.IsValidIndex(Cmd.IntParam))
+			{
+				FighterPawnRef->ProjectilePools[Cmd.IntParam]->ActivateProjectile();
+			}
+			break;
 		
 		default:
 			break;

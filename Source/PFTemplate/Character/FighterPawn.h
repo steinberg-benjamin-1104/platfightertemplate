@@ -16,6 +16,7 @@
 #include "FighterAnimInstance.h"
 #include "StickDirection.h"
 #include "BakedSockets.h"
+#include "ProjectilePool.h"
 #include "InputBuffer.h"
 
 #include "FighterPawn.generated.h"
@@ -27,6 +28,7 @@ class UFighterStateMachine;
 class UFighterAnimInstance;
 class AHurtbox2D;
 class UCharacterPanelWidget;
+class UProjectilePool;
 
 UCLASS()
 class PFTEMPLATE_API AFighterPawn : public APawn, public IHittable, public ICamTarget
@@ -179,6 +181,11 @@ public:
 
 	UPROPERTY() FInputBuffer InputBuffer;
 
+	UPROPERTY(EditAnywhere, Instanced, Category="Projectile")
+	TArray<UProjectilePool*> ProjectilePools;
+
+
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
@@ -188,9 +195,6 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Hurtboxes")
 	TMap<FName, AHurtbox2D*> HurtboxMap;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Hurtboxes")
-	TArray<UProjectilePool*> ProjectilePools;
 	
 	virtual void BeginPlay() override;
 
