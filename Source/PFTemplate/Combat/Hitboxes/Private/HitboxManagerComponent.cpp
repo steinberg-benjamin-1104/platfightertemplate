@@ -40,6 +40,9 @@ void UHitboxManagerComponent::ProcessHits()
 {
     for (const FPendingHit& Hit : PendingHits)
     {
+        AFighterPawn* fighter = Cast<AFighterPawn>(Hit.HitObject.GetObject());
+        fighter->SetFacingDirection(FighterPawnRef->GetFacingDirection() * -1);
+        FighterPawnRef->FreezePlayer(true);
         Hit.HitObject->WasHit(Hit.DamageInfo, FighterPawnRef);
     }
     PendingHits.Empty();

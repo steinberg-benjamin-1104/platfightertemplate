@@ -10,7 +10,6 @@ void UHitstopState::OnEnter()
 	FighterPawnRef->FaceInstigator();
 	FighterPawnRef->UpdateAnimation();
 	FighterPawnRef->FreezePlayer(true);
-	FighterPawnRef->LastInstigator->FreezePlayer(true);
 	Duration = CalcHitstop();
 	MoveComp->StopMovementCompletely();
 }

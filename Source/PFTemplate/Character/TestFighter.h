@@ -9,4 +9,6 @@ class PFTEMPLATE_API ATestFighter : public AFighterPawn
 	GENERATED_BODY()
 	
 public:
+
+protected:
 };

@@ -188,6 +188,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Hurtboxes")
 	TMap<FName, AHurtbox2D*> HurtboxMap;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Hurtboxes")
+	TArray<UProjectilePool*> ProjectilePools;
 	
 	virtual void BeginPlay() override;
 

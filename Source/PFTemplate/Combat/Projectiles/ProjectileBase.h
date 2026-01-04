@@ -17,14 +17,16 @@ public:
 	void StepFrame();
 	void ActivateProjectile(const FHitboxDefinition& InDefinition);
 	void Initialize(AFighterPawn* InPawn);
-	bool ProcessHits();
 	bool IsActive() { return bIsActive; }
+	virtual void UpdateLocation();
+	bool PreCollision();
+	void DetectCollisions();
+	bool ProcessHits();
 	
 protected:
 
 	void DeactivateProjectile();
 	AProjectileBase();
-	virtual void UpdateLocation();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D InitialVelocity;
@@ -44,6 +46,10 @@ protected:
 	UChildActorComponent* Hitbox = nullptr;
 
 	UPROPERTY() AHitbox2D* HitboxActor = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* Mesh = nullptr;
+
 
 private:
 	

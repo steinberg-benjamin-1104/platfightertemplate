@@ -7,6 +7,7 @@
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
 #include "AttackDefinition.h"
+#include "PFTemplate/Combat/Projectiles/ProjectilePool.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Hitstop Called"));
 
@@ -58,6 +59,8 @@ void AFighterPawn::BeginPlay()
 	FrameScriptRunner->Initialize(this);
 
 	ShieldComponent->InitShield(ShieldMesh);
+
+	for (UProjectilePool* pool : ProjectilePools) pool->Initialize(this);
 	
 	InitHurtboxes();
 	SetCurrentAnimation("Idle");
@@ -82,6 +85,7 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	if (StateMachine) StateMachine->TickCurrentState();
 	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
 	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation();
+	for (UProjectilePool* pool : ProjectilePools) pool->PreCollision();
 }
 
 void AFighterPawn::UpdateAnimation()
@@ -105,11 +109,13 @@ void AFighterPawn::UpdateAnimation()
 void AFighterPawn::DetectCollisions()
 {
 	if (HitboxManager) HitboxManager->ScanActiveHitboxes();
+	for (UProjectilePool* pool : ProjectilePools) pool->DetectCollision();
 }
 
 void AFighterPawn::ProcessCollisions()
 {
 	if (HitboxManager) HitboxManager->ProcessHits();
+	for (UProjectilePool* pool : ProjectilePools) pool->ProcessHits();
 }
 
 void AFighterPawn::PostCollisionPhase()
@@ -279,7 +285,6 @@ void AFighterPawn::InitiateKnockback()
 		ShieldComponent->ApplyDamage(StoredDamageInfo.Damage);
 		return;
 	}
-	FFighterInput None;
 	ApplyDamage(StoredDamageInfo.Damage);
 	StateMachine->ChangeFighterState("Hitstop");
 }
