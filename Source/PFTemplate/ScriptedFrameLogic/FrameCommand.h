@@ -32,3 +32,15 @@ struct FFrameCommand
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UObject> Filepath;
 };
+
+UCLASS(BlueprintType)
+class UMoveLogicAsset : public UDataAsset
+{
+
+	GENERATED_BODY()
+
+public:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Logic")
+	TArray<FFrameCommand> Commands;
+};

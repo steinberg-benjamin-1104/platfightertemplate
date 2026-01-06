@@ -459,16 +459,16 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 void UFighterMovementComponent::ApplyAnimMovement(int32 Frame)
 {
 	if (BakedAnimMvmt == nullptr) return;
-	if (Frame >= BakedAnimMvmt->StartFrame && Frame <= BakedAnimMvmt->EndFrame)
+	if (Frame >= BakedAnimMvmt->BakeStartFrame && Frame <= BakedAnimMvmt->BakeEndFrame)
 	{
-		if (Frame == BakedAnimMvmt->StartFrame) SetMovementMode(BakedAnimMvmt->TargetMode);
+		if (Frame == BakedAnimMvmt->BakeStartFrame) SetMovementMode(BakedAnimMvmt->TargetMode);
 		
-		int32 CurrentFrame = Frame - BakedAnimMvmt->StartFrame;
+		int32 CurrentFrame = Frame - BakedAnimMvmt->BakeStartFrame;
 		Velocity = Vector2DToFixed2D(BakedAnimMvmt->DeltaPos[CurrentFrame]) / FixedDt;
 		Velocity.X *= FighterPawnRef->GetFacingDirection();
 		if (IsGrounded()) PreventLedgeFall(Velocity, BakedAnimMvmt->bPreventLedgeFall);
 	}
-	if (Frame == BakedAnimMvmt->EndFrame + 1)
+	if (Frame == BakedAnimMvmt->BakeEndFrame + 1)
 	{
 		SetMovementMode(BakedAnimMvmt->FinishedMode);
 		if (!BakedAnimMvmt->X.KeepVelocity) Velocity.X = 0.f;
@@ -476,6 +476,7 @@ void UFighterMovementComponent::ApplyAnimMovement(int32 Frame)
 		BakedAnimMvmt = nullptr;
 	}
 }
+
 void UFighterMovementComponent::TestIsGrounded()
 {
 	FFixedVector2D TestVelocity(Velocity.X, 120.f);

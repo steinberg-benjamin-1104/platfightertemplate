@@ -17,7 +17,7 @@ struct FAnimation : public FTableRowBase
 	bool bIsLoop = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FFrameCommand> Commands;
+	UMoveLogicAsset* CommandScript;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBakedAnimMvmt* BakedAnimMvmt = nullptr;

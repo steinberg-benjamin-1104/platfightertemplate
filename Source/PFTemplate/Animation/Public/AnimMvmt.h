@@ -7,6 +7,12 @@ USTRUCT(BlueprintType)
 struct FAxisMovement
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 StartFrame = 0; //start of motion
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 EndFrame = 0; //last frame of motion
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* Curve = nullptr;
@@ -25,10 +31,10 @@ class UBakedAnimMvmt : public UDataAsset
 public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 StartFrame = 0; //start of motion
+	int32 BakeStartFrame = 0; //start of motion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EndFrame = 0; //last frame of motion
+	int32 BakeEndFrame = 0; //last frame of motion
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAxisMovement X;

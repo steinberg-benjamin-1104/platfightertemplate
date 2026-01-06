@@ -199,7 +199,11 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni.Commands);
+	if (UMoveLogicAsset* CommandAsset = NewAni.CommandScript)
+		FrameScriptRunner->LoadScript(CommandAsset->Commands);
+	else
+		FrameScriptRunner->LoadScript({});
+	
 	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
 	return true;
@@ -215,7 +219,11 @@ bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int32 BlendTime
 	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;
 
-	FrameScriptRunner->LoadScript(NewAni.Commands);
+	if (UMoveLogicAsset* CommandAsset = NewAni.CommandScript)
+		FrameScriptRunner->LoadScript(CommandAsset->Commands);
+	else
+		FrameScriptRunner->LoadScript({});
+	
 	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
 	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
 
