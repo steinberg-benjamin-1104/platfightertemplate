@@ -194,7 +194,6 @@ bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
 	if (!NewAni.BakedAnimation) return false;
 
 	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
-	if (!AnimSequence) return false;
 
 	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
 	CurrentAnimation = NewAni;

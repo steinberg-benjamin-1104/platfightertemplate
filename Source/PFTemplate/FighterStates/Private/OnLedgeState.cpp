@@ -26,7 +26,7 @@ void UOnLedgeState::HandleInput()
 		Input->Consume(EInputButton::Jump);
 		if (FighterPawnRef->SetCurrentAnimation("LedgeJump"))
 		{
-			StateMachine->ChangeFighterState("OffLedge");
+			StateMachine->ChangeFighterState("JumpFromLedge");
 			return;
 		}
 	}
@@ -56,15 +56,6 @@ void UOnLedgeState::HandleInput()
 	if (Stickdir == EStickDir::Forward)
 	{
 		if (FighterPawnRef->SetCurrentAnimation("LedgeGetUp"))
-		{
-			StateMachine->ChangeFighterState("OffLedge");
-			return;
-		}
-	}
-
-	if (Stickdir == EStickDir::Up)
-	{
-		if (FighterPawnRef->SetCurrentAnimation("LedgeJump"))
 		{
 			StateMachine->ChangeFighterState("OffLedge");
 			return;

@@ -12,4 +12,6 @@ class PFTEMPLATE_API UOffLedgeState : public UMiscAnimState
 public:
     virtual void OnEnter() override;
     virtual void OnExit() override;
+
+    virtual FString GetStateName() override { return "Getting Off Ledge"; }
 };

@@ -14,6 +14,7 @@
 #include "AirAttackState.h"
 #include "AirdodgeState.h"
 #include "HitstopState.h"
+#include "JumpFromLedgeState.h"
 #include "KnockbackState.h"
 #include "KnockdownState.h"
 #include "MiscAnimState.h"
@@ -52,6 +53,7 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("Airdodge", NewObject<UAirDodgeState>(this));
 	StateMap.Add("MiscAnim", NewObject<UMiscAnimState>(this));
 	StateMap.Add("OffLedge", NewObject<UOffLedgeState>(this));
+	StateMap.Add("JumpFromLedge", NewObject<UJumpFromLedgeState>(this));
 	
 	InOwner->RegisterCustomStates(this);
 
