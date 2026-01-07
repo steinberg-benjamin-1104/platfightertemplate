@@ -22,10 +22,63 @@ void UOnLedgeState::HandleInput()
 	
 	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
-		FighterPawnRef->SetFixedLoc(FighterPawnRef->GetFixedLoc() + FFixedVector2D(0.f, 200.f));
-		MoveComp->StartJump(EJumpType::Full);
+		MoveComp->CachedJumpType = EJumpType::Full;
 		Input->Consume(EInputButton::Jump);
-		StateMachine->ChangeFighterState("JumpUp");
+		if (FighterPawnRef->SetCurrentAnimation("LedgeJump"))
+		{
+			StateMachine->ChangeFighterState("OffLedge");
+			return;
+		}
+	}
+
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Shield))
+	{
+		Input->Consume(EInputButton::Shield);
+		if (FighterPawnRef->SetCurrentAnimation("LedgeRoll"))
+		{
+			StateMachine->ChangeFighterState("OffLedge");
+			return;
+		}
+	}
+
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Attack))
+	{
+		Input->Consume(EInputButton::Attack);
+		if (FighterPawnRef->SetCurrentAnimation("LedgeAttack"))
+		{
+			StateMachine->ChangeFighterState("OffLedge");
+			return;
+		}
+	}
+
+	EStickDir Stickdir = GetCurrentStickDir();
+
+	if (Stickdir == EStickDir::Forward)
+	{
+		if (FighterPawnRef->SetCurrentAnimation("LedgeGetUp"))
+		{
+			StateMachine->ChangeFighterState("OffLedge");
+			return;
+		}
+	}
+
+	if (Stickdir == EStickDir::Up)
+	{
+		if (FighterPawnRef->SetCurrentAnimation("LedgeJump"))
+		{
+			StateMachine->ChangeFighterState("OffLedge");
+			return;
+		}
+	}
+	
+	if (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Down)
+	{
+		if (InputBuffer->GetRecent()->IsPressed(EInputButton::StickDown))
+		{
+			InputBuffer->GetRecent()->Consume(EInputButton::StickDown);
+		}
+		StateMachine->ChangeFighterState("Falling");
+		return;
 	}
 }
 

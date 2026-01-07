@@ -16,6 +16,8 @@
 #include "HitstopState.h"
 #include "KnockbackState.h"
 #include "KnockdownState.h"
+#include "MiscAnimState.h"
+#include "OffLedgeState.h"
 #include "OnLedgeState.h"
 #include "ParryState.h"
 #include "PlatformDrop.h"
@@ -48,6 +50,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("Special", NewObject<USpecialState>(this));
 	StateMap.Add("PlatformDrop", NewObject<UPlatformDropState>(this));
 	StateMap.Add("Airdodge", NewObject<UAirDodgeState>(this));
+	StateMap.Add("MiscAnim", NewObject<UMiscAnimState>(this));
+	StateMap.Add("OffLedge", NewObject<UOffLedgeState>(this));
 	
 	InOwner->RegisterCustomStates(this);
 

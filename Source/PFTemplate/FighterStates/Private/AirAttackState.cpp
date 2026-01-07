@@ -29,11 +29,11 @@ bool UAirAttackState::HandlePhysics()
 
 void UAirAttackState::HandleInput()
 {
-	if (!MoveComp->bIsFastFalling && InputBuffer->GetRecent().IsPressed(EInputButton::StickDown))
+	if (!MoveComp->bIsFastFalling && InputBuffer->GetRecent()->IsPressed(EInputButton::StickDown))
 	{
 		MoveComp->bIsFastFalling = true;
-		InputBuffer->GetRecent().Consume(EInputButton::StickDown);
+		InputBuffer->GetRecent()->Consume(EInputButton::StickDown);
 	}
 	
-	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent()->StickPos.X);
 }

@@ -34,5 +34,5 @@ struct FInputBuffer
 
 	bool IsHeld(EInputButton Button) {return History[CurrentFrameIndex].IsHeld(Button); }
 
-	FFighterInput GetRecent() const {return History[CurrentFrameIndex]; }
+	FFighterInput* GetRecent() { return &History[CurrentFrameIndex]; }
 };

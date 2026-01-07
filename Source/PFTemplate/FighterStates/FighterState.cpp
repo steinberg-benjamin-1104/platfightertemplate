@@ -11,7 +11,7 @@ void UFighterState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCompo
 
 EStickDir UFighterState::GetCurrentStickDir()
 {
-	return GetStickDirection(InputBuffer->GetRecent().StickPos, FighterPawnRef->IsFacingRight());
+	return GetStickDirection(InputBuffer->GetRecent()->StickPos, FighterPawnRef->IsFacingRight());
 }
 
 bool UFighterState::CheckActionButtons()

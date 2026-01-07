@@ -19,7 +19,7 @@ void UFallingState::HandleInput()
 		if (MoveComp->StartJump(EJumpType::Air))
 		{
 			FFixedVector2D Velocity = MoveComp->GetVelocity();
-			Velocity.X = InputBuffer->GetRecent().StickPos.X * MoveComp->MaxAirSpeed;
+			Velocity.X = InputBuffer->GetRecent()->StickPos.X * MoveComp->MaxAirSpeed;
 			MoveComp->SetVelocity(Velocity);
 
 			Input->Consume(EInputButton::Jump);
@@ -34,16 +34,16 @@ void UFallingState::HandleInput()
 		StateMachine->ChangeFighterState("Airdodge");
 	}
 
-	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::StickDown))
+	if (InputBuffer->GetRecent()->IsPressed(EInputButton::StickDown))
 	{
 		if (!MoveComp->bIsFastFalling)
 		{
-			Input->Consume(EInputButton::StickDown);
+			InputBuffer->GetRecent()->Consume(EInputButton::StickDown);
 			MoveComp->bIsFastFalling = true;
 		}
 	}
 
-	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent()->StickPos.X);
 }
 
 bool UFallingState::HandlePhysics()

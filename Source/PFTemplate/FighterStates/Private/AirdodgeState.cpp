@@ -4,7 +4,7 @@
 
 void UAirDodgeState::OnEnter()
 {
-	FFixedVector2D StickPos = InputBuffer->GetRecent().StickPos;
+	FFixedVector2D StickPos = InputBuffer->GetRecent()->StickPos;
 	bIsGrounded = false;
 	FFixedVector2D Velocity = Speed * StickPos.GetSafeNormal();
 	MoveComp->SetVelocity(Velocity);

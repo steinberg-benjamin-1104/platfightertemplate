@@ -14,7 +14,7 @@ void UDashState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Dash");
 
-	EStickDir StickDir = GetStickDirection(InputBuffer->GetRecent().StickPos, FighterPawnRef->IsFacingRight());
+	EStickDir StickDir = GetStickDirection(InputBuffer->GetRecent()->StickPos, FighterPawnRef->IsFacingRight());
 	
 	if (StickDir == EStickDir::Backward) FighterPawnRef->FlipFacingDirection();
 	FFixedVector2D Velocity = MoveComp->GetVelocity();
@@ -72,9 +72,9 @@ void UDashState::HandleInput()
 
 	EStickDir StickDir = GetCurrentStickDir();
 	
-	if (StickDir == EStickDir::Backward && InputBuffer->GetRecent().IsPressed(EInputButton::Flick))
+	if (StickDir == EStickDir::Backward && InputBuffer->GetRecent()->IsPressed(EInputButton::Flick))
 	{
-		InputBuffer->GetRecent().Consume(EInputButton::Flick);
+		InputBuffer->GetRecent()->Consume(EInputButton::Flick);
 		StateMachine->ChangeFighterState("Dash");
 	}
 }
@@ -90,7 +90,7 @@ bool UDashState::HandleTimer(int32 FramesInState)
 			return true;
 		}
 		
-		if (StickDir == EStickDir::Backward && InputBuffer->GetRecent().IsPressed(EInputButton::Flick))
+		if (StickDir == EStickDir::Backward && InputBuffer->GetRecent()->IsPressed(EInputButton::Flick))
 		{
 			StateMachine->ChangeFighterState("Dash");
 			return true;

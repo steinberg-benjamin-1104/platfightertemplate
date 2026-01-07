@@ -24,5 +24,4 @@ bool UBaseAttackState::HandlePhysics()
 void UBaseAttackState::OnExit()
 {
 	FighterPawnRef->GetHitboxManager()->DeactivateHitboxes(true);
-	FighterPawnRef->MovementComponent->bCanApplyGroundFriction = true;
 }

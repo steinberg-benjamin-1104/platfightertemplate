@@ -22,7 +22,7 @@ void UJumpUpState::HandleInput()
 		if (MoveComp->StartJump(EJumpType::Air))
 		{
 			FFixedVector2D Velocity = MoveComp->GetVelocity();
-			Velocity.X = InputBuffer->GetRecent().StickPos.X * MoveComp->MaxAirSpeed;
+			Velocity.X = InputBuffer->GetRecent()->StickPos.X * MoveComp->MaxAirSpeed;
 			MoveComp->SetVelocity(Velocity);
 
 			Input->Consume(EInputButton::Jump);
@@ -37,7 +37,7 @@ void UJumpUpState::HandleInput()
 		StateMachine->ChangeFighterState("Airdodge");
 	}
 
-	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
+	MoveComp->ApplyAirDrift(InputBuffer->GetRecent()->StickPos.X);
 }
 
 bool UJumpUpState::HandlePhysics()

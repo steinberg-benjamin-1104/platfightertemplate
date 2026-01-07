@@ -43,9 +43,9 @@ void UWalkingState::HandleInput()
 	EStickDir Stickdir = GetCurrentStickDir();
 	if (Stickdir == EStickDir::Backward || Stickdir == EStickDir::Forward)
 	{
-		if (InputBuffer->GetRecent().IsPressed(EInputButton::Flick))
+		if (InputBuffer->GetRecent()->IsPressed(EInputButton::Flick))
 		{
-			InputBuffer->GetRecent().Consume(EInputButton::Flick);
+			InputBuffer->GetRecent()->Consume(EInputButton::Flick);
 			FighterPawnRef->StateMachine->ChangeFighterState("Dash");
 			return;
 		}

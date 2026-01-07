@@ -124,6 +124,8 @@ public:
 
 	void SetBakedMovement(UBakedAnimMvmt* NewMovement) { BakedAnimMvmt = NewMovement;}
 
+	void TestIsGrounded();
+
 	bool bOnPlatform = false;
 	bool bIgnorePlatform = false;
 
@@ -134,8 +136,6 @@ protected:
 	UPROPERTY() FFighterCapsule FollowCapsule;
 
 	UPROPERTY() UBakedAnimMvmt* BakedAnimMvmt;
-
-	void TestIsGrounded();
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);
