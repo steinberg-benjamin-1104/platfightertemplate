@@ -34,6 +34,15 @@ void UFallingState::HandleInput()
 		StateMachine->ChangeFighterState("Airdodge");
 	}
 
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::StickDown))
+	{
+		if (!MoveComp->bIsFastFalling)
+		{
+			Input->Consume(EInputButton::StickDown);
+			MoveComp->bIsFastFalling = true;
+		}
+	}
+
 	MoveComp->ApplyAirDrift(InputBuffer->GetRecent().StickPos.X);
 }
 
