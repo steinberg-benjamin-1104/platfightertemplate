@@ -57,7 +57,7 @@ protected:
 	FVector2D GetVec2(const UInputAction* Action) const;
 
 	//Stick Configuration
-	FFixed_32 DownThreshold  = FFixed_32(0.5f);
+	FFixed_32 DownThreshold  = FFixed_32(0.6f);
 	FFixed_32 FlickStart = FFixed_32(0.4f);
 	FFixed_32 FlickEnd = FFixed_32(0.7f);
 	FFixed_32 DeadZone = FFixed_32(0.1f);

@@ -93,7 +93,7 @@ void AFighterPlayerController::UpdateStickState(FFighterInput& InputState, FFixe
     if (New.Z.Abs() < DeadZone) New.Z = FFixed_32(0.f);
 	
     InputState.StickPos = New;
-	
+
     if ((InputState.StickPos.Z < -DownThreshold) && !(PrevStick.Z < -DownThreshold))
     {
         InputState.Pressed |= static_cast<uint32>(EInputButton::StickDown);

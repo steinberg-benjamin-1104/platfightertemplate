@@ -27,7 +27,7 @@ void UShieldStartupState::HandleInput()
 {
 	EStickDir StickDir = GetCurrentStickDir();
 
-	if (StickDir == EStickDir::Forward)
+	if (StickDir == EStickDir::Forward && InputBuffer->WasPressed(EInputButton::Flick))
 	{
 		FighterPawnRef->FlipFacingDirection();
 		if (FighterPawnRef->SetCurrentAnimation("ForwardRoll"))
@@ -35,7 +35,7 @@ void UShieldStartupState::HandleInput()
 		return;
 	}
 
-	if (StickDir == EStickDir::Backward)
+	if (StickDir == EStickDir::Backward && InputBuffer->WasPressed(EInputButton::Flick))
 	{
 		if (FighterPawnRef->SetCurrentAnimation("BackRoll"))
 			StateMachine->ChangeFighterState("MiscAnim");
