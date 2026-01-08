@@ -23,6 +23,8 @@
 #include "ParryState.h"
 #include "PlatformDrop.h"
 #include "ShieldbreakState.h"
+#include "ShieldReleaseState.h"
+#include "ShieldStartupState.h"
 #include "ShieldState.h"
 #include "SpecialState.h"
 #include "TumbleState.h"
@@ -54,6 +56,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("MiscAnim", NewObject<UMiscAnimState>(this));
 	StateMap.Add("OffLedge", NewObject<UOffLedgeState>(this));
 	StateMap.Add("JumpFromLedge", NewObject<UJumpFromLedgeState>(this));
+	StateMap.Add("ShieldStartup", NewObject<UShieldStartupState>(this));
+	StateMap.Add("ShieldRelease", NewObject<UShieldReleaseState>(this));
 	
 	InOwner->RegisterCustomStates(this);
 
@@ -65,7 +69,6 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 
 	CurrentStateKey = "Idle";
 	CurrentState = StateMap[CurrentStateKey];
-	FFighterInput NewInput;
 	CurrentState->OnEnter();
 }
 

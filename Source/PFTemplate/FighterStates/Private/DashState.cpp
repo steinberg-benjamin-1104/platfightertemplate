@@ -49,14 +49,14 @@ void UDashState::HandleInput()
 	{
 		MoveComp->HaltHorizontalVelocity();
 		Input->Consume(EInputButton::Shield);
-		StateMachine->ChangeFighterState("Shield");
+		StateMachine->ChangeFighterState("ShieldStartup");
 		return;
 	}
 	
 	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
 		MoveComp->HaltHorizontalVelocity();
-		StateMachine->ChangeFighterState("Shield");
+		StateMachine->ChangeFighterState("ShieldStartup");
 		return;
 	}
 

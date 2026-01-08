@@ -33,14 +33,14 @@ void UIdleState::HandleInput()
 	
 	static const TMap<EInputButton, FName> ButtonToState = {
 		{ EInputButton::Jump, "JumpSquat" },
-		{ EInputButton::Shield, "Shield"}
+		{ EInputButton::Shield, "ShieldStartup"}
 	};
 
 	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
 
 	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		StateMachine->ChangeFighterState("Shield");
+		StateMachine->ChangeFighterState("ShieldStartup");
 		return;
 	}
 

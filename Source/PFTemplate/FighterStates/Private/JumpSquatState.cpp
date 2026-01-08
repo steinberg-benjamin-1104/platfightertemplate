@@ -4,7 +4,6 @@
 
 void UJumpSquatState::OnEnter()
 {
-	bJumpButtonHeld = true;
 	FighterPawnRef->SetCurrentAnimation("JumpSquat");
 }
 
@@ -12,19 +11,12 @@ bool UJumpSquatState::HandleTimer(int32 FramesInState)
 {
 	if (FramesInState == Duration)
 	{
+		bool bJumpButtonHeld = InputBuffer->IsHeld(EInputButton::Jump);
 		StateMachine->ChangeFighterState("JumpUp");
 		MoveComp->CachedJumpType = bJumpButtonHeld ? EJumpType::Full : EJumpType::Short;
 		return true;
 	}
 	return false;
-}
-
-void UJumpSquatState::HandleInput()
-{
-	if (!InputBuffer->IsHeld(EInputButton::Jump) && bJumpButtonHeld)
-	{
-		bJumpButtonHeld = false;
-	}
 }
 
 bool UJumpSquatState::HandlePhysics()

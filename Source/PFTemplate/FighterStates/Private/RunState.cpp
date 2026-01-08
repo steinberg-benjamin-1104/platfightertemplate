@@ -18,14 +18,14 @@ void URunState::HandleInput()
 	static const TMap<EInputButton, FName> ButtonToState = {
 		{ EInputButton::Jump, "JumpSquat" },
 		{ EInputButton::StickDown, "PlatformDrop" },
-		{ EInputButton::Shield, "Shield"}
+		{ EInputButton::Shield, "ShieldStartup"}
 	};
 
 	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
 
 	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
-		StateMachine->ChangeFighterState("Shield");
+		StateMachine->ChangeFighterState("ShieldStartup");
 		return;
 	}
 

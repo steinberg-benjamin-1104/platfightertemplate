@@ -11,22 +11,7 @@ void UShieldState::InitState(AFighterPawn* InFighterPawn, UFighterMovementCompon
 void UShieldState::OnEnter()
 {
 	FighterPawnRef->SetCurrentAnimation("Shield");
-}
-
-bool UShieldState::HandleTimer(int32 FramesInState)
-{
-	if (FramesInState == StartupFrames)
-	{
-		ShieldComponent->SetShieldActive(true);
-	}
-
-	if (FramesInState >= FramesToEnd && InEndLag)
-	{
-		FighterPawnRef->SetCurrentAnimation("Idle");
-		StateMachine->ChangeFighterState("Idle");
-		return true;
-	}
-	return false;
+	ShieldComponent->SetShieldActive(true);
 }
 
 void UShieldState::HandleInput()
@@ -38,13 +23,27 @@ void UShieldState::HandleInput()
 		return;
 	}
 
-	if (!InputBuffer->IsHeld(EInputButton::Shield))
+	if (!InputBuffer->IsHeld(EInputButton::Shield) && StateMachine->FramesInState)
 	{
-		if (!ShieldComponent->IsActive() || InEndLag) return;
-		FramesToEnd = StateMachine->FramesInState + EndLagFrames;
 		ShieldComponent->SetShieldActive(false);
-		InEndLag = true;
-		FighterPawnRef->SetCurrentAnimation("ShieldRelease", 3);
+		StateMachine->ChangeFighterState("ShieldRelease");
+	}
+
+	EStickDir StickDir = GetCurrentStickDir();
+
+	if (StickDir == EStickDir::Forward)
+	{
+		FighterPawnRef->FlipFacingDirection();
+		if (FighterPawnRef->SetCurrentAnimation("ForwardRoll"))
+			StateMachine->ChangeFighterState("MiscAnim");
+		return;
+	}
+
+	if (StickDir == EStickDir::Backward)
+	{
+		if (FighterPawnRef->SetCurrentAnimation("BackRoll"))
+			StateMachine->ChangeFighterState("MiscAnim");
+		return;
 	}
 }
 
@@ -64,5 +63,4 @@ bool UShieldState::HandlePhysics()
 void UShieldState::OnExit()
 {
 	ShieldComponent->SetShieldActive(false);
-	InEndLag = false;
 }
