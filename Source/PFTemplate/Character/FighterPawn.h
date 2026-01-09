@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "FighterStateMachine.h"
+#include "EffectMachine.h"
 #include "HitboxManagerComponent.h"
 #include "FighterPlayerController.h"
 #include "Animation.h"
@@ -25,6 +26,7 @@ class UFighterMovementComponent;
 class UBoxComponent;
 class USkeletalMeshComponent;
 class UFighterStateMachine;
+class UEffectMachine;
 class UFighterAnimInstance;
 class AHurtbox2D;
 class UCharacterPanelWidget;
@@ -61,6 +63,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	UFighterStateMachine* StateMachine;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	UEffectMachine* EffectMachine;
 
 	//StateMachine->AddState("Fireball", NewObject<UFireballState>(FSM));
 	UFUNCTION(BlueprintCallable, Category = "FSM")
@@ -184,7 +189,7 @@ public:
 	UPROPERTY(EditAnywhere, Instanced, Category="Projectile")
 	TArray<UProjectilePool*> ProjectilePools;
 
-
+	bool bCanLedge = true;
 
 protected:
 

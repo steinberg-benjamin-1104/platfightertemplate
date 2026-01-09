@@ -74,6 +74,7 @@ void UFallingState::Tick(int32 FramesInState)
 
 ALedge* UFallingState::DetectNearbyLedge() const
 {
+	if (!FighterPawnRef->bCanLedge) return nullptr;
 	const FFixedVector2D BaseLoc = FighterPawnRef->GetFixedLoc() + MoveComp->GetVelocity() * FixedDt;
 	const int32 ForwardDir = FighterPawnRef->GetFacingDirection();
 	const FFixedVector2D HalfExtent(60.f, 40.f);

@@ -54,6 +54,9 @@ void AFighterPawn::BeginPlay()
 	
 	StateMachine = NewObject<UFighterStateMachine>(this);
 	StateMachine->Initialize(this);
+
+	EffectMachine = NewObject<UEffectMachine>(this);
+	EffectMachine->Initialize(this);
 	
 	HitboxManager->Initialize(this, 16);
 	FrameScriptRunner->Initialize(this);
@@ -82,6 +85,7 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	FFighterInput NewInput;
 	if (FPC) FPC->UpdateInput(CurrentFrame, NewInput);
 	InputBuffer.Update(NewInput);
+	if (EffectMachine) EffectMachine->UpdateEffectTimers();
 	if (StateMachine) StateMachine->TickCurrentState();
 	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
 	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation();
@@ -121,12 +125,12 @@ void AFighterPawn::ProcessCollisions()
 void AFighterPawn::PostCollisionPhase()
 {
 	ShieldPhase();
+	if (EffectMachine) EffectMachine->UpdateActiveEffects();
 }
 
 void AFighterPawn::ShieldPhase()
 {
 	ShieldComponent->UpdateShield();
-	FFighterInput None;
 	if (ShieldComponent->IsBroken())
 	{
 		StateMachine->ChangeFighterState("Shieldbreak");

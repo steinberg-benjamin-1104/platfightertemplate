@@ -68,6 +68,8 @@ void UOnLedgeState::HandleInput()
 		{
 			InputBuffer->GetRecent()->Consume(EInputButton::StickDown);
 		}
+		FighterPawnRef->EffectMachine->EnableEffect("LedgeTimer");
+		MoveComp->SetMovementMode(EFighterMovementMode::Falling);
 		StateMachine->ChangeFighterState("Falling");
 		return;
 	}
