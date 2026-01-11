@@ -16,7 +16,7 @@ EStickDir UFighterState::GetCurrentStickDir()
 
 bool UFighterState::CheckActionButtons()
 {
-	EInputButton AttackButtons[] = { EInputButton::Attack, EInputButton::Special };
+	EInputButton AttackButtons[] = { EInputButton::Attack, EInputButton::Special, EInputButton::Grab };
 	for (EInputButton Btn : AttackButtons)
 	{
 		if (FFighterInput* Input = InputBuffer->WasPressed(Btn))

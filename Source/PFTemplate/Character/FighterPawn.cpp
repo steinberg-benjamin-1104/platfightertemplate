@@ -284,6 +284,9 @@ void AFighterPawn::WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigato
 		case EHitEffect::Knockback:
 			InitiateKnockback();
 			break;
+		case EHitEffect::Grab:
+			HandleGrab();
+			break;
 		default:
 			break;
 	}
@@ -298,6 +301,12 @@ void AFighterPawn::InitiateKnockback()
 	}
 	ApplyDamage(StoredDamageInfo.Damage);
 	StateMachine->ChangeFighterState("Hitstop");
+}
+
+void AFighterPawn::HandleGrab()
+{
+	StateMachine->ChangeFighterState("GrabHeld");
+	LastInstigator->StateMachine->ChangeFighterState("GrabHold");
 }
 
 void AFighterPawn::ApplyDamage(int32 Damage)

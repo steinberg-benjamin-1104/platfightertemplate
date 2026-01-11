@@ -13,6 +13,8 @@
 #include "FallingState.h"
 #include "AirAttackState.h"
 #include "AirdodgeState.h"
+#include "GrabHeldState.h"
+#include "GrabHoldState.h"
 #include "HitstopState.h"
 #include "JumpFromLedgeState.h"
 #include "KnockbackState.h"
@@ -58,6 +60,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 	StateMap.Add("JumpFromLedge", NewObject<UJumpFromLedgeState>(this));
 	StateMap.Add("ShieldStartup", NewObject<UShieldStartupState>(this));
 	StateMap.Add("ShieldRelease", NewObject<UShieldReleaseState>(this));
+	StateMap.Add("GrabHold", NewObject<UGrabHoldState>(this));
+	StateMap.Add("GrabHeld", NewObject<UGrabHeldState>(this));
 	
 	InOwner->RegisterCustomStates(this);
 

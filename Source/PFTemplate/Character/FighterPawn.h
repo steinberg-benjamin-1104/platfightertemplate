@@ -164,6 +164,7 @@ public:
 	void ResetMeshOffset();
 	
 	void InitiateKnockback();
+	void HandleGrab();
 	void HandleParry();
 
 	UPROPERTY() FDamageInfo StoredDamageInfo;

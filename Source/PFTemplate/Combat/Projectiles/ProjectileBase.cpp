@@ -66,7 +66,7 @@ bool AProjectileBase::ProcessHits()
 	for (const FPendingHit& Hit : PendingHits)
 	{
 		AFighterPawn* fighter = Cast<AFighterPawn>(Hit.HitObject.GetObject());
-		fighter->SetFacingDirection(Velocity.X.Sign());
+		fighter->SetFacingDirection(Velocity.X.Sign() * -1);
 		Hit.HitObject->WasHit(Hit.DamageInfo, FighterPawnRef);
 	}
 	

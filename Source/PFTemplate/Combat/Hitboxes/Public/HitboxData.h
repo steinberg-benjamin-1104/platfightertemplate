@@ -11,6 +11,7 @@ enum class EHitEffect : uint8
 	None       UMETA(DisplayName = "None"),
 	Knockback  UMETA(DisplayName = "Knockback"),
 	Clash      UMETA(DisplayName = "Clash"),
+	Grab       UMETA(DisplayName = "Grab"),
 };
 
 UENUM(BlueprintType)
@@ -46,6 +47,9 @@ struct FDamageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Priority = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName OnGrabState;
 
 	bool HasSamePriority(const FDamageInfo& Other) const { return Priority == Other.Priority; }
 	bool HasHigherPriority(const FDamageInfo& Other) const { return Priority > Other.Priority; }

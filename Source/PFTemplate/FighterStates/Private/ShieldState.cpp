@@ -16,6 +16,7 @@ void UShieldState::OnEnter()
 
 void UShieldState::HandleInput()
 {
+	if (CheckActionButtons()) return;
 	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
 	{
 		Input->Consume(EInputButton::Jump);
