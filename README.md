@@ -38,7 +38,7 @@ A custom collision detection system built specifically to interface with the fix
 - Rendering: An interpolation layer sits between the fixed-point simulation and the floating-point renderer, ensuring smooth visuals without sacrificing logic determinism.
 
 ## Tech Stack
-Language: C++
+Language: C++, C#
 Engine: Unreal Engine
 
 Networking: GGPO (Good Game Peace Out)
