@@ -48,7 +48,8 @@ public class PFTemplate : ModuleRules
 			"PFTemplate/Combat/Hitboxes/Public",
 			"PFTemplate/Combat/Projectiles",
 			"PFTemplate/Effects/Public",
-			"PFTemplate/Combat/Grabs"
+			"PFTemplate/Combat/Grabs",
+			"PFTemplate/Rollback/CollisionSystem/Public"
 		});
 	}
 }

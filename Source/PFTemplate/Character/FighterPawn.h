@@ -42,6 +42,7 @@ public:
 
 	//simulated tick phases
 	void PreCollisionPhase(int32 CurrentFrame);
+	void UpdateDependencies();
 	void UpdateAnimation();
 	void DetectCollisions();
 	void ProcessCollisions();

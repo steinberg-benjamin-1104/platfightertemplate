@@ -1,6 +1,5 @@
 #pragma once
 #include "Fixed32.h"
-#include <stdint.h>
 
 struct FFixedVector2D
 {
@@ -28,8 +27,12 @@ struct FFixedVector2D
 
     //utilities
     FFixed_32 Dot  (const FFixedVector2D& o) const { return X * o.X + Z * o.Z; }
+    static FFixed_32 Dot(const FFixedVector2D& A, const FFixedVector2D& B) {
+        return (A.X * B.X) + (A.Z * B.Z);
+    }
     FFixed_32 Cross(const FFixedVector2D& o) const { return X * o.Z - Z * o.X; }
     FFixed_32 LengthSquared() const { return Dot(*this); }
+    static FFixed_32 DistSq(const FFixedVector2D& A, const FFixedVector2D& B) { return Dot(A, B); }
     FFixed_32 Length() const { return LengthSquared().Sqrt(); }
     FFixedVector2D GetSafeNormal() const
     {
@@ -37,6 +40,8 @@ struct FFixedVector2D
         return len.v == 0 ? FFixedVector2D{} : *this / len;
     }
 };
+
+FORCEINLINE 
 
 FORCEINLINE FVector Fixed2DToVector(const FFixedVector2D& V)
 {

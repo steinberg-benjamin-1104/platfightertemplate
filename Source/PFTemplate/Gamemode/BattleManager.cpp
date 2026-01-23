@@ -28,6 +28,9 @@ void ABattleManager::StepFrame()
 	//Update States, Animation, Movement
 	for (AFighterPawn* F : Fighters) F->PreCollisionPhase(BattleFrame);
 
+	//Anything Relying on position/anim of another fighter
+	for (AFighterPawn* F: Fighters) F->UpdateDependencies();
+	
 	//Test for Collision After Char Updates
 	for (AFighterPawn* F : Fighters) F->DetectCollisions();
 

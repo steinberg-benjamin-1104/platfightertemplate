@@ -110,6 +110,11 @@ void AFighterPawn::UpdateAnimation()
 	FrameScriptRunner->TickScript(FighterAnimInstance->GetCurrentFrameIndex());
 }
 
+void AFighterPawn::UpdateDependencies()
+{
+	
+}
+
 void AFighterPawn::DetectCollisions()
 {
 	if (HitboxManager) HitboxManager->ScanActiveHitboxes();
