@@ -1,50 +1,50 @@
 #include "CollisionWorld.h"
 #include "CollisionMath.h"
 
-void FDeterministicCollisionWorld::RegisterCapsule(const FCapsuleCollision& InCapsule)
+void FDeterministicCollisionWorld::RegisterHitbox(const FCapsuleCollision InCapsule)
 {
-	RegisteredCapsules.Add(InCapsule);
+	HitboxBucket.Add(InCapsule);
 }
 
-void FDeterministicCollisionWorld::RegisterPolygon(const FPolygonCollision& InPolygon)
+void FDeterministicCollisionWorld::RegisterHurtbox(const FCapsuleCollision InCapsule)
 {
-	RegisteredPolygons.Add(InPolygon);
+	HurtboxBucket.Add(InCapsule);
 }
 
-void FDeterministicCollisionWorld::QueryOverlaps(const FCollisionComponent& QueryComp, TArray<uint32>& OutHitOwnerIDs) const {
-	for (const auto& Target : RegisteredComponents)
+void FDeterministicCollisionWorld::QueryHitboxGroup(FHitboxGroupQuery& Group)
+{
+	for (const FCapsuleCollision& MyCapsule : Group.Capsules)
 	{
-		// 1. Filter logic
-		if (QueryComp.OwnerID == Target.OwnerID) continue;
-		if (!(QueryComp.ResponseMask & (uint32)Target.Channel)) continue;
-
-		bool bOverlapped = false;
-
-		// 2. Purely routing based on type
-		if (QueryComp.IsCapsule && Target.IsCapsule) {
-			bOverlapped = CollisionMath::CapsulesOverlap(QueryComp, Target);
-		}
-		else if (!QueryComp.IsCapsule && !Target.IsCapsule)
+		for (const FCapsuleCollision& TargetHurtbox : HurtboxBucket)
 		{
-			bOverlapped = CollisionMath::PolygonsOverlap(QueryComp, Target);
-		}
+			if (TargetHurtbox.OwnerID == Group.OwnerID) continue;
+			if (Group.AlreadyHitOwners.Contains(TargetHurtbox.OwnerID)) continue;
 
-		if (bOverlapped)
+			if (CollisionMath::CapsulesOverlap(MyCapsule, TargetHurtbox))
+			{
+				Group.AlreadyHitOwners.Add(TargetHurtbox.OwnerID);
+				break; 
+			}
+		}
+		
+		for (const FCapsuleCollision& OtherHitbox : HitboxBucket)
 		{
-			OutHitOwnerIDs.Add(Target.OwnerID);
+			if (OtherHitbox.OwnerID == Group.OwnerID) continue;
+
+			if (CollisionMath::CapsulesOverlap(MyCapsule, OtherHitbox))
+			{
+				// Trigger Clash Logic (recoil, sparks, etc.)
+			}
 		}
 	}
 }
 
-// Add this to your FDeterministicCollisionWorld
-void FDeterministicCollisionWorld::QueryShapeOverlap(const FPolygonShape2D& TransientShape, ECollisionChannel TargetChannel, TArray<uint32>& OutHitOwnerIDs) const {
-	// We don't need a full Component, just the geometry and a mask
-	for (const auto& Target : RegisteredPolygons) {
-		// Only check against the Ledge channel
-		if (!(Target.Channel & (uint32)TargetChannel)) continue;
+FSweepResult FDeterministicCollisionWorld::ECBCollision(FPolygonCollision& CharacterECB, FFixedVector2D DesiredVelocity)
+{
+	for (auto Stage : StageGeometry)
+	{
+		FSweepResult CurrentHit = CollisionMath::SweepPolygonVsPolygon(CharacterECB, DesiredVelocity,Stage);
 
-		if (CollisionMath::PolygonsOverlap(TransientShape, Target.Polygon)) {
-			OutHitOwnerIDs.Add(Target.OwnerID);
-		}
+		if (CurrentHit.bHit) return CurrentHit;
 	}
 }

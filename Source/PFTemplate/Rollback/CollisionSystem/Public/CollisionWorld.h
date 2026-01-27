@@ -5,15 +5,17 @@ class FDeterministicCollisionWorld
 {
 	
 public:
-	void RegisterCapsule(const FCapsuleCollision& InCapsule);
-	void RegisterPolygon(const FPolygonCollision& InPolygon);
-    
-	// Scans a specific component against the world
-	void QueryOverlaps(const FCollisionComponent& QueryComp, TArray<uint32>& OutHitOwnerIDs) const;
+	void RegisterHitbox(const FCapsuleCollision InCapsule);
+	void RegisterHurtbox(const FCapsuleCollision InCapsule);
+	
+	void RegisterStageGeometry(const FPolygonCollision InPolygon);
+	
+	void QueryHitboxGroup(FHitboxGroupQuery& Group);
 
-	void QueryShapeOverlap(const FPolygonShape2D& TransientShape, ECollisionChannel TargetChannel, TArray<uint32>& OutHitOwnerIDs) const;
+	FSweepResult ECBCollision(FPolygonCollision& CharacterECB, FFixedVector2D DesiredVelocity);
 
 private:
-	TArray<FCapsuleCollision> RegisteredCapsules;
-	TArray<FPolygonCollision> RegisteredPolygons;
+	TArray<FCapsuleCollision> HurtboxBucket; 
+	TArray<FCapsuleCollision> HitboxBucket;
+	TArray<FPolygonCollision> StageGeometry;
 };

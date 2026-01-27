@@ -10,7 +10,8 @@ enum class EDeterministicCC : uint32
 	Stage	= 1 << 1,
 	Hitbox	= 1 << 2,
 	Hurtbox	= 1 << 3,
-	Ledge	= 1 << 4
+	Ledge	= 1 << 4,
+	Platform= 1 << 5
 };
 
 struct FCapsuleShape2D
@@ -45,4 +46,20 @@ struct FCapsuleCollision : FCollisionComponent
 struct FPolygonCollision : FCollisionComponent
 {
 	FPolygonShape2D Polygon;
+};
+
+struct FHitboxGroupQuery
+{
+	uint32 GroupID;
+	uint32 OwnerID;
+	TArray<FCapsuleCollision> Capsules;
+	TArray<uint32> AlreadyHitOwners;
+};
+
+struct FSweepResult
+{
+	bool bHit = false;
+	FFixedVector2D Normal = FFixedVector2D(0, 0);
+	FFixedVector2D ImpactPoint = FFixedVector2D(0, 0);
+	FFixed_32 Time;
 };
