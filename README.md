@@ -14,7 +14,8 @@ This project focuses on eliminating non-determinism at every layer of the simula
 - Deterministic Simulation Model
 
 ## Single-threaded simulation
-#All gameplay logic, physics, and collision run on a single deterministic update loop. No async tasks, no parallel physics, no frame-dependent ordering.
+
+All gameplay logic, physics, and collision run on a single deterministic update loop. No async tasks, no parallel physics, no frame-dependent ordering.
 
 - Fixed 60Hz tick rate
 - Simulation is fully decoupled from rendering. Visuals interpolate; logic does not.
@@ -53,23 +54,7 @@ This project focuses on eliminating non-determinism at every layer of the simula
 
 ## Rollback Netcode (GGPO)
 
-- Uses GGPO-style input prediction and rollback
-
-- Clean separation between:
-
-  - Simulation state (rollback-safe)
-
-  - Rendering/view state (non-deterministic, disposable)
-
-- Fast state snapshotting
-
-  - Pre-allocated memory pools
-
-  - Shallow copies where possible
-
-  - O(1) save/load paths for rollback
-
-  - On misprediction, rolls back N frames and resimulates collision and physics in a single update.
+Uses GGPO-style input prediction and rollback, more technical info can be found at ggpo.net
 
 ## Tech Stack
 Language: C++, C#
