@@ -15,7 +15,7 @@ class PFTEMPLATE_API AHitbox2D : public ACapsule2D
 
 public:
 	AHitbox2D();
-	virtual void Initialize(APawn* InPawn) override;
+	virtual void Initialize(APawn* InPawn, FDeterministicCollisionWorld* CW) override;
 
 	void SetBoxActive(bool bActivate, const FHitboxDefinition&);
 	void TickHitbox();

@@ -29,8 +29,14 @@ protected:
 
 public:
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2D Capsule Settings", meta=(DisplayName="Capsule Radius/HalfLength"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2D Capsule Settings", meta=(DisplayName="Capsule Radius/Segment Length"))
 	FVector2D CapsuleSize = {50.f, 100.f};
+
+	void SetCapsuleSize(FVector2D InSize)
+	{
+		CapsuleSize = InSize;
+		RebuildCapsule();
+	}
 
 	UPROPERTY(Transient)
 	int32 CircleSegments = 32;

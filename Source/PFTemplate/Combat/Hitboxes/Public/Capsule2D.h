@@ -3,12 +3,13 @@
 #include "CoreMinimal.h"
 #include "Procedural2DCapsuleComponent.h"
 #include "GameFramework/Actor.h"
-#include "HitboxData.h"
+#include "SafeMath.h"
+#include "CollisionDefinitions.h"
+#include "CollisionWorld.h"
 
 #include "Capsule2D.generated.h"
 
 class UProcedural2DCapsuleComponent;
-class UCapsuleComponent;
 
 UCLASS(Blueprintable)
 class PFTEMPLATE_API ACapsule2D : public AActor
@@ -18,7 +19,11 @@ class PFTEMPLATE_API ACapsule2D : public AActor
 public:
     ACapsule2D();
 
-    virtual void Initialize(APawn* InPawn) { SetOwner(InPawn); }
+    virtual void Initialize(APawn* InPawn, FDeterministicCollisionWorld* CW)
+    {
+        SetOwner(InPawn);
+        CollisionWorld = CW;
+    }
 
 protected:
     virtual void OnConstruction(const FTransform& Transform) override;
@@ -28,13 +33,17 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "2D Capsule")
-    FVector2D CapsuleSize = FVector2D(50.f, 100.f);
+    FFixedVector2D CapsuleSize = FFixedVector2D(50.f, 100.f);
 
     UFUNCTION(BlueprintCallable, Category = "2D Capsule")
-    FVector2D GetCapsuleSize() const { return CapsuleMesh->CapsuleSize; }
+    FFixedVector2D GetCapsuleSize() const { return CapsuleSize; }
     
     UFUNCTION(BlueprintCallable, Category = "2D Capsule")
-    virtual void SetCapsuleSize(FVector2D NewCapsuleSize);
+    virtual void SetCapsuleSize(FFixedVector2D NewCapsuleSize);
+
+    void SetCapsuleRotation(FFixed_32 Rotation);
+
+    void SetCapsuleLocation(FFixedVector2D NewLoc);
 
     UFUNCTION(BlueprintCallable, Category = "2D Capsule")
     void SetDebugVisible(bool bVisible);
@@ -44,6 +53,8 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
     UProcedural2DCapsuleComponent* CapsuleMesh;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "2D Capsule Components")
-    UCapsuleComponent* CollisionCapsule;
+    FCapsuleCollision CollisionCapsule;
+
+private:
+    FDeterministicCollisionWorld* CollisionWorld;
 };

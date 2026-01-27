@@ -17,7 +17,7 @@ public:
     AHurtbox2D();
     void TickHurtbox();
 
-    virtual void Initialize(APawn* InOwner) override;
+    virtual void Initialize(APawn* InOwner, FDeterministicCollisionWorld* CW) override;
     
     UFUNCTION(BlueprintCallable, Category = "Hurtbox")
     void UpdateLocation();

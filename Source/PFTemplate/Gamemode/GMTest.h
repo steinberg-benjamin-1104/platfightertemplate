@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CollisionWorld.h"
 #include "GameFramework/GameModeBase.h"
 #include "GMTest.generated.h"
 
@@ -54,4 +55,6 @@ protected:
 
 	// Runtime reference
 	UPROPERTY() UHUDWidget* HUDWidget;
+
+	FDeterministicCollisionWorld CollisionWorld;
 };

@@ -11,11 +11,7 @@ ACapsule2D::ACapsule2D()
 
     CapsuleMesh = CreateDefaultSubobject<UProcedural2DCapsuleComponent>(TEXT("ProceduralCapsule"));
     RootComponent = CapsuleMesh;
-
-    CollisionCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionCapsule"));
-    CollisionCapsule->SetupAttachment(RootComponent);
-    CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    CollisionCapsule->SetGenerateOverlapEvents(true);
+    
 }
 
 void ACapsule2D::OnConstruction(const FTransform& Transform)
@@ -46,24 +42,27 @@ void ACapsule2D::SetDebugVisible(bool bVisible)
     }
 }
 
-void ACapsule2D::SetCapsuleSize(FVector2D NewCapsuleSize)
+void ACapsule2D::SetCapsuleSize(FFixedVector2D NewCapsuleSize)
 {
     CapsuleSize = NewCapsuleSize;
     
-    if (CapsuleMesh)
-    {
-        CapsuleMesh->CapsuleSize = NewCapsuleSize;
-        CapsuleMesh->RebuildCapsule();
-    }
+    if (CapsuleMesh) CapsuleMesh->SetCapsuleSize(Fixed2DToVector2D(NewCapsuleSize));
+    
+    CollisionCapsule.Capsule.SetSize(NewCapsuleSize);
+    
+}
 
-    if (CollisionCapsule)
-    {
-        float Radius = NewCapsuleSize.X;
-        float HalfHeight = NewCapsuleSize.Y + NewCapsuleSize.X;
+void ACapsule2D::SetCapsuleRotation(FFixed_32 Rotation)
+{
+    CollisionCapsule.Capsule.SetRotation(Rotation);
+    
+    //For procedural capsule visual, doesn't affect collision
+    SetActorRotation(FRotator(FixedToFloat(Rotation), 0.f, 0.f));
+}
 
-        CollisionCapsule->SetCapsuleRadius(Radius);
-        CollisionCapsule->SetCapsuleHalfHeight(HalfHeight);
-        
-        CollisionCapsule->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
-    }
+void ACapsule2D::SetCapsuleLocation(FFixedVector2D NewLoc)
+{
+    SetActorLocation(Fixed2DToVector(NewLoc));
+
+    CollisionCapsule.WorldPos = NewLoc;
 }

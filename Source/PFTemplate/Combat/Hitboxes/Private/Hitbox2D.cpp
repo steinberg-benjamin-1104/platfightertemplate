@@ -39,15 +39,14 @@ void AHitbox2D::UpdateTransform()
     if (!FighterPawnRef) return;
 
     ApplyMaterialForType();
-    SetCapsuleSize(Fixed2DToVector2D(HitboxDefinition.Transform.Size.ToFixed()));
+    SetCapsuleSize(HitboxDefinition.Transform.Size.ToFixed());
     UpdateRotation();
 }
 
-void AHitbox2D::Initialize(APawn* InPawn)
+void AHitbox2D::Initialize(APawn* InPawn, FDeterministicCollisionWorld* CW)
 {
-    Super::Initialize(InPawn);
+    Super::Initialize(InPawn, CW);
     FighterPawnRef = Cast<AFighterPawn>(InPawn);
-    SetOwner(InPawn);
 }
 
 void AHitbox2D::UpdateLocation()
@@ -58,7 +57,7 @@ void AHitbox2D::UpdateLocation()
     FFixedVector2D Offset2D = HitboxDefinition.Transform.LocationFromBone.ToFixed();
     Offset2D.X *= FighterPawnRef->GetFacingDirection();
     FFixedVector2D FinalLoc = BoneLoc + Offset2D;
-    SetActorLocation(Fixed2DToVector(FinalLoc));
+    SetCapsuleLocation(FinalLoc);
 }
 
 void AHitbox2D::UpdateRotation()
@@ -69,7 +68,7 @@ void AHitbox2D::UpdateRotation()
         Pitch = FFixed_32(180.f) - Pitch;
     }
 
-    SetActorRotation(FRotator(FixedToFloat(Pitch), 0.f, 0.f));
+    SetCapsuleRotation(Pitch);
 }
 
 void AHitbox2D::ApplyMaterialForType()

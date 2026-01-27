@@ -10,12 +10,11 @@ AHurtbox2D::AHurtbox2D()
 	SetActorTickEnabled(false);
 }
 
-void AHurtbox2D::Initialize(APawn* InOwner)
+void AHurtbox2D::Initialize(APawn* InPawn, FDeterministicCollisionWorld* CW)
 {
-	Super::Initialize(InOwner);
+	Super::Initialize(InPawn, CW);
 	SetInvincibility(false);
-	FighterPawnRef = Cast<AFighterPawn>(InOwner);
-	SetOwner(FighterPawnRef);
+	FighterPawnRef = Cast<AFighterPawn>(InPawn);
 }
 
 void AHurtbox2D::TickHurtbox()
@@ -27,19 +26,20 @@ void AHurtbox2D::TickHurtbox()
 void AHurtbox2D::UpdateLocation()
 {
 	if (!FighterPawnRef || BoneName.IsNone()) return;
-
-	FFixedVector2D Loc = FighterPawnRef->GetBakedSocketLocation(BoneName);
-	SetActorLocation(Fixed2DToVector(Loc));
+	
+	SetCapsuleLocation(FighterPawnRef->GetBakedSocketLocation(BoneName));
 }
 
 void AHurtbox2D::UpdateRotation()
 {
-	SetActorRotation({FighterPawnRef->GetBakedBoneRotation(BoneName), 0.f, 0.f}, ETeleportType::None);
+	SetCapsuleRotation(FloatToFixed(FighterPawnRef->GetBakedBoneRotation(BoneName)));
 }
 
 void AHurtbox2D::SetInvincibility(bool bInvulnerable)
 {
 	bIsInvincible = bInvulnerable;
+
+	
 
 	const FHitboxMaterialSet& MaterialSet = bIsInvincible ? InvulnerableColors : ActiveColors;
 
