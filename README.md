@@ -30,6 +30,6 @@ Uses GGPO-style input prediction and rollback, more technical info can be found 
 - Yet to be implemented
 
 ## Tech Stack
-Language: C++, C#
-Engine: Unreal Engine
-Plugins: GGPO
+- Languages: C++, C#
+- Engine: Unreal Engine
+- Plugins: GGPO
