@@ -1,15 +1,19 @@
 #pragma once
 #include "CollisionDefinitions.h"
 
-class FDeterministicCollisionWorld {
+class FDeterministicCollisionWorld
+{
+	
 public:
-	void Reset();
-	void RegisterComponent(const FCollisionComponent& InComponent);
+	void RegisterCapsule(const FCapsuleCollision& InCapsule);
+	void RegisterPolygon(const FPolygonCollision& InPolygon);
     
 	// Scans a specific component against the world
 	void QueryOverlaps(const FCollisionComponent& QueryComp, TArray<uint32>& OutHitOwnerIDs) const;
 
+	void QueryShapeOverlap(const FPolygonShape2D& TransientShape, ECollisionChannel TargetChannel, TArray<uint32>& OutHitOwnerIDs) const;
+
 private:
-	// Fixed size array is more deterministic/performant for rollback than TMap
-	TArray<FCollisionComponent> RegisteredComponents;
+	TArray<FCapsuleCollision> RegisteredCapsules;
+	TArray<FPolygonCollision> RegisteredPolygons;
 };
