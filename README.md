@@ -1,42 +1,77 @@
 # Rollback Platform Fighter Study
 
-A high-performance platform fighter engine built from the ground up with a focus on frame-perfect determinism and low-latency online play. This project serves as a technical demonstration of custom fixed-point physics, manual memory management for state-saving, and the integration of rollback netcode.
+A deterministic 2.5D platform fighter built in Unreal Engine to support GGPO-style rollback netcode.
+This project focuses on eliminating non-determinism at every layer of the simulation: update order, math, physics, and collision.
 
-## Technical Core Pillars
-### 1. Deterministic Fixed-Point Math
-To ensure cross-platform synchronization and prevent desyncs in a rollback environment, the engine eschews standard floating-point arithmetic in favor of my Fixed-Point Math Library.
+## Core Determinism Goals
 
-- Precision Control: Implements 64-bit fixed-point integers to handle positions, velocities, and acceleration.
+- Frame-perfect rollback compatibility
 
-- Consistency: Guarantees identical simulation results across different CPU architectures (x86 vs. ARM) by avoiding IEEE 754 floating-point non-determinism.
+- Identical simulation results across machines
 
-- Custom Trigonometry: Includes LUT (Look-Up Table) based sine and cosine functions for deterministic knockback trajectories and angle calculations.
+- Fast state save/load for resimulation
 
-### 2. Rollback Netcode (GGPO - https://www.ggpo.net/)
-- The networking layer utilizes the GGPO protocol to provide a lag-free experience, hiding latency through predictive input and state resimulation.
+- Deterministic Simulation Model
 
-- State Snapshotting: The engine is architected to separate "View" (rendering) from "Simulation" (logic). This allows the simulation state to be serialized and "rolled back" instantly.
+## Single-threaded simulation
+#All gameplay logic, physics, and collision run on a single deterministic update loop. No async tasks, no parallel physics, no frame-dependent ordering.
 
-- Input Prediction: Implements local input prediction to provide 0ms perceived latency for the local player.
+- Fixed 60Hz tick rate
+- Simulation is fully decoupled from rendering. Visuals interpolate; logic does not.
 
-- Resimulation Loop: When a remote input conflict is detected, the engine can roll back up frames and resimulate the physics and collision logic in a single frame.
+## Fixed-Point Math
 
-### 3. Fixed-Point Collision & Physics
-A custom collision detection system built specifically to interface with the fixed-point library, optimized for the high-speed movement characteristic of platform fighters.
+- All gameplay math uses a custom 64-bit fixed-point library.
 
-- AABB & Slopes: Support for Axis-Aligned Bounding Boxes with specialized handling for varied terrain and platform passthroughs.
+- No IEEE 754 floats in simulation code.
 
-- Frame-Perfect Hitboxes: Uses a frame-discrete "Active/Inactive" system for hitboxes and hurtboxes, ensuring that interactions occur exactly when the visual data suggests.
+## Deterministic replacements for:
 
-- Deterministic Resolvers: Collision resolution logic that avoids "jitter" by using integer-based penetration depth calculations.
+- Position, velocity, acceleration
 
-## Architecture Overview
-- Simulation/Logic: Completely decoupled from the frame rate. The game logic runs at a locked 60Hz tick rate.
+- Knockback and movement curves
 
-- Memory Management: Utilizes pre-allocated memory pools for game states to make "Save/Load" operations for GGPO extremely fast (O(1) or O(n) shallow copies).
+- Trigonometry via LUT-based sine/cosine
 
-- Rendering: An interpolation layer sits between the fixed-point simulation and the floating-point renderer, ensuring smooth visuals without sacrificing logic determinism.
+- Guarantees identical results across x86 / ARM and different compilers.
+
+## Collision & Physics (2D)
+
+- Designed specifically for rollback and fixed-point math.
+
+### Capsule vs Capsule (2D)
+- Primary character collision uses 2D capsules for stable movement, smooth sliding, and predictable penetration resolution.
+
+### SAT for Convex Polygons
+- Hitboxes and environmental shapes use Separating Axis Theorem with fixed-point math for deterministic overlap testing.
+
+### Frame-discrete hit detection
+- Hitboxes/hurtboxes are explicitly active or inactive per frame—no continuous overlap queries.
+
+### Integer-only resolution
+- Penetration depth and separation vectors are computed deterministically to avoid jitter and divergence during resimulation.
+
+## Rollback Netcode (GGPO)
+
+- Uses GGPO-style input prediction and rollback
+
+- Clean separation between:
+
+  - Simulation state (rollback-safe)
+
+  - Rendering/view state (non-deterministic, disposable)
+
+- Fast state snapshotting
+
+  - Pre-allocated memory pools
+
+  - Shallow copies where possible
+
+  - O(1) save/load paths for rollback
+
+  - On misprediction, rolls back N frames and resimulates collision and physics in a single update.
 
 ## Tech Stack
 Language: C++, C#
 Engine: Unreal Engine
+Plugins: GGPO
