@@ -15,20 +15,19 @@ All gameplay math uses a custom 64-bit fixed-point library.
 
 - Trigonometry via LUT-based sine/cosine
 
-- No IEEE 754 floats in simulation code to guarantees identical results across x86 / ARM and different compilers.
+- No IEEE 754 floats in simulation code to guarantees identical results across CPU types ie (x86 / x64 / ARM).
 
 - Determinstic Physics
   - Calculations for Position, velocity, acceleration
 
 - Determinstic Collision
-  
   - Hitboxes, Hurtboxes, and Shields exclusively use Capsule vs Capsule collision.
-
-  - Character and environmental shapes use Polygon collisions via SAT method.
+  - Character (ECB) and environmental shapes use Polygon collisions via SAT method.
 
 ## Rollback Netcode (GGPO)
 
-Uses GGPO-style input prediction and rollback, more technical info can be found at ggpo.net
+Uses GGPO-style input prediction and rollback, more technical info can be found at ggpo.net.
+- Yet to be implemented
 
 ## Tech Stack
 Language: C++, C#
