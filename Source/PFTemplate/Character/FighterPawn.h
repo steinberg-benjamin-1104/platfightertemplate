@@ -11,7 +11,6 @@
 #include "Hittable.h"
 #include "CamTarget.h"
 #include "FighterMovementComponent.h"
-#include "BoneVectorAxis.h"
 #include "AttackDefinition.h"
 #include "FighterAnimInstance.h"
 #include "StickDirection.h"
@@ -38,9 +37,11 @@ class PFTEMPLATE_API AFighterPawn : public APawn, public IHittable, public ICamT
 	GENERATED_BODY()
 
 public:
-	AFighterPawn();
 
-	//simulated tick phases
+	int32 PlayerID;
+	
+	AFighterPawn();
+	
 	void PreCollisionPhase(int32 CurrentFrame);
 	void UpdateDependencies();
 	void UpdateAnimation();
@@ -49,15 +50,6 @@ public:
 	void ShieldPhase();
 	void PostCollisionPhase();
 	void FighterDebug();
-	
-	UFUNCTION(BlueprintPure, Category = "Component Getters")
-	UFighterMovementComponent* GetFighterMovementComponent() const {return MovementComponent;}
-
-	UFUNCTION(BlueprintPure, Category = "Component Getters")
-	UHitboxManagerComponent* GetHitboxManager() {return HitboxManager;}
-
-	UFUNCTION(BlueprintPure, Category = "Component Getters")
-	USkeletalMeshComponent* GetMesh() const {return CharacterMesh;}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenet")
 	UFighterMovementComponent* MovementComponent;
@@ -65,18 +57,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	UFighterStateMachine* StateMachine;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UHitboxManagerComponent* HitboxManager;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	UEffectMachine* EffectMachine;
-
-	//StateMachine->AddState("Fireball", NewObject<UFireballState>(FSM));
-	UFUNCTION(BlueprintCallable, Category = "FSM")
-	virtual void RegisterCustomStates(UFighterStateMachine* FSM){}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UShieldComponent* ShieldComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<UCharacterAnimationSet> AnimSet;
+
+	UFUNCTION(BlueprintCallable, Category = "FSM")
+	virtual void RegisterCustomStates(UFighterStateMachine* FSM){}
 	
 	bool SetCurrentAnimation(EAnimSlot Anim, int32 BlendTime = 0);
 
@@ -101,30 +95,9 @@ public:
 
 	void InitHurtboxes();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animations")
-	UDataTable* AnimationTable;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attacks")
-	UDataTable* AttackTable;
-	
 	const FAttackDefinition* DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const;
 
 	bool TryStartAttack(EInputButton Button, FFighterInput* Input);
-
-	bool bStopAnimUpdates = false;
-	bool bStopMvmtUpdates = false;
-
-	void FreezePlayer(bool bFreeze);
-
-	// 0 - 9999
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-	int32 Health = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-	int32 StocksLeft = 3;
-
-	UFUNCTION(BlueprintPure, Category = "Damage")
-	float GetHealthFloat() const {return Health/10.f;}
 
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void ApplyDamage(int32 Damage);
@@ -138,57 +111,33 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void LoseStock();
 
-	UFUNCTION(BlueprintCallable, Category = "Damage")
-	void ResetHealth() {Health = 0;}
-
 	virtual void WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigator) override;
 
 	virtual FVector CenterLocation() override {return Fixed2DToVector(MovementComponent->GetCenter());}
 	
 	float GetBakedBoneRotation(FName BoneName);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	EBoneVectorAxis BoneVectorDirection = EBoneVectorAxis::Forward;
-
-	UFUNCTION(BlueprintCallable, Category = "Mesh")
+	FBakedSocketKey GetBakedSocketKey(FName SocketName);
+	FFixedVector2D GetBakedSocketLocation(FName SocketName);
+	
 	void ShakeMesh();
-
-	UFUNCTION(BlueprintCallable, Category = "Mesh")
 	void ResetMeshOffset();
 	
 	void InitiateKnockback();
 	void HandleGrab();
 	void HandleParry();
 
-	UPROPERTY() FDamageInfo StoredDamageInfo;
-	UPROPERTY() AFighterPawn* LastInstigator;
-
 	UPROPERTY(BlueprintReadWrite, Category = "CharStats")
 	int32 Weight = 100;
 
 	void SetCharacterPanel(UCharacterPanelWidget* Panel) { CharacterPanel = Panel; }
 
-	bool bParry = false;
-
 	FFixedVector2D GetFixedLoc() const { return VectorToFixed2D(GetActorLocation()); }
 	void SetFixedLoc(FFixedVector2D InLoc) { SetActorLocation(Fixed2DToVector(InLoc)); }
-
-	bool AnimFinished() {return FighterAnimInstance->CurrentAnimFinished(); }
-
-	FBakedSocketKey GetBakedSocketKey(FName SocketName);
-	FFixedVector2D GetBakedSocketLocation(FName SocketName);
-
-	UPROPERTY() FInputBuffer InputBuffer;
 
 	UPROPERTY(EditAnywhere, Instanced, Category="Projectile")
 	TArray<UProjectilePool*> ProjectilePools;
 
-	bool bCanLedge = true;
-
 protected:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	UHitboxManagerComponent* HitboxManager;
 
 	UPROPERTY() UFighterAnimInstance* FighterAnimInstance;
 	
@@ -213,5 +162,4 @@ private:
 	UPROPERTY() UCharacterPanelWidget* CharacterPanel;
 	
 	int32 ShakeSign = 1;
-	FVector RootPreviousFrame = FVector::ZeroVector;
 };

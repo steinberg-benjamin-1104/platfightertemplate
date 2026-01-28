@@ -5,7 +5,6 @@
 #include "FighterCapsule.h"
 #include "Jump.h"
 #include "SafeMath.h"
-#include "SafeMathBP.h"
 #include "FixedCollision.h"
 #include "AnimMvmt.h"
 #include "FighterMovementMode.h"
@@ -44,7 +43,6 @@ public:
 	
 	// Jumping
 	bool StartJump(EJumpType HopType);
-	EJumpType CachedJumpType;
 	bool StartGroundJump() { return StartJump(CachedJumpType); }
 	
 	void ResetJumpCount();
@@ -63,17 +61,17 @@ public:
 	void ApplyAirDrift(FFixed_32 StickX);
 	
 	//Divide by 36000 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP Gravity = 3600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Gravity = 3600.f;
 	
 	FFixed_32 RisingGravity;
 	//Divide by 600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP TerminalFallVelocity = -900.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP AirFriction = 360.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP FastFallMultiplier = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AirFriction = 360.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float FastFallMultiplier = 1.6f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP AirAcceleration = 3000.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) FFixed_32BP MaxAirSpeed = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AirAcceleration = 3000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MaxAirSpeed = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EJumpType, FJumpData> JumpDataMap;
@@ -81,19 +79,17 @@ public:
 	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
 	FFixedVector2D GetVelocity() const { return Velocity; }
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP RunSpeed = 1200.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP DashSpeed = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float RunSpeed = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float DashSpeed = 1400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int DashDuration = 12;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP WalkSpeed = 720.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float WalkSpeed = 720.f;
 
 	//Lower Friction: 0.95, Higher Friction: 0.5
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") FFixed_32BP GroundTraction = 36.f; //melee value * 600
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float GroundTraction = 36.f; //melee value * 600
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int MaxJumpCount = 2;
-	int JumpsRemaining = 0;
-	bool bIsFastFalling = false;
+	
 	void ApplyGroundFriction();
-	bool bCanApplyGroundFriction = true;
-	void ApplyCustomFriction(FFixed_32 Friction);
+	
 	void SnapToNearestGroundBehindStep(int32 inDirection);
 	FFixedVector2D FindFurthestGroundedPosition(int32 Direction) const;
 	
@@ -114,28 +110,23 @@ public:
 	
 	FFixedVector2D GetCenter() const {return CollisionCapsule.GetCenter();}
 
-	bool bDoCollisionChecks = true;
-
-	UPROPERTY() EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
-
 	void ManualDisplacement(FFixedVector2D Movement, bool bPreventLedgeFall);
-
-	void ApplyAnimMovement(int32 Frame);
-
-	void SetBakedMovement(UBakedAnimMvmt* NewMovement) { BakedAnimMvmt = NewMovement;}
 
 	void TestIsGrounded();
 
+	UPROPERTY() EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
 	bool bOnPlatform = false;
 	bool bIgnorePlatform = false;
+	bool bStopMovementUpdates = false;
+	bool bCanLedge = true;
+	bool bDoCollisionChecks = true;
+	EJumpType CachedJumpType;
+	int JumpsRemaining = 0;
+	bool bIsFastFalling = false;
 
 protected:
-	
-	UPROPERTY() AFighterPawn* FighterPawnRef = nullptr;
 
 	UPROPERTY() FFighterCapsule FollowCapsule;
-
-	UPROPERTY() UBakedAnimMvmt* BakedAnimMvmt;
 
 private:
 	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);

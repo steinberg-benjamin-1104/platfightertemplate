@@ -18,7 +18,7 @@ void UFighterMovementComponent::InitFMC(AFighterPawn* InFighterPawn)
 
 void UFighterMovementComponent::TickFMC()
 {
-	if (!FighterPawnRef) return;
+	if (!FighterPawnRef && bStopMovementUpdates) return;
 	
 	FollowCapsule = CollisionCapsule;
 	ApplyMovementPhysics();
@@ -70,7 +70,7 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 	switch (NewMode)
 	{
 		case EFighterMovementMode::KeepCurrent: return;
-		case EFighterMovementMode:: AutoResolve:
+		case EFighterMovementMode::AutoResolve:
 			{
 				TestIsGrounded();
 				if (!IsGrounded()) SetMovementMode(EFighterMovementMode::Falling);
@@ -80,7 +80,7 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 			{
 				bOnPlatform = false;
 			}
-	case EFighterMovementMode::None: bIsFastFalling = false;
+	case EFighterMovementMode::Custom: bIsFastFalling = false;
 		default: break;
 	}
 	
@@ -135,7 +135,7 @@ void UFighterMovementComponent::ApplyGroundFriction()
 	if (Velocity.X == FFixed_32(0.f)) return;
 	
 	FFixed_32 CurrentTraction = GroundTraction;
-	if (Velocity.X.Abs() > WalkSpeed.ToFixed() * FFixed_32(1.3f)) CurrentTraction *= FFixed_32(2.f);
+	if (Velocity.X.Abs() > FFixed_32(WalkSpeed) * FFixed_32(1.3f)) CurrentTraction *= FFixed_32(2.f);
 	
 	FFixed_32 DecelAmount = CurrentTraction;
 	
@@ -169,7 +169,7 @@ void UFighterMovementComponent::ApplyAirDrift(FFixed_32 StickX)
 {
 	if (StickX == FFixed_32(0.f)) // no stick input
 	{
-		const FFixed_32 Decel = AirFriction.ToFixed() * FixedDt;
+		const FFixed_32 Decel = FFixed_32(AirFriction) * FixedDt;
 
 		if (Velocity.X > FFixed_32(0.f))
 			Velocity.X = FixedMax(FFixed_32(0.f), Velocity.X - Decel);
@@ -300,7 +300,7 @@ void UFighterMovementComponent::PreventLedgeFall(FFixedVector2D& InVelocity, boo
 		else
 		{
 			SetMovementMode(EFighterMovementMode::Falling);
-			Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed.ToFixed(), MaxAirSpeed);
+			Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed, MaxAirSpeed);
 			JumpsRemaining--;
 		}
 	}
@@ -317,24 +317,8 @@ bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 void UFighterMovementComponent::StopMovementCompletely(bool bStopCollision)
 {
 	Velocity = FFixedVector2D(0.f, 0.f);
-	SetMovementMode(EFighterMovementMode::None);
+	SetMovementMode(EFighterMovementMode::Custom);
 	if (bStopCollision) bDoCollisionChecks = false;
-}
-
-void UFighterMovementComponent::DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color)
-{
-	DrawDebugCapsule(
-		GetWorld(),
-		Fixed2DToVector(Capsule.GetCenter()),
-		FixedToFloat(Capsule.HalfHeight),
-		FixedToFloat(Capsule.Radius),
-		FQuat::Identity,
-		Color,
-		false,
-		0.0f,
-		0,
-		2.0f
-	);
 }
 
 void UFighterMovementComponent::PerformCollisionChecks(FFixedVector2D &InVelocity)
@@ -414,7 +398,7 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
 			return FFixedHitResult();
 		}
 		FFixedVector2D NewLocation = OutHit.ImpactPoint;
-		NewLocation.Z += CollisionCapsule.bufferlayer;
+		//Add buffer layer here
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
@@ -435,8 +419,8 @@ FFixedHitResult UFighterMovementComponent::PerformCeilingCollisionCheck(FFixedVe
 	if (OutHit.bBlockingHit)
 	{
 		if (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform"))) return FFixedHitResult();
-		const FFixed_32 CapsuleTopOffset = (CollisionCapsule.defaultHalfHeight.ToFixed() * 2) + CollisionCapsule.bufferlayer.ToFixed();
-		const FFixedVector2D NewLocation = OutHit.ImpactPoint - FFixedVector2D(0.f, CapsuleTopOffset);
+		//add buffer layer here
+		const FFixedVector2D NewLocation; //needs update here
 		FighterPawnRef->SetFixedLoc(NewLocation);
 		HaltVerticalVelocity();
 		CollisionCapsule.UpdateCenter(NewLocation);
@@ -454,27 +438,6 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	
 	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
-}
-
-void UFighterMovementComponent::ApplyAnimMovement(int32 Frame)
-{
-	if (BakedAnimMvmt == nullptr) return;
-	if (Frame >= BakedAnimMvmt->BakeStartFrame && Frame <= BakedAnimMvmt->BakeEndFrame)
-	{
-		if (Frame == BakedAnimMvmt->BakeStartFrame) SetMovementMode(BakedAnimMvmt->TargetMode);
-		
-		int32 CurrentFrame = Frame - BakedAnimMvmt->BakeStartFrame;
-		Velocity = Vector2DToFixed2D(BakedAnimMvmt->DeltaPos[CurrentFrame]) / FixedDt;
-		Velocity.X *= FighterPawnRef->GetFacingDirection();
-		if (IsGrounded()) PreventLedgeFall(Velocity, BakedAnimMvmt->bPreventLedgeFall);
-	}
-	if (Frame == BakedAnimMvmt->BakeEndFrame + 1)
-	{
-		SetMovementMode(BakedAnimMvmt->FinishedMode);
-		if (!BakedAnimMvmt->X.KeepVelocity) Velocity.X = 0.f;
-		if (!BakedAnimMvmt->Z.KeepVelocity) Velocity.Z = 0.f;
-		BakedAnimMvmt = nullptr;
-	}
 }
 
 void UFighterMovementComponent::TestIsGrounded()

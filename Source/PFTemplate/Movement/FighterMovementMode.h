@@ -10,5 +10,5 @@ enum class EFighterMovementMode : uint8
 	Falling UMETA(DisplayName = "Falling"),
 	KeepCurrent UMETA(DisplayName = "Keep Current"),
 	AutoResolve UMETA(DisplayName = "Auto Resolve"),
-	None UMETA(DisplayName = "None")
+	Custom UMETA(DisplayName = "None")
 };

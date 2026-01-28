@@ -86,20 +86,17 @@ void AFighterPawn::PreCollisionPhase(int32 CurrentFrame)
 	InputBuffer.Update(NewInput);
 	if (EffectMachine) EffectMachine->UpdateEffectTimers();
 	if (StateMachine) StateMachine->TickCurrentState();
-	if (MovementComponent && !bStopMvmtUpdates) MovementComponent->TickFMC();
-	if (CharacterMesh && FighterAnimInstance && !bStopAnimUpdates) UpdateAnimation();
+	if (MovementComponent) MovementComponent->TickFMC();
+	if (CharacterMesh && FighterAnimInstance) UpdateAnimation();
 	for (UProjectilePool* pool : ProjectilePools) pool->PreCollision();
 }
 
 void AFighterPawn::UpdateAnimation()
 {
 	FighterAnimInstance->AdvanceFrame();
-	FighterAnimInstance->UpdateAnimation(FixedToFloat(FixedDt), false);
 	CharacterMesh->RefreshBoneTransforms();
 	CharacterMesh->FinalizeBoneTransform();
 	CharacterMesh->UpdateComponentToWorld();
-
-	MovementComponent->ApplyAnimMovement(FighterAnimInstance->GetCurrentFrameIndex());
 	
 	for (auto& Pair : HurtboxMap)
 	{
@@ -242,11 +239,6 @@ void AFighterPawn::WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigato
 {
 	StoredDamageInfo = DamageInfo;
 	LastInstigator = Instigator;
-	if (bParry)
-	{
-		HandleParry();
-		return;
-	}
 	
 	switch (DamageInfo.HitEffect)
 	{
@@ -280,27 +272,27 @@ void AFighterPawn::HandleGrab()
 
 void AFighterPawn::ApplyDamage(int32 Damage)
 {
-	Health += Damage;
-	CharacterPanel->SetDamage(GetHealthFloat());
+	//call function here to apply damage
+	CharacterPanel->SetDamage();
 }
 
 void AFighterPawn::SetStocks(int32 StockCount)
 {
-	StocksLeft = StockCount;
+	//set stocks here
 	CharacterPanel->SetStocks(StocksLeft);
 }
 
 void AFighterPawn::LoseStock()
 {
-	StocksLeft--;
-	SetStocks(StocksLeft);
+	//deduct stocks here
+	//reset health here
+	CharacterPanel->SetStocks(StocksLeft);
 }
 
 void AFighterPawn::HandleParry()
 {
 	
 }
-
 
 #pragma endregion
 
@@ -365,11 +357,6 @@ void AFighterPawn::ToggleHurtboxInvulnerable(FName HurtboxSuffix, bool bEnable)
 
 #pragma endregion
 
-void AFighterPawn::FreezePlayer(bool bFreeze)
-{
-	bStopAnimUpdates = bFreeze;
-	bStopMvmtUpdates = bFreeze;
-}
 
 bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput* Input)
 {

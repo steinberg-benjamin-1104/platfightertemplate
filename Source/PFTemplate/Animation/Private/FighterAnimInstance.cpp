@@ -13,6 +13,8 @@ void UFighterAnimInstance::SetAnimationSequence(UAnimSequence* NewSequence, bool
 
 void UFighterAnimInstance::AdvanceFrame()
 {
+	if (bStopAnimUpdates) return;
+	
 	int32 Frame = Current.AdvanceFrame();
 	
 	if (BlendAlpha < 1.f && Current.IsValid() && Previous.IsValid())
@@ -24,4 +26,6 @@ void UFighterAnimInstance::AdvanceFrame()
 		if (BlendFrameCounter >= BlendTotalFrames) BlendAlpha = 1.f;
 	}
 	else BlendAlpha = 1.f;
+
+	UpdateAnimation(FixedToFloat(FixedDt), false);
 }

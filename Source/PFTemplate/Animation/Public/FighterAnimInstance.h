@@ -33,4 +33,6 @@ public:
 
 	int32 GetCurrentFrameIndex() const {return Current.CurrentFrame; }
 	bool CurrentAnimFinished() const {return Current.AnimIsFinished(); }
+
+	bool bStopAnimUpdates = false;
 };

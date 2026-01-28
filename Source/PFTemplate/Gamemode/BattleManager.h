@@ -1,9 +1,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterSnapshot.h"
 #include "GameFramework/Actor.h"
 
 #include "BattleManager.generated.h"
+
+USTRUCT(BlueprintType)
+struct FBattleSnapShot
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	int32 FrameNumber;
+	
+	UPROPERTY()
+	FCharacterSnapshot PlayerStates[4];
+};
 
 class AFighterPawn;
 class APFCamera;

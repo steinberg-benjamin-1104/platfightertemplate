@@ -18,7 +18,7 @@ struct FJumpData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP JumpHeight = 0.f;
+	float JumpHeight = 0.f;
 
 	//peak height is reached at this frame
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

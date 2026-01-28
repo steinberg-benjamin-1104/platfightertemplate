@@ -9,8 +9,7 @@ void UEffectMachine::Initialize(AFighterPawn* InOwner)
 
 	for (auto& Elem : EffectMap)
 	{
-		if (Elem.Value)
-			Elem.Value->Initialize(InOwner);
+		if (Elem.Value) Elem.Value->Initialize(InOwner);
 	}
 }
 
