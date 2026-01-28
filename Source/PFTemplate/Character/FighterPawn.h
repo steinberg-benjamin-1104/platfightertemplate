@@ -6,8 +6,7 @@
 #include "EffectMachine.h"
 #include "HitboxManagerComponent.h"
 #include "FighterPlayerController.h"
-#include "Animation.h"
-#include "FrameScriptRunner.h"
+#include "AnimationSlots.h"
 #include "ShieldComponent.h"
 #include "Hittable.h"
 #include "CamTarget.h"
@@ -31,6 +30,7 @@ class UFighterAnimInstance;
 class AHurtbox2D;
 class UCharacterPanelWidget;
 class UProjectilePool;
+class UCharacterAnimationSet;
 
 UCLASS()
 class PFTEMPLATE_API AFighterPawn : public APawn, public IHittable, public ICamTarget
@@ -71,21 +71,14 @@ public:
 	//StateMachine->AddState("Fireball", NewObject<UFireballState>(FSM));
 	UFUNCTION(BlueprintCallable, Category = "FSM")
 	virtual void RegisterCustomStates(UFighterStateMachine* FSM){}
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	UFrameScriptRunnerComponent* FrameScriptRunner;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UShieldComponent* ShieldComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
-	FAnimation CurrentAnimation;
-
-	UFUNCTION(BlueprintPure, Category = "Animation")
-	FAnimation GetCurrentAnimation() const {return CurrentAnimation; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<UCharacterAnimationSet> AnimSet;
 	
-	bool SetCurrentAnimation(FName AnimationName, int32 BlendTime = 0);
-	bool SetCurrentAnimation(const FAnimation& NewAnimation, int32 BlendTime = 0);
+	bool SetCurrentAnimation(EAnimSlot Anim, int32 BlendTime = 0);
 
 	UPROPERTY() AFighterPlayerController* FPC = nullptr;
 
@@ -114,7 +107,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attacks")
 	UDataTable* AttackTable;
 	
-	FAnimation GetAnimationByName(FName MoveName) const;
 	const FAttackDefinition* DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const;
 
 	bool TryStartAttack(EInputButton Button, FFighterInput* Input);

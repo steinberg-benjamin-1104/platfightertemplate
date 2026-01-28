@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SafeMathBP.h"
 
 #include "HitboxData.generated.h"
 
@@ -60,52 +59,37 @@ struct FHitboxTransform
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName BoneName = "root";
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVec2DBP Size;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFixed_32BP Rotation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVec2DBP LocationFromBone;
-
+	//visual indication
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EHitboxType HitboxType = EHitboxType::Normal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName BoneName = "root";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D Size;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Rotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D LocationFromBone;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsAttached = false;
-
-	FHitboxTransform()
-	{
-		Size.X = 20.f;
-		Size.Z = 20.f;
-		Rotation.Value = 0.f;
-	}
 };
 
 USTRUCT(BlueprintType)
-struct FHitboxDefinition
+struct FHitboxGroup
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FHitboxTransform Transform;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FDamageInfo DamageInfo;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bProjectile = false;
-};
-
-USTRUCT(BlueprintType)
-struct FHitboxGroup : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FHitboxDefinition> Hitboxes;
+	
+	UPROPERTY(EditAnywhere)
+	FName GroupName;
+	
+	UPROPERTY(EditAnywhere)
+	FDamageInfo Damage;
+	
+	UPROPERTY(EditAnywhere)
+	TArray<FHitboxTransform> Hitboxes;
 };

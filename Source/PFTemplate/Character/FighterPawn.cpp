@@ -1,9 +1,10 @@
 #include "FighterPawn.h"
+
+#include "AnimationSlots.h"
 #include "FighterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "FighterAnimInstance.h"
 #include "Hurtbox2D.h"
-#include "FrameScriptRunner.h"
 #include "ShieldComponent.h"
 #include "CharacterPanelWidget.h"
 #include "AttackDefinition.h"
@@ -32,7 +33,6 @@ AFighterPawn::AFighterPawn()
 	MovementComponent->PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	//Component Setup
-	FrameScriptRunner = CreateDefaultSubobject<UFrameScriptRunnerComponent>(TEXT("FrameScriptRunner"));
 	HitboxManager = CreateDefaultSubobject<UHitboxManagerComponent>(TEXT("HitboxManager"));
 	ShieldComponent = CreateDefaultSubobject<UShieldComponent>(TEXT("Shield"));
 	ShieldComponent->SetupAttachment(Root);
@@ -59,7 +59,6 @@ void AFighterPawn::BeginPlay()
 	EffectMachine->Initialize(this);
 	
 	HitboxManager->Initialize(this, 16);
-	FrameScriptRunner->Initialize(this);
 
 	ShieldComponent->InitShield(ShieldMesh);
 
@@ -106,8 +105,6 @@ void AFighterPawn::UpdateAnimation()
 	{
 		if (AHurtbox2D* Hurtbox = Pair.Value) Hurtbox->TickHurtbox();
 	}
-	
-	FrameScriptRunner->TickScript(FighterAnimInstance->GetCurrentFrameIndex());
 }
 
 void AFighterPawn::UpdateDependencies()
@@ -184,57 +181,24 @@ void AFighterPawn::FaceInstigator()
 
 #pragma region Animation
 
-FAnimation AFighterPawn::GetAnimationByName(FName MoveName) const
+bool AFighterPawn::SetCurrentAnimation(EAnimSlot Anim, int32 BlendTime)
 {
-	if (!AnimationTable) return FAnimation();
-
-	static const FString Context = TEXT("Move Lookup");
-	const FAnimation* Row = AnimationTable->FindRow<FAnimation>(MoveName, Context, true);
-
-	if (Row) return *Row;
+	FCharacterAnimEntry AnimEntry = AnimSet->GetAnimation(Anim);
 	
-	return FAnimation();
-}
+	FighterAnimInstance->SetAnimationSequence
+	(
+		AnimEntry.Animation->AnimSequence,
+		AnimEntry.bLoop,
+		AnimEntry.Animation->GetNumFrames(),
+		BlendTime
+	);
 
-bool AFighterPawn::SetCurrentAnimation(FName AniName, int32 BlendTime)
-{
-	const FAnimation NewAni = GetAnimationByName(AniName);
-
-	if (!NewAni.BakedAnimation) return false;
-
-	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
-
-	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
-	CurrentAnimation = NewAni;
-
-	if (UMoveLogicAsset* CommandAsset = NewAni.CommandScript)
-		FrameScriptRunner->LoadScript(CommandAsset->Commands);
-	else
-		FrameScriptRunner->LoadScript({});
+	if (!AnimEntry.Animation)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Animation not found for slot: %d"), static_cast<int32>(Anim));
+		return false;
+	}
 	
-	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
-	return true;
-}
-
-bool AFighterPawn::SetCurrentAnimation(const FAnimation& NewAni, int32 BlendTime)
-{
-	if (!NewAni.BakedAnimation) return false;
-
-	UAnimSequence* AnimSequence = NewAni.BakedAnimation->AnimSequence;
-	if (!AnimSequence) return false;
-	
-	const int32 NumFrames = AnimSequence->GetNumberOfSampledKeys();
-	CurrentAnimation = NewAni;
-
-	if (UMoveLogicAsset* CommandAsset = NewAni.CommandScript)
-		FrameScriptRunner->LoadScript(CommandAsset->Commands);
-	else
-		FrameScriptRunner->LoadScript({});
-	
-	FighterAnimInstance->SetAnimationSequence(AnimSequence, NewAni.bIsLoop, NumFrames, BlendTime);
-	MovementComponent->SetBakedMovement(NewAni.BakedAnimMvmt);
-
 	return true;
 }
 

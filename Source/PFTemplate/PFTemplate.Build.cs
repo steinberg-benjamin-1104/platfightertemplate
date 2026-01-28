@@ -49,7 +49,8 @@ public class PFTemplate : ModuleRules
 			"PFTemplate/Combat/Projectiles",
 			"PFTemplate/Effects/Public",
 			"PFTemplate/Combat/Grabs",
-			"PFTemplate/Rollback/CollisionSystem/Public"
+			"PFTemplate/Rollback/CollisionSystem/Public",
+			"PFTemplate/Bakery/Public"
 		});
 	}
 }

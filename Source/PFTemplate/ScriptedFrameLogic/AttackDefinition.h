@@ -1,28 +1,37 @@
 #pragma once
-#include "Engine/DataTable.h"
 #include "StickDirection.h"
+#include "BakedSockets.h"
+#include "Windows.h"
 #include "AttackDefinition.generated.h"
 
-USTRUCT(BlueprintType)
-struct FAttackDefinition : public FTableRowBase
+UCLASS(BlueprintType)
+class PFTEMPLATE_API UAttackDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAnimation Animation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UBakedAnimation* BakedAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FName> ValidStates;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bFlickInput = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EMoveButton MoveButton = EMoveButton::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EStickDir StickDir = EStickDir::Center;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TargetState = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsSpecial = false;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FHitboxGroup> HitboxGroups;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FAttackWindow> Windows;
 };
