@@ -2,6 +2,13 @@
 #include "CoreMinimal.h"
 #include "EffectBase.generated.h"
 
+struct FEffectSnapshot
+{
+	FName EffectID;
+	int32 Duration;
+	int32 RemainingFrames;
+};
+
 class AFighterPawn;
 
 UCLASS()

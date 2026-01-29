@@ -31,6 +31,20 @@ class UCharacterPanelWidget;
 class UProjectilePool;
 class UCharacterAnimationSet;
 
+USTRUCT()
+struct FCombatSnapshot
+{
+	GENERATED_BODY()
+
+	
+	int32 Health = 0;
+	int32 Stocks = 3;
+	FFixed_32 ShieldHealth;
+
+	UPROPERTY() FDamageInfo StoredDamageInfo;
+	UPROPERTY() AFighterPawn* LastInstigator;
+};
+
 UCLASS()
 class PFTEMPLATE_API AFighterPawn : public APawn, public IHittable, public ICamTarget
 {
@@ -39,6 +53,7 @@ class PFTEMPLATE_API AFighterPawn : public APawn, public IHittable, public ICamT
 public:
 
 	int32 PlayerID;
+	FCombatSnapshot CombatSnapshot;
 	
 	AFighterPawn();
 	

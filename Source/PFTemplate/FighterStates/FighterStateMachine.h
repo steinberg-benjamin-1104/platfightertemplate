@@ -5,6 +5,15 @@
 
 #include "FighterStateMachine.generated.h"
 
+USTRUCT()
+struct FFSMSnapshot
+{
+	GENERATED_BODY()
+
+	int32 FramesInState = -1;
+	FName CurrentStateKey;
+};
+
 class AFighterPawn;
 class UFighterState;
 
@@ -14,14 +23,23 @@ class PFTEMPLATE_API UFighterStateMachine : public UObject
 	GENERATED_BODY()
 
 public:
+	UPROPERTY() FFSMSnapshot FSMSnapshot;
 	UPROPERTY() UFighterState* CurrentState;
-	UPROPERTY(BlueprintReadOnly) FName CurrentStateKey = NAME_None;
 	UPROPERTY() TMap<FName, UFighterState*> StateMap;
-	int FramesInState = 0;
 	
 	void Initialize(AFighterPawn* InOwner);
 	void ChangeFighterState(FName NewState);
 	void AddState(FName StateName, UFighterState* State);
 	void TickCurrentState();
 	void ShowStateDebug();
+
+	//Snapshot
+	FName GetCurrentStateKey() const { return FSMSnapshot.CurrentStateKey; }
+	int32 GetFrame() const { return FSMSnapshot.FramesInState; }
+
+private:
+	void ResetFrameCount() { FSMSnapshot.FramesInState = -1; }
+	void IncrementFrame() { FSMSnapshot.FramesInState++; }
+	void SetCurrentStateKey(FName NewKey) { FSMSnapshot.CurrentStateKey = NewKey; }
+	
 };

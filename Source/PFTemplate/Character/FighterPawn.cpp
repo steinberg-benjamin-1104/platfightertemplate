@@ -237,8 +237,8 @@ const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputMask, b
 
 void AFighterPawn::WasHit(const FDamageInfo& DamageInfo, AFighterPawn* Instigator)
 {
-	StoredDamageInfo = DamageInfo;
-	LastInstigator = Instigator;
+	CombatSnapshot.StoredDamageInfo = DamageInfo;
+	CombatSnapshot.LastInstigator = Instigator;
 	
 	switch (DamageInfo.HitEffect)
 	{
@@ -257,36 +257,29 @@ void AFighterPawn::InitiateKnockback()
 {
 	if (ShieldComponent->IsActive())
 	{
-		ShieldComponent->ApplyDamage(StoredDamageInfo.Damage);
+		ShieldComponent->ApplyDamage(CombatSnapshot.StoredDamageInfo.Damage);
 		return;
 	}
-	ApplyDamage(StoredDamageInfo.Damage);
+	ApplyDamage(CombatSnapshot.StoredDamageInfo.Damage);
 	StateMachine->ChangeFighterState("Hitstop");
 }
 
 void AFighterPawn::HandleGrab()
 {
 	StateMachine->ChangeFighterState("GrabHeld");
-	LastInstigator->StateMachine->ChangeFighterState("GrabHold");
+	CombatSnapshot.LastInstigator->StateMachine->ChangeFighterState("GrabHold");
 }
 
 void AFighterPawn::ApplyDamage(int32 Damage)
 {
-	//call function here to apply damage
-	CharacterPanel->SetDamage();
+	CombatSnapshot.Health -= Damage;
+	CharacterPanel->SetDamage(CombatSnapshot.Health);
 }
 
 void AFighterPawn::SetStocks(int32 StockCount)
 {
-	//set stocks here
-	CharacterPanel->SetStocks(StocksLeft);
-}
-
-void AFighterPawn::LoseStock()
-{
-	//deduct stocks here
-	//reset health here
-	CharacterPanel->SetStocks(StocksLeft);
+	CombatSnapshot.Stocks = StockCount;
+	CharacterPanel->SetStocks(CombatSnapshot.Stocks);
 }
 
 void AFighterPawn::HandleParry()

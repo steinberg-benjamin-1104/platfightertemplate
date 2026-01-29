@@ -5,6 +5,11 @@
 class AFighterPawn;
 class UEffectBase;
 
+struct FEffectMachineSnapshot
+{
+	TArray<FEffectSnapshot> ActiveEffects;
+};
+
 UCLASS()
 class PFTEMPLATE_API UEffectMachine : public UObject
 {

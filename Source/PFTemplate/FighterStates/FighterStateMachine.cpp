@@ -71,8 +71,8 @@ void UFighterStateMachine::Initialize(AFighterPawn* InOwner)
 			Elem.Value->InitState(InOwner, InOwner->MovementComponent, this, &InOwner->InputBuffer);
 	}
 
-	CurrentStateKey = "Idle";
-	CurrentState = StateMap[CurrentStateKey];
+	SetCurrentStateKey("Idle");
+	CurrentState = StateMap[GetCurrentStateKey()];
 	CurrentState->OnEnter();
 }
 
@@ -88,9 +88,9 @@ void UFighterStateMachine::ChangeFighterState(FName NewState)
 	{
 		CurrentState->OnExit();
 		CurrentState = StateMap[NewState];
-		CurrentStateKey = NewState;
+		SetCurrentStateKey(NewState);
 		CurrentState->OnEnter();
-		FramesInState = -1;
+		ResetFrameCount();
 		TickCurrentState();
 	}
 }
@@ -99,8 +99,8 @@ void UFighterStateMachine::TickCurrentState()
 {
 	if (CurrentState)
 	{
-		FramesInState++;
-		CurrentState->Tick(FramesInState);
+		IncrementFrame();
+		CurrentState->Tick();
 	}
 }
 

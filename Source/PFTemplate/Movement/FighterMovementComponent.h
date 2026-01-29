@@ -6,9 +6,28 @@
 #include "Jump.h"
 #include "SafeMath.h"
 #include "FixedCollision.h"
-#include "AnimMvmt.h"
 #include "FighterMovementMode.h"
 #include "FighterMovementComponent.generated.h"
+
+USTRUCT()
+struct FPhysicsSnapshot
+{
+	GENERATED_BODY()
+
+	FFixedVector2D Location;
+	FFixedVector2D Velocity;
+
+	EJumpType CachedJumpType;
+	int32 JumpsRemaining = 0;
+	UPROPERTY() EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
+	
+	bool bOnPlatform = false;
+	bool bIgnorePlatform = false;
+	bool bStopMovementUpdates = false;
+	bool bCanLedge = true;
+	bool bDoCollisionChecks = true;
+	bool bIsFastFalling = false;
+};
 
 class AFighterPawn;
 
@@ -20,10 +39,10 @@ class PFTEMPLATE_API UFighterMovementComponent : public UActorComponent
 public:
 	UFighterMovementComponent();
 
-	FFixedVector2D Velocity = FFixedVector2D(FFixed_32(0.f), FFixed_32(0.f));
+	FPhysicsSnapshot PhysicsSnapshot;
 
 	UFUNCTION(BlueprintCallable)
-	EFighterMovementMode GetCurrentMode() {return CurrentMovementMode;}
+	EFighterMovementMode GetCurrentMode() {return PhysicsSnapshot.CurrentMovementMode;}
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetMovementMode(EFighterMovementMode NewMode);
@@ -36,14 +55,15 @@ public:
 	void DisplayDebug();
 
 	UFUNCTION(BlueprintPure)
-	bool IsGrounded() const {return CurrentMovementMode == EFighterMovementMode::Grounded;}
+	bool IsGrounded() const {return PhysicsSnapshot.CurrentMovementMode == EFighterMovementMode::Grounded;}
 	
 	UFUNCTION(BlueprintPure)
-	bool IsAirborne() {return CurrentMovementMode == EFighterMovementMode::Falling || CurrentMovementMode == EFighterMovementMode::JumpingUp;}
+	bool IsAirborne() { return PhysicsSnapshot.CurrentMovementMode == EFighterMovementMode::Falling ||
+								PhysicsSnapshot.CurrentMovementMode == EFighterMovementMode::JumpingUp; }
 	
 	// Jumping
 	bool StartJump(EJumpType HopType);
-	bool StartGroundJump() { return StartJump(CachedJumpType); }
+	bool StartGroundJump() { return StartJump(PhysicsSnapshot.CachedJumpType); }
 	
 	void ResetJumpCount();
 	void SetMaxJumpCount(int32 NewMaxJumpCount);
@@ -76,8 +96,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EJumpType, FJumpData> JumpDataMap;
 	
-	void SetVelocity(const FFixedVector2D& InVelocity) { Velocity = InVelocity; }
-	FFixedVector2D GetVelocity() const { return Velocity; }
+	void SetVelocity(const FFixedVector2D& InVelocity) { PhysicsSnapshot.Velocity = InVelocity; }
+	FFixedVector2D GetVelocity() const { return PhysicsSnapshot.Velocity; }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float RunSpeed = 1200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float DashSpeed = 1400.f;
@@ -86,7 +106,7 @@ public:
 
 	//Lower Friction: 0.95, Higher Friction: 0.5
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float GroundTraction = 36.f; //melee value * 600
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int MaxJumpCount = 2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") int32 MaxJumpCount = 2;
 	
 	void ApplyGroundFriction();
 	
@@ -101,7 +121,7 @@ public:
 	void StopMovementCompletely(bool bStopCollision = false);
 	
 	void PreventLedgeFall(FFixedVector2D& InVelocity, bool bPreventFall);
-	void PreventLedgeFall(bool bPreventFall) { PreventLedgeFall(Velocity, bPreventFall); }
+	void PreventLedgeFall(bool bPreventFall) { PreventLedgeFall(PhysicsSnapshot.Velocity, bPreventFall); }
 
 	bool IsStandingOnFacingLedge() const;
 	
@@ -114,20 +134,9 @@ public:
 
 	void TestIsGrounded();
 
-	UPROPERTY() EFighterMovementMode CurrentMovementMode = EFighterMovementMode::Falling;
-	bool bOnPlatform = false;
-	bool bIgnorePlatform = false;
-	bool bStopMovementUpdates = false;
-	bool bCanLedge = true;
-	bool bDoCollisionChecks = true;
-	EJumpType CachedJumpType;
-	int JumpsRemaining = 0;
-	bool bIsFastFalling = false;
-
 protected:
 
+	UPROPERTY() AFighterPawn* FighterPawnRef;
+	
 	UPROPERTY() FFighterCapsule FollowCapsule;
-
-private:
-	void DrawDebugFighterCapsule(const FFighterCapsule& Capsule, const FColor& Color);
 };
