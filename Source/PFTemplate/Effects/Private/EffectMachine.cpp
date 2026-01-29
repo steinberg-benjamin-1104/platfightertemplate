@@ -17,28 +17,21 @@ void UEffectMachine::EnableEffect(FName NewEffect, int32 InDuration)
 {
 	if (!EffectMap.Contains(NewEffect)) return;
 
-	UEffectBase* Effect = EffectMap[NewEffect];
-
-	Effect->SetDuration(InDuration);
-	Effect->OnEnter();
-	ActiveEffects.AddUnique(Effect);
+	EffectMap[NewEffect]->OnEnter();
+	EMSnapshot.AddEffect(FEffectSnapshot(NewEffect, InDuration));
 }
 
-void UEffectMachine::UpdateEffectTimers()
+void UEffectMachine::UpdateEffects()
 {
-	for (int32 i = ActiveEffects.Num() - 1; i >= 0; --i)
+	for (FEffectSnapshot EffectSnapshot : EMSnapshot.ActiveEffects)
 	{
-		UEffectBase* Effect = ActiveEffects[i];
+		UEffectBase* Effect = EffectMap[EffectSnapshot.EffectID];
 		
-		if (Effect->UpdateFrame())
+		if (EffectSnapshot.Update())
 		{
 			Effect->OnExit();
-			ActiveEffects.RemoveAt(i);
+			EMSnapshot.RemoveEffect(EffectSnapshot);
 		}
+		else Effect->Tick();
 	}
-}
-
-void UEffectMachine::UpdateActiveEffects()
-{
-	for (UEffectBase* Effect : ActiveEffects) Effect->Tick(); 
 }

@@ -45,7 +45,7 @@ struct FAnimSnapshot
 	void SetNewAnim(FAnimCursor NewAnim, FBlendProfile NewProf)
 	{
 		Previous = Current;
-		Current = Previous;
+		Current = NewAnim;
 		Blend = NewProf;
 	}
 };
