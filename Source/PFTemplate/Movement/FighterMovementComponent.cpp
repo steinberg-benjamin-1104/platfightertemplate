@@ -7,6 +7,7 @@
 UFighterMovementComponent::UFighterMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	PhysicsSnapshot.JumpsRemaining = MaxJumpCount;
 }
 
 void UFighterMovementComponent::InitFMC(AFighterPawn* InFighterPawn)
@@ -18,14 +19,14 @@ void UFighterMovementComponent::InitFMC(AFighterPawn* InFighterPawn)
 
 void UFighterMovementComponent::TickFMC()
 {
-	if (!FighterPawnRef && bStopMovementUpdates) return;
+	if (!FighterPawnRef && PhysicsSnapshot.bStopMovementUpdates) return;
 	
 	FollowCapsule = CollisionCapsule;
 	ApplyMovementPhysics();
 
-	if (bDoCollisionChecks) PerformCollisionChecks(Velocity);
+	if (PhysicsSnapshot.bDoCollisionChecks) PerformCollisionChecks(PhysicsSnapshot.Velocity);
 	
-	FVector DesiredMove = Fixed2DToVector(Velocity * FixedDt);
+	FVector DesiredMove = Fixed2DToVector(GetVelocity() * FixedDt);
 	FighterPawnRef->AddActorWorldOffset(DesiredMove, false);
 	
 	CollisionCapsule.UpdateCenter(FighterPawnRef->GetFixedLoc());
@@ -33,7 +34,7 @@ void UFighterMovementComponent::TickFMC()
 
 void UFighterMovementComponent::ApplyMovementPhysics()
 {
-	switch (CurrentMovementMode)
+	switch (PhysicsSnapshot.CurrentMovementMode)
 	{
 		case EFighterMovementMode::JumpingUp:
 			UpdateJumpRise();
@@ -42,7 +43,7 @@ void UFighterMovementComponent::ApplyMovementPhysics()
 			ApplyFallingGravity();
 			break;
 		case EFighterMovementMode::Grounded:
-			Velocity.Z = 0.0f;
+			PhysicsSnapshot.Velocity.Z = FFixed_32(0);
 		default:
 			break;
 	}
@@ -51,7 +52,7 @@ void UFighterMovementComponent::ApplyMovementPhysics()
 void UFighterMovementComponent::DisplayDebug()
 {
 	// Display movement mode
-	FString ModeName = UEnum::GetValueAsString(CurrentMovementMode);
+	FString ModeName = UEnum::GetValueAsString(PhysicsSnapshot.CurrentMovementMode);
 	ModeName = ModeName.RightChop(FString("EFighterMovementMode::").Len());
 	GEngine->AddOnScreenDebugMessage(
 		-1,
@@ -59,10 +60,6 @@ void UFighterMovementComponent::DisplayDebug()
 		FColor::Cyan,
 		FString::Printf(TEXT("MVMT State: %s"), *ModeName)
 	);
-
-	// Draw capsules
-	//DrawDebugFighterCapsule(FollowCapsule, FColor::Yellow);
-	DrawDebugFighterCapsule(CollisionCapsule, FColor::Cyan);
 }
 
 void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
@@ -78,13 +75,12 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 			}
 		case EFighterMovementMode::Falling:
 			{
-				bOnPlatform = false;
+				PhysicsSnapshot.bOnPlatform = false;
 			}
-	case EFighterMovementMode::Custom: bIsFastFalling = false;
+	case EFighterMovementMode::Custom: PhysicsSnapshot.bIsFastFalling = false;
 		default: break;
 	}
-	
-	CurrentMovementMode = NewMode;
+	SetMovementMode(NewMode);
 }
 
 #pragma region Jump Handling
@@ -92,7 +88,7 @@ void UFighterMovementComponent::SetMovementMode(EFighterMovementMode NewMode)
 
 bool UFighterMovementComponent::StartJump(EJumpType JumpType)
 {
-	if (JumpsRemaining <= 0) return false;
+	if (PhysicsSnapshot.JumpsRemaining <= 0) return false;
 
 	const FJumpData* JumpData = JumpDataMap.Find(JumpType);
 	if (!JumpData || JumpData->FramesToApex <= 0) return false;
@@ -100,66 +96,47 @@ bool UFighterMovementComponent::StartJump(EJumpType JumpType)
 	//CollisionCapsule.LiftBottom();
 
 	FFixed_32 time = JumpData->FramesToApex * FixedDt;
-	Velocity.Z = FFixed_32(2.f) * JumpData->JumpHeight / time;
+	PhysicsSnapshot.Velocity.Z = FFixed_32(2.f) * JumpData->JumpHeight / time;
 	RisingGravity = FFixed_32(2.f) * JumpData->JumpHeight/ (time * time);
 
 	SetMovementMode(EFighterMovementMode::JumpingUp);
-	JumpsRemaining--;
-	bOnPlatform = false;
-	bIsFastFalling = false;
+	PhysicsSnapshot.JumpsRemaining--;
+	PhysicsSnapshot.bOnPlatform = false;
+	PhysicsSnapshot.bIsFastFalling = false;
 	return true;
 }
 
 void UFighterMovementComponent::UpdateJumpRise()
 {
-	Velocity.Z -= RisingGravity * FixedDt;
+	PhysicsSnapshot.Velocity.Z -= RisingGravity * FixedDt;
 
-	if (Velocity.Z <= FFixed_32(0.0f)) CurrentMovementMode = EFighterMovementMode::Falling;
-}
-
-void UFighterMovementComponent::SetMaxJumpCount(int32 NewMaxJumpCount)
-{
-	MaxJumpCount = NewMaxJumpCount;
-	JumpsRemaining = MaxJumpCount;
+	if (PhysicsSnapshot.Velocity.Z <= FFixed_32(0.0f)) SetMovementMode(EFighterMovementMode::Falling);
 }
 
 void UFighterMovementComponent::ResetJumpCount()
 {
-	JumpsRemaining = MaxJumpCount;
+	PhysicsSnapshot.JumpsRemaining = MaxJumpCount;
 }
 
 #pragma endregion
 
 void UFighterMovementComponent::ApplyGroundFriction()
 {
-	if (Velocity.X == FFixed_32(0.f)) return;
+	if (PhysicsSnapshot.Velocity.X == FFixed_32(0.f)) return;
 	
 	FFixed_32 CurrentTraction = GroundTraction;
-	if (Velocity.X.Abs() > FFixed_32(WalkSpeed) * FFixed_32(1.3f)) CurrentTraction *= FFixed_32(2.f);
+	if (PhysicsSnapshot.Velocity.X.Abs() > FFixed_32(WalkSpeed) * FFixed_32(1.3f)) CurrentTraction *= FFixed_32(2.f);
 	
 	FFixed_32 DecelAmount = CurrentTraction;
 	
-	FFixed_32 Direction = Velocity.X.Sign();
-	FFixed_32 PrevVelocityX = Velocity.X;
+	FFixed_32 Direction = PhysicsSnapshot.Velocity.X.Sign();
+	FFixed_32 PrevVelocityX = PhysicsSnapshot.Velocity.X;
     
-	Velocity.X -= DecelAmount * Direction;
+	PhysicsSnapshot.Velocity.X -= DecelAmount * Direction;
 	
-	if ((PrevVelocityX > 0 && Velocity.X <= 0) || (PrevVelocityX < 0 && Velocity.X >= 0))
+	if ((PrevVelocityX > 0 && PhysicsSnapshot.Velocity.X <= 0) || (PrevVelocityX < 0 && PhysicsSnapshot.Velocity.X >= 0))
 	{
-		Velocity.X = FFixed_32(0.f);
-	}
-}
-
-void UFighterMovementComponent::ApplyCustomFriction(FFixed_32 Friction)
-{
-	if (Velocity.X == FFixed_32(0.f)) return;
-	
-	Velocity.X *= Friction;
-	
-	const FFixed_32 MinVelocity = FFixed_32(0.01f);
-	if (Velocity.X.Abs() < MinVelocity)
-	{
-		Velocity.X = FFixed_32(0.f);
+		PhysicsSnapshot.Velocity.X = FFixed_32(0.f);
 	}
 }
 
@@ -171,10 +148,10 @@ void UFighterMovementComponent::ApplyAirDrift(FFixed_32 StickX)
 	{
 		const FFixed_32 Decel = FFixed_32(AirFriction) * FixedDt;
 
-		if (Velocity.X > FFixed_32(0.f))
-			Velocity.X = FixedMax(FFixed_32(0.f), Velocity.X - Decel);
-		else if (Velocity.X < FFixed_32(0.f))
-			Velocity.X = FixedMin(FFixed_32(0.f), Velocity.X + Decel);
+		if (PhysicsSnapshot.Velocity.X > FFixed_32(0.f))
+			PhysicsSnapshot.Velocity.X = FixedMax(FFixed_32(0.f), PhysicsSnapshot.Velocity.X - Decel);
+		else if (PhysicsSnapshot.Velocity.X < FFixed_32(0.f))
+			PhysicsSnapshot.Velocity.X = FixedMin(FFixed_32(0.f), PhysicsSnapshot.Velocity.X + Decel);
 
 		return;
 	}
@@ -186,26 +163,26 @@ void UFighterMovementComponent::ApplyAirDrift(FFixed_32 StickX)
 	const FFixed_32 MaxDelta = AirAcceleration * FixedDt;
 
 	// Difference to target
-	const FFixed_32 SpeedDiff = TargetSpeed - Velocity.X;
+	const FFixed_32 SpeedDiff = TargetSpeed - PhysicsSnapshot.Velocity.X;
 
 	// Move toward target speed without overshooting
 	if (SpeedDiff > FFixed_32(0.f))
 	{
-		Velocity.X += FixedMin(SpeedDiff, MaxDelta);
+		PhysicsSnapshot.Velocity.X += FixedMin(SpeedDiff, MaxDelta);
 	}
 	else if (SpeedDiff < FFixed_32(0.f))
 	{
-		Velocity.X += FixedMax(SpeedDiff, -MaxDelta);
+		PhysicsSnapshot.Velocity.X += FixedMax(SpeedDiff, -MaxDelta);
 	}
 }
 
 void UFighterMovementComponent::ApplyFallingGravity()
 {
-	if (bIsFastFalling) Velocity.Z = TerminalFallVelocity * FastFallMultiplier;
+	if (PhysicsSnapshot.bIsFastFalling) PhysicsSnapshot.Velocity.Z = TerminalFallVelocity * FastFallMultiplier;
 	else
 	{
-		Velocity.Z -= (FixedDt* Gravity);
-		if (Velocity.Z < TerminalFallVelocity) Velocity.Z = TerminalFallVelocity;
+		PhysicsSnapshot.Velocity.Z -= (FixedDt* Gravity);
+		if (PhysicsSnapshot.Velocity.Z < TerminalFallVelocity) PhysicsSnapshot.Velocity.Z = TerminalFallVelocity;
 	}
 }
 
@@ -213,7 +190,7 @@ void UFighterMovementComponent::ProcessLanded()
 {
 	CollisionCapsule.Reset();
 	ResetJumpCount();
-	bIsFastFalling = false;
+	PhysicsSnapshot.bIsFastFalling = false;
 	SetMovementMode(EFighterMovementMode::Grounded);
 }
 
@@ -269,18 +246,18 @@ bool UFighterMovementComponent::WillStayGroundedNextFrame(FFixed_32 HorizontalSp
 void UFighterMovementComponent::SnapToNearestGroundBehindStep(int32 inDirection)
 {
 	FFixedVector2D SafePosition = FindFurthestGroundedPosition(inDirection);
-	Velocity = FFixedVector2D(0.f, 0.f);
+	PhysicsSnapshot.Velocity = FFixedVector2D(0.f, 0.f);
 	FighterPawnRef->SetFixedLoc(SafePosition);
 }
 
 void UFighterMovementComponent::HaltHorizontalVelocity()
 {
-	Velocity.X = FFixed_32(0.f);
+	PhysicsSnapshot.Velocity.X = FFixed_32(0.f);
 }
 
 void UFighterMovementComponent::HaltVerticalVelocity()
 {
-	Velocity.Z = FFixed_32(0.f);
+	PhysicsSnapshot.Velocity.Z = FFixed_32(0.f);
 }
 
 void UFighterMovementComponent::PreventLedgeFall(FFixedVector2D& InVelocity, bool bPreventFall)
@@ -300,8 +277,8 @@ void UFighterMovementComponent::PreventLedgeFall(FFixedVector2D& InVelocity, boo
 		else
 		{
 			SetMovementMode(EFighterMovementMode::Falling);
-			Velocity.X = FixedClamp(Velocity.X, -MaxAirSpeed, MaxAirSpeed);
-			JumpsRemaining--;
+			PhysicsSnapshot.Velocity.X = FixedClamp(PhysicsSnapshot.Velocity.X, -MaxAirSpeed, MaxAirSpeed);
+			PhysicsSnapshot.JumpsRemaining--;
 		}
 	}
 }
@@ -316,9 +293,9 @@ bool UFighterMovementComponent::IsStandingOnFacingLedge() const
 
 void UFighterMovementComponent::StopMovementCompletely(bool bStopCollision)
 {
-	Velocity = FFixedVector2D(0.f, 0.f);
+	PhysicsSnapshot.Velocity = FFixedVector2D(0.f, 0.f);
 	SetMovementMode(EFighterMovementMode::Custom);
-	if (bStopCollision) bDoCollisionChecks = false;
+	if (bStopCollision) PhysicsSnapshot.bDoCollisionChecks = false;
 }
 
 void UFighterMovementComponent::PerformCollisionChecks(FFixedVector2D &InVelocity)
@@ -391,10 +368,10 @@ FFixedHitResult UFighterMovementComponent::PerformGroundCollisionCheck(FFixedVec
     
 	if (OutHit.bBlockingHit && !IsGrounded())
 	{
-		bOnPlatform = (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform")));
-		if (bIgnorePlatform && bOnPlatform || (bIsFastFalling && bOnPlatform))
+		PhysicsSnapshot.bOnPlatform = (OutHit.HitActor && OutHit.HitActor->ActorHasTag(FName("Platform")));
+		if (PhysicsSnapshot.bIgnorePlatform && PhysicsSnapshot.bOnPlatform || (PhysicsSnapshot.bIsFastFalling && PhysicsSnapshot.bOnPlatform))
 		{
-			bOnPlatform = false;
+			PhysicsSnapshot.bOnPlatform = false;
 			return FFixedHitResult();
 		}
 		FFixedVector2D NewLocation = OutHit.ImpactPoint;
@@ -442,6 +419,6 @@ void UFighterMovementComponent::ManualDisplacement(FFixedVector2D Movement /*not
 
 void UFighterMovementComponent::TestIsGrounded()
 {
-	FFixedVector2D TestVelocity(Velocity.X, 120.f);
+	FFixedVector2D TestVelocity(PhysicsSnapshot.Velocity.X, 120.f);
 	PerformGroundCollisionCheck(TestVelocity).bBlockingHit;
 }

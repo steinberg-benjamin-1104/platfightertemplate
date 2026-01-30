@@ -41,10 +41,10 @@ public:
 
 	FPhysicsSnapshot PhysicsSnapshot;
 
-	UFUNCTION(BlueprintCallable)
-	EFighterMovementMode GetCurrentMode() {return PhysicsSnapshot.CurrentMovementMode;}
-
-	UFUNCTION(BlueprintCallable)
+	void SetVelocity(const FFixedVector2D& InVelocity) { PhysicsSnapshot.Velocity = InVelocity; }
+	FFixedVector2D GetVelocity() const { return PhysicsSnapshot.Velocity; }
+	
+	EFighterMovementMode GetCurrentMode() const {return PhysicsSnapshot.CurrentMovementMode;}
 	virtual void SetMovementMode(EFighterMovementMode NewMode);
 	
 	void InitFMC(AFighterPawn* InFighterPawn);
@@ -82,8 +82,6 @@ public:
 	
 	//Divide by 36000 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Gravity = 3600.f;
-	
-	FFixed_32 RisingGravity;
 	//Divide by 600 to get Smash Values
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TerminalFallVelocity = -900.f;
 	//Divide by 3600 to get Smash Values
@@ -95,9 +93,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EJumpType, FJumpData> JumpDataMap;
-	
-	void SetVelocity(const FFixedVector2D& InVelocity) { PhysicsSnapshot.Velocity = InVelocity; }
-	FFixedVector2D GetVelocity() const { return PhysicsSnapshot.Velocity; }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float RunSpeed = 1200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement") float DashSpeed = 1400.f;
@@ -139,4 +134,6 @@ protected:
 	UPROPERTY() AFighterPawn* FighterPawnRef;
 	
 	UPROPERTY() FFighterCapsule FollowCapsule;
+
+	FFixed_32 RisingGravity;
 };
