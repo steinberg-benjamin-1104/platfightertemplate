@@ -10,7 +10,8 @@ enum class EAttackWindowType : uint8
 {
 	CancelOnWhiff,
 	CancelOnHit,
-	Movement
+	Movement,
+	HitboxGroup
 };
 
 USTRUCT(BlueprintType)

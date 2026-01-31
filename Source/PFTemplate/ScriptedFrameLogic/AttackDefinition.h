@@ -1,4 +1,5 @@
 #pragma once
+#include "BakedAnimation.h"
 #include "StickDirection.h"
 #include "BakedSockets.h"
 #include "Windows.h"
@@ -14,24 +15,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UBakedAnimation* BakedAnim;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FName> ValidStates;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	bool bFlickInput = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EMoveButton MoveButton = EMoveButton::None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EStickDir StickDir = EStickDir::Center;
-
+	//check for b-reverse/wavebounce
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsSpecial = false;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FHitboxGroup> HitboxGroups;
-	
+
+	//For cancels, either on-hit or just open windows
+	//also custom movement data
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FAttackWindow> Windows;
 };

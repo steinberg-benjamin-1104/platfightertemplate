@@ -40,48 +40,38 @@ struct FCollisionComponent
 	uint32 OwnerID;
 	FFixedVector2D WorldPos;
 
-	FCollisionComponent(uint32 InOwnerID)
+	FCollisionComponent(uint32 InOwnerID, FFixedVector2D InWorldPos)
 	{
 		OwnerID = InOwnerID;
-		WorldPos = FFixedVector2D(0, 0);
+		WorldPos = InWorldPos;
 	}
-
-	FFixedVector2D GetWorldPos() const { return WorldPos; }
-	void SetWorldPos(FFixedVector2D NewPos) { WorldPos = NewPos; }
 };
 
-struct FHitbox : FCollisionComponent
+struct FCollisionCapsule : FCollisionComponent
 {
 	FCapsuleShape2D Capsule;
-	FFixedVector2D OffsetFromBone;
-	bool bIsAttached = true;
-	FName BoneName;
-	int32 Lifespan;
-	
-	FHitbox(uint32 InOwnerID, const FCapsuleShape2D& InCapsuleShape, bool InAttach, FName Bone, int32 InLife) : FCollisionComponent(InOwnerID)
+
+	FCollisionCapsule(uint32 InOwner, FFixedVector2D InWorldPos, const FCapsuleShape2D& InCapsule) : FCollisionComponent(InOwner, InWorldPos)
 	{
-		Capsule = InCapsuleShape;
-		bIsAttached = InAttach;
-		BoneName = Bone;
-		Lifespan = InLife;
+		Capsule = InCapsule;
 	}
 
 	void SetRotation(FFixed_32 Degrees) { Capsule.SetRotation(Degrees); }
 };
 
-struct FHurtbox : FCollisionComponent
+struct FHitbox : FCollisionCapsule
 {
-	FCapsuleShape2D Capsule;
-	bool bIsActive = true;
-	FName BoneName;
-
-	FHurtbox(uint32 InOwnerID, const FCapsuleShape2D& InCapsuleShape, FName Bone) : FCollisionComponent(InOwnerID)
-	{
-		Capsule = InCapsuleShape;
-		BoneName = Bone;
-	}
+	uint32 InstigatorID;
+	uint16 GroupID;
+	uint16 Index;
 	
-	void SetRotation(FFixed_32 Degrees) { Capsule.SetRotation(Degrees); }
+	FHitbox(uint32 InOwner, const FCapsuleShape2D& InCapsule, FFixedVector2D InWorldPos, uint32 InInstigator, uint16 InGroupID, uint16 InIndex)
+	: FCollisionCapsule(InOwner, InWorldPos, InCapsule)
+	{
+		InstigatorID = InInstigator;
+		GroupID = InGroupID;
+		Index = InIndex;
+	}
 };
 
 struct FPolygonCollision : FCollisionComponent
@@ -89,14 +79,6 @@ struct FPolygonCollision : FCollisionComponent
 	FPolygonShape2D Polygon;
 	EECBCC ChannelID;
 	uint32 ResponseMask;
-};
-
-struct FHitboxGroupQuery
-{
-	uint32 GroupID;
-	uint32 OwnerID;
-	TArray<FHitbox> Capsules;
-	TArray<uint32> AlreadyHitOwners;
 };
 
 struct FSweepResult
