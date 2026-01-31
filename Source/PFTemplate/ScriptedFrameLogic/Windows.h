@@ -8,11 +8,9 @@ class UAttackDataAsset;
 UENUM(BlueprintType)
 enum class EAttackWindowType : uint8
 {
-	Hitbox,
 	CancelOnWhiff,
 	CancelOnHit,
-	Movement,
-	HurtboxIntangible,
+	Movement
 };
 
 USTRUCT(BlueprintType)

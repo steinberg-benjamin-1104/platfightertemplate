@@ -3,15 +3,14 @@
 #include "SafeMath.h"
 #include "CollisionDefinitions.generated.h"
 
-enum class EDeterministicCC : uint32
+//ECB Collision Channels
+enum class EECBCC : uint32
 {
 	None	= 0,
-	ECB		= 1 << 0,
-	Stage	= 1 << 1,
-	Hitbox	= 1 << 2,
-	Hurtbox	= 1 << 3,
-	Ledge	= 1 << 4,
-	Platform= 1 << 5
+	Stage	= 1 << 0,
+	Platform= 1 << 1,
+	Ledge	= 1 << 2,
+	ECB		= 1 << 3
 };
 
 struct FCapsuleShape2D
@@ -21,12 +20,6 @@ struct FCapsuleShape2D
 	FFixed_32 Radius;
 
 	FCapsuleShape2D() : Axis(0, 0), HalfLength(20), Radius(5) {}
-
-	void SetSize(FFixedVector2D InSize)
-	{
-		HalfLength = InSize.X;
-		Radius = InSize.Z;
-	}
 
 	void SetRotation(FFixed_32 Degrees)
 	{
@@ -45,52 +38,64 @@ struct FPolygonShape2D
 struct FCollisionComponent
 {
 	uint32 OwnerID;
-	EDeterministicCC Channel;
-	uint32 ResponseMask;
 	FFixedVector2D WorldPos;
 
-	FCollisionComponent(uint32 InOwnerID, EDeterministicCC InChannel, uint32 InMask)
+	FCollisionComponent(uint32 InOwnerID)
 	{
 		OwnerID = InOwnerID;
-		Channel = InChannel;
-		ResponseMask = InMask;
 		WorldPos = FFixedVector2D(0, 0);
 	}
+
+	FFixedVector2D GetWorldPos() const { return WorldPos; }
+	void SetWorldPos(FFixedVector2D NewPos) { WorldPos = NewPos; }
 };
 
-struct FCapsuleCollision : FCollisionComponent
+struct FHitbox : FCollisionComponent
+{
+	FCapsuleShape2D Capsule;
+	FFixedVector2D OffsetFromBone;
+	bool bIsAttached = true;
+	FName BoneName;
+	int32 Lifespan;
+	
+	FHitbox(uint32 InOwnerID, const FCapsuleShape2D& InCapsuleShape, bool InAttach, FName Bone, int32 InLife) : FCollisionComponent(InOwnerID)
+	{
+		Capsule = InCapsuleShape;
+		bIsAttached = InAttach;
+		BoneName = Bone;
+		Lifespan = InLife;
+	}
+
+	void SetRotation(FFixed_32 Degrees) { Capsule.SetRotation(Degrees); }
+};
+
+struct FHurtbox : FCollisionComponent
 {
 	FCapsuleShape2D Capsule;
 	bool bIsActive = true;
-	bool bIgnoreOwner = true;
+	FName BoneName;
 
-	FCapsuleCollision()
-		: FCollisionComponent(0, EDeterministicCC::None, 0)
-	{
-		Capsule = FCapsuleShape2D();
-		bIsActive = true;
-		bIgnoreOwner = true;
-	}
-	
-	FCapsuleCollision(uint32 InOwnerID, EDeterministicCC InChannel, uint32 InMask, FCapsuleShape2D InCapsuleShape, bool InActive)
-		: FCollisionComponent(InOwnerID, InChannel, InMask)
+	FHurtbox(uint32 InOwnerID, const FCapsuleShape2D& InCapsuleShape, FName Bone) : FCollisionComponent(InOwnerID)
 	{
 		Capsule = InCapsuleShape;
-		bIsActive = InActive;
-		bIgnoreOwner = true;
+		BoneName = Bone;
 	}
+	
+	void SetRotation(FFixed_32 Degrees) { Capsule.SetRotation(Degrees); }
 };
 
 struct FPolygonCollision : FCollisionComponent
 {
 	FPolygonShape2D Polygon;
+	EECBCC ChannelID;
+	uint32 ResponseMask;
 };
 
 struct FHitboxGroupQuery
 {
 	uint32 GroupID;
 	uint32 OwnerID;
-	TArray<FCapsuleCollision> Capsules;
+	TArray<FHitbox> Capsules;
 	TArray<uint32> AlreadyHitOwners;
 };
 
