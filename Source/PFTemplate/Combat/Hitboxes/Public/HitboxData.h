@@ -93,3 +93,15 @@ struct FHitboxGroup
 	UPROPERTY(EditAnywhere)
 	TArray<FHitboxTransform> Hitboxes;
 };
+
+USTRUCT(BlueprintType)
+struct FHitboxCollection
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	TArray<FHitboxGroup> HitboxGroups;
+
+	UPROPERTY(EditAnywhere)
+	bool bClearHits;
+};

@@ -20,7 +20,7 @@ public:
 	bool bIsSpecial = false;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FHitboxGroup> HitboxGroups;
+	TArray<FHitboxCollection> HitboxCollections;
 
 	//For cancels, either on-hit or just open windows
 	//also custom movement data

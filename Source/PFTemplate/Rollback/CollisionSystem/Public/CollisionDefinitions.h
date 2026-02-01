@@ -8,9 +8,7 @@ enum class EECBCC : uint32
 {
 	None	= 0,
 	Stage	= 1 << 0,
-	Platform= 1 << 1,
-	Ledge	= 1 << 2,
-	ECB		= 1 << 3
+	Platform= 1 << 1
 };
 
 struct FCapsuleShape2D
@@ -51,26 +49,21 @@ struct FCollisionCapsule : FCollisionComponent
 {
 	FCapsuleShape2D Capsule;
 
-	FCollisionCapsule(uint32 InOwner, FFixedVector2D InWorldPos, const FCapsuleShape2D& InCapsule) : FCollisionComponent(InOwner, InWorldPos)
+	FCollisionCapsule(uint32 InOwner, FFixedVector2D InWorldPos, const FCapsuleShape2D& InCapsule, FFixed_32 InRotation) : FCollisionComponent(InOwner, InWorldPos)
 	{
 		Capsule = InCapsule;
+		Capsule.SetRotation(InRotation);
 	}
-
-	void SetRotation(FFixed_32 Degrees) { Capsule.SetRotation(Degrees); }
 };
 
 struct FHitbox : FCollisionCapsule
 {
 	uint32 InstigatorID;
-	uint16 GroupID;
-	uint16 Index;
 	
-	FHitbox(uint32 InOwner, const FCapsuleShape2D& InCapsule, FFixedVector2D InWorldPos, uint32 InInstigator, uint16 InGroupID, uint16 InIndex)
-	: FCollisionCapsule(InOwner, InWorldPos, InCapsule)
+	FHitbox(uint32 InOwner, FCapsuleShape2D InCapsule, FFixedVector2D InWorldPos, FFixed_32 InRotation, uint32 InInstigator)
+	: FCollisionCapsule(InOwner, InWorldPos, InCapsule, InRotation)
 	{
 		InstigatorID = InInstigator;
-		GroupID = InGroupID;
-		Index = InIndex;
 	}
 };
 

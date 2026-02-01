@@ -5,17 +5,15 @@ class FDeterministicCollisionWorld
 {
 	
 public:
-	void RegisterHitbox(const FCapsuleCollision* InCapsule);
-	void RegisterHurtbox(const FCapsuleCollision* InCapsule);
-	
-	void RegisterStageGeometry(const FPolygonCollision* InPolygon);
-	
-	void QueryHitboxGroup(FHitboxGroupQuery& Group);
+	void ResetHitboxBucket();
+	void ResetHurtboxBucket();
+	void RegisterHitbox(const FHitbox InCapsule);
+	void RegisterHurtbox(const FCollisionCapsule InCapsule);
 
 	FSweepResult ECBCollision(FPolygonCollision& CharacterECB, FFixedVector2D DesiredVelocity);
 
 private:
-	TArray<const FCapsuleCollision*> HurtboxBucket; 
-	TArray<const FCapsuleCollision*> HitboxBucket;
+	TArray<const FCollisionCapsule> HurtboxBucket; 
+	TArray<const FHitbox> HitboxBucket;
 	TArray<const FPolygonCollision*> StageGeometry;
 };
