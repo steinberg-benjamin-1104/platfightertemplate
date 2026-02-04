@@ -30,3 +30,17 @@ FSweepResult FDeterministicCollisionWorld::ECBCollision(FPolygonCollision& Chara
 		if (CurrentHit.bHit) return CurrentHit;
 	}
 }
+
+void FDeterministicCollisionWorld::DetectHits()
+{
+	for (FHitbox Hitbox : HitboxBucket)
+	{
+		for (FCollisionCapsule Hurtbox : HurtboxBucket)
+		{
+			if (CollisionMath::CapsulesOverlap(Hitbox, Hurtbox))
+			{
+				PendingHits.Add({ &Hitbox, &Hurtbox });
+			}
+		}
+	}
+}

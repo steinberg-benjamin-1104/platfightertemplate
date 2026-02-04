@@ -52,6 +52,4 @@ public:
 
 protected:
 	EStickDir GetCurrentStickDir();
-	bool CheckActionButtons();
-	bool CheckBufferedButtonStateChanges(const TMap<EInputButton, FName>& TransitionMap);
 };

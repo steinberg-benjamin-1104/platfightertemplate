@@ -11,12 +11,8 @@ class PFTEMPLATE_API UIdleState : public UFighterState
 
 public:
 	
-	virtual void OnExit() override;
 	virtual bool HandlePhysics() override;
 	virtual void HandleInput() override;
 
-	virtual FString GetStateName() override {return "Idle";}
-
-private:
-	bool bOnLedge = false;
+	virtual FString GetStateName() override { return "Idle"; }
 };

@@ -5,7 +5,7 @@ class CollisionMath
 {
 public:
 	
-	static bool CapsulesOverlap(const FCapsuleCollision& A, const FCapsuleCollision& B);
+	static bool CapsulesOverlap(const FCollisionCapsule& A, const FCollisionCapsule& B);
 	static FSweepResult SweepPolygonVsPolygon(
 		const FPolygonCollision& MovingPoly, const FFixedVector2D Velocity, const FPolygonCollision& StaticPoly);
 

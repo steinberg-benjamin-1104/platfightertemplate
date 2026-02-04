@@ -199,38 +199,6 @@ bool AFighterPawn::SetCurrentAnimation(EAnimSlot Anim, int32 BlendTime)
 	return true;
 }
 
-const FAttackDefinition* AFighterPawn::DetermineAttack(EInputButton InputMask, bool bFlickInput, EStickDir StickDir) const
-{
-	if (!AttackTable) return nullptr;
-
-	const FName CurrentState = StateMachine->CurrentStateKey;
-
-	TArray<FAttackDefinition*> Rows;
-	AttackTable->GetAllRows<FAttackDefinition>(TEXT("AttackLookup"), Rows);
-
-	for (const FAttackDefinition* Def : Rows)
-	{
-		if (Def->ValidStates.Num() > 0 && !Def->ValidStates.Contains(CurrentState))
-			continue;
-
-		uint16 DefMask = CompileMoveButtonMask(Def->MoveButton);
-
-		// Check if all buttons in the attack definition are pressed
-		if (DefMask != 0 && (static_cast<uint16>(InputMask) & DefMask) != DefMask)
-			continue;
-
-		if (Def->bFlickInput != bFlickInput)
-			continue;
-
-		if (Def->StickDir != EStickDir::Any & Def->StickDir != StickDir)
-			continue;
-		
-		return Def;
-	}
-
-	return nullptr;
-}
-
 #pragma endregion
 
 #pragma region Combat
@@ -350,21 +318,6 @@ void AFighterPawn::ToggleHurtboxInvulnerable(FName HurtboxSuffix, bool bEnable)
 
 #pragma endregion
 
-
-bool AFighterPawn::TryStartAttack(EInputButton Button, FFighterInput* Input)
-{
-	const EStickDir StickDir = GetStickDirection(Input->StickPos, IsFacingRight());
-	
-	if (const FAttackDefinition* Attack = DetermineAttack(Button, Input->IsPressed(EInputButton::Flick), StickDir))
-	{
-		if (SetCurrentAnimation(Attack->Animation))
-		{
-			StateMachine->ChangeFighterState(Attack->TargetState);
-			return true;
-		}
-	}
-	return false;
-}
 
 FBakedSocketKey AFighterPawn::GetBakedSocketKey(FName SocketName)
 {

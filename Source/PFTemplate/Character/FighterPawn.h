@@ -15,6 +15,7 @@
 #include "FighterAnimInstance.h"
 #include "StickDirection.h"
 #include "BakedSockets.h"
+#include "HitPermission.h"
 #include "ProjectilePool.h"
 #include "InputBuffer.h"
 
@@ -35,7 +36,6 @@ USTRUCT()
 struct FCombatSnapshot
 {
 	GENERATED_BODY()
-
 	
 	int32 Health = 0;
 	int32 Stocks = 3;
@@ -43,6 +43,8 @@ struct FCombatSnapshot
 
 	UPROPERTY() FDamageInfo StoredDamageInfo;
 	UPROPERTY() AFighterPawn* LastInstigator;
+	TMap<int32 /*AttackerID*/, int32 /*LastPermissionHit*/> HitMemory;
+
 };
 
 UCLASS()
@@ -109,10 +111,6 @@ public:
 	void ToggleHurtboxInvulnerable(FName HurtboxSuffix, bool bEnable);
 
 	void InitHurtboxes();
-	
-	const FAttackDefinition* DetermineAttack(EInputButton InputButton, bool bFlickInput, EStickDir StickDir) const;
-
-	bool TryStartAttack(EInputButton Button, FFighterInput* Input);
 
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void ApplyDamage(int32 Damage);

@@ -2,11 +2,6 @@
 #include "FighterPawn.h"
 #include "FighterMovementComponent.h"
 
-void UIdleState::OnExit()
-{
-	bOnLedge = false;
-}
-
 bool UIdleState::HandlePhysics()
 {
 	MoveComp->ApplyGroundFriction();
@@ -18,25 +13,25 @@ bool UIdleState::HandlePhysics()
 		return true;
 	}
 
-	if (MoveComp->IsStandingOnFacingLedge() && (MoveComp->GetVelocity().X == FFixed_32(0.f)) && !bOnLedge)
-	{
-		FighterPawnRef->SetCurrentAnimation("Teeter");
-		bOnLedge = true;
-	}
-
 	return false;
 }
 
 void UIdleState::HandleInput()
 {
-	if (CheckActionButtons()) return;
-	
-	static const TMap<EInputButton, FName> ButtonToState = {
-		{ EInputButton::Jump, "JumpSquat" },
-		{ EInputButton::Shield, "ShieldStartup"}
-	};
 
-	if (CheckBufferedButtonStateChanges(ButtonToState)) return;
+	// Handle Attack Buttons Here!!
+	
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Jump))
+	{
+		Input->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("JumpSquat");
+	}
+
+	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::Shield))
+	{
+		Input->Consume(EInputButton::Jump);
+		StateMachine->ChangeFighterState("ShieldStartup");
+	}
 
 	if (InputBuffer->IsHeld(EInputButton::Shield))
 	{
@@ -46,7 +41,7 @@ void UIdleState::HandleInput()
 
 	if (FFighterInput* Input = InputBuffer->WasPressed(EInputButton::StickDown))
 	{
-		if (MoveComp->bOnPlatform)
+		if (MoveComp->PhysicsSnapshot.bOnPlatform)
 		{
 			Input->Consume(EInputButton::StickDown);
 			StateMachine->ChangeFighterState("PlatformDrop");

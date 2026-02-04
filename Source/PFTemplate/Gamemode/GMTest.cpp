@@ -101,6 +101,7 @@ AFighterPawn* AGMTest::SpawnAndPossessPawn(APlayerController* PC, int32 SpawnInd
 	{
 		PC->Possess(NewPawn);
 		FighterPawns.Add(NewPawn);
+		NewPawn->PlayerID = SpawnIndex;
 
 		if (BattleManager)
 		{

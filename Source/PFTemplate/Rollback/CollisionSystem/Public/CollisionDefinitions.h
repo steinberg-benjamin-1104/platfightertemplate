@@ -59,11 +59,13 @@ struct FCollisionCapsule : FCollisionComponent
 struct FHitbox : FCollisionCapsule
 {
 	uint32 InstigatorID;
+	uint32 HitPermissionID;
 	
-	FHitbox(uint32 InOwner, FCapsuleShape2D InCapsule, FFixedVector2D InWorldPos, FFixed_32 InRotation, uint32 InInstigator)
+	FHitbox(uint32 InOwner, FCapsuleShape2D InCapsule, FFixedVector2D InWorldPos, FFixed_32 InRotation, uint32 InInstigator, uint32 InHitPerm)
 	: FCollisionCapsule(InOwner, InWorldPos, InCapsule, InRotation)
 	{
 		InstigatorID = InInstigator;
+		HitPermissionID = InHitPerm;
 	}
 };
 
