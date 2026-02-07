@@ -31,5 +31,5 @@ Uses GGPO-style input prediction and rollback, more technical info can be found 
 
 ## Tech Stack
 - Languages: C++, C#
-- Engine: Unreal Engine
+- Engine: Unreal Engine 5.7
 - Plugins: GGPO
